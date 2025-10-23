@@ -1,4 +1,4 @@
-// TODO: JWT utility functions for token generation and verification
+// JWT utility functions for token generation and verification
 const jwt = require('jsonwebtoken');
 
 const generateToken = (payload) => {

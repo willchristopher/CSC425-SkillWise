@@ -1,4 +1,4 @@
--- TODO: Create users table with authentication fields
+-- Create users table with authentication fields
 -- Migration 001: Create users table
 
 CREATE TABLE IF NOT EXISTS users (

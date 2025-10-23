@@ -5,6 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 // Import all pages
 import HomePage from './pages/HomePage';
+import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import DashboardPage from './pages/DashboardPage';
@@ -32,7 +33,8 @@ function App() {
           <main className="main-content">
             <Routes>
               {/* Public routes */}
-              <Route path="/" element={<HomePage />} />
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/home" element={<HomePage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/error" element={<ErrorPage />} />
