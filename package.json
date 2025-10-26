@@ -18,7 +18,14 @@
     "test": "echo \"Run tests in individual services\" && exit 0",
     "prepare": "husky install"
   },
-  "keywords": ["ai", "tutor", "education", "react", "node", "postgresql"],
+  "keywords": [
+    "ai",
+    "tutor",
+    "education",
+    "react",
+    "node",
+    "postgresql"
+  ],
   "author": "",
   "license": "ISC",
   "description": "SkillWise AI Tutor - An intelligent tutoring system",
@@ -27,5 +34,13 @@
     "lint-staged": "^13.2.3",
     "eslint": "^8.44.0",
     "prettier": "^2.8.8"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/willchristopher/CSC425-SkillWise.git"
+  },
+  "bugs": {
+    "url": "https://github.com/willchristopher/CSC425-SkillWise/issues"
+  },
+  "homepage": "https://github.com/willchristopher/CSC425-SkillWise#readme"
 }

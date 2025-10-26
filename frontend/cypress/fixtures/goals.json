@@ -1,0 +1,9 @@
+{
+  "goals": [
+    {
+      "id": 1,
+      "title": "Learn React",
+      "description": "Master React fundamentals"
+    }
+  ]
+}

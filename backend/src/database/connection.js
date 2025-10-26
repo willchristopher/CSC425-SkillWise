@@ -1,48 +1,67 @@
-// TODO: PostgreSQL database connection and configuration
+/**
+ * PostgreSQL database connection and helpers
+ * Provides connection pooling, query execution, and transaction support
+ */
+
 const { Pool } = require('pg');
 const pino = require('pino');
 
 const logger = pino({
-  name: 'skillwise-db'
+  name: 'skillwise-db',
+  transport: {
+    target: 'pino-pretty',
+    options: {
+      colorize: true
+    }
+  }
 });
 
 // Database configuration
 const dbConfig = {
   connectionString: process.env.DATABASE_URL,
-  // Additional configuration for production
+  // Fallback configuration if DATABASE_URL is not set
+  host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT) || 5432,
+  database: process.env.DB_NAME,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  // Production SSL configuration
   ...(process.env.NODE_ENV === 'production' && {
     ssl: {
       rejectUnauthorized: false
     }
   }),
   // Connection pool settings
-  max: 20, // Maximum number of clients in pool
-  idleTimeoutMillis: 30000, // How long a client is allowed to remain idle
-  connectionTimeoutMillis: 2000, // How long to wait when connecting
+  max: parseInt(process.env.DB_POOL_SIZE) || 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
 };
 
 // Create connection pool
 const pool = new Pool(dbConfig);
 
 // Handle pool events
-pool.on('connect', (client) => {
+pool.on('connect', () => {
   logger.info('New database client connected');
 });
 
 pool.on('error', (err) => {
   logger.error('Database pool error:', err);
+  // Only exit on critical connection errors
+  if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+    logger.fatal('Database connection lost - shutting down');
+    process.exit(1);
+  }
 });
 
-pool.on('remove', (client) => {
+pool.on('remove', () => {
   logger.info('Database client removed from pool');
 });
 
 // Test database connection
 const testConnection = async () => {
   try {
-    const client = await pool.connect();
-    const result = await client.query('SELECT NOW()');
-    client.release();
+    const result = await query('SELECT NOW()');
     logger.info('✅ Database connection successful:', result.rows[0].now);
     return true;
   } catch (err) {

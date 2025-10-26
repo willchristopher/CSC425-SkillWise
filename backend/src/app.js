@@ -1,4 +1,4 @@
-// TODO: Main Express application setup with middleware and routing
+// Main Express application setup with middleware and routing
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -28,6 +28,9 @@ const logger = pino({
     }
   }
 });
+
+// Make logger available to other modules
+app.set('logger', logger);
 
 // Add request logging middleware
 app.use(pinoHttp({
@@ -69,6 +72,17 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
+// Body parsing middleware
+app.use(express.json({ 
+  limit: '10mb',
+  strict: true
+}));
+
+app.use(express.urlencoded({ 
+  extended: true,
+  limit: '10mb'
+}));
+
 // Rate limiting
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
@@ -83,17 +97,6 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-// Body parsing middleware
-app.use(express.json({ 
-  limit: '10mb',
-  strict: true
-}));
-
-app.use(express.urlencoded({ 
-  extended: true,
-  limit: '10mb'
-}));
-
 // Health check endpoint
 app.get('/healthz', (req, res) => {
   res.status(200).json({
@@ -105,8 +108,8 @@ app.get('/healthz', (req, res) => {
   });
 });
 
-// Mount API routes
-app.use('/api', routes);
+// Mount API routes under /api prefix
+app.use(process.env.API_PREFIX || '/api', routes);
 
 // 404 handler for unmatched routes
 app.use('*', (req, res) => {
@@ -119,8 +122,5 @@ app.use('*', (req, res) => {
 
 // Global error handler (must be last)
 app.use(errorHandler);
-
-// Make logger available to other modules
-app.set('logger', logger);
 
 module.exports = app;

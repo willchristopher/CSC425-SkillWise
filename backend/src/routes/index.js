@@ -1,23 +1,23 @@
 /**
- * API Routes Index - Mounts all API endpoints under /api/*
+ * API Routes Index
+ * Mounts all API endpoints under /api/* following RESTful conventions
  * 
  * Route Structure:
- * - /api/auth/*          - Authentication endpoints (login, register, logout, refresh)
+ * - /api/auth/*          - Authentication (login, register, logout, refresh)
  * - /api/users/*         - User management (profile, settings, statistics)
- * - /api/goals/*         - Learning goals CRUD operations
- * - /api/challenges/*    - Challenge management and participation
+ * - /api/goals/*         - Learning goals CRUD and progress tracking
+ * - /api/challenges/*    - Challenge management and submissions
  * - /api/progress/*      - Progress tracking and analytics
- * - /api/submissions/*   - Work submission and evaluation
- * - /api/ai/*           - AI-powered features (feedback, hints, suggestions)
+ * - /api/submissions/*   - Work submissions and evaluations
+ * - /api/ai/*           - AI feedback and assistance
  * - /api/reviews/*       - Peer review system
  * - /api/leaderboard/*   - Rankings and achievements
- * - /api/health         - API health check endpoint
  */
 
 const express = require('express');
 const router = express.Router();
 
-// Import route modules
+// Import routes
 const authRoutes = require('./auth');
 const userRoutes = require('./users');
 const goalRoutes = require('./goals');
@@ -28,25 +28,24 @@ const aiRoutes = require('./ai');
 const reviewRoutes = require('./reviews');
 const leaderboardRoutes = require('./leaderboard');
 
-// API Documentation endpoint
+// API documentation endpoint
 router.get('/', (req, res) => {
   res.json({
     name: 'SkillWise API',
-    version: '1.0.0',
+    version: process.env.npm_package_version || '1.0.0',
     description: 'AI-powered learning platform API',
     endpoints: {
-      auth: '/api/auth - Authentication endpoints',
-      users: '/api/users - User management',
-      goals: '/api/goals - Learning goals',
-      challenges: '/api/challenges - Learning challenges',
-      progress: '/api/progress - Progress tracking',
-      submissions: '/api/submissions - Work submissions',
-      ai: '/api/ai - AI-powered features',
-      reviews: '/api/reviews - Peer review system',
-      leaderboard: '/api/leaderboard - Rankings and achievements',
-      health: '/api/health - Health check'
+      auth: '/auth - Authentication and authorization',
+      users: '/users - User management and profiles',
+      goals: '/goals - Learning goals and tracking',
+      challenges: '/challenges - Learning challenges',
+      progress: '/progress - Progress analytics',
+      submissions: '/submissions - Work submissions',
+      ai: '/ai - AI assistance and feedback',
+      reviews: '/reviews - Peer review system',
+      leaderboard: '/leaderboard - Rankings'
     },
-    documentation: '/api/docs',
+    docs: 'https://github.com/willchristopher/CSC425-SkillWise/blob/main/docs/api/API_ENDPOINTS.md',
     timestamp: new Date().toISOString()
   });
 });
