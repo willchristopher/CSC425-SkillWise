@@ -3,6 +3,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
+// Import styles
+import './styles/auth.css';
+
 // Import all pages
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';

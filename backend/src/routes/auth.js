@@ -1,20 +1,24 @@
-// TODO: Implement authentication routes
+// Authentication routes
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const validation = require('../middleware/validation');
+const auth = require('../middleware/auth');
 
-// TODO: Add POST /login route
+// POST /login route
 router.post('/login', validation.loginValidation, authController.login);
 
-// TODO: Add POST /register route
+// POST /register route
 router.post('/register', validation.registerValidation, authController.register);
 
-// TODO: Add POST /logout route
+// POST /logout route
 router.post('/logout', authController.logout);
 
-// TODO: Add POST /refresh route
+// POST /refresh route
 router.post('/refresh', authController.refreshToken);
+
+// GET /profile route (protected)
+router.get('/profile', auth, authController.getProfile);
 
 // TODO: Add POST /forgot-password route
 // router.post('/forgot-password', authController.forgotPassword);
