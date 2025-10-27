@@ -16,24 +16,32 @@ const LoginPage = () => {
   const from = location.state?.from?.pathname || '/dashboard';
 
   const handleLogin = async (formData) => {
+    console.log('🚀 handleLogin called with:', formData);
     try {
       setIsLoading(true);
       setError('');
       
+      console.log('📞 Calling login function...');
       const result = await login({
         email: formData.email,
         password: formData.password
       });
       
+      console.log('📬 Login result:', result);
+      
       if (result.success) {
+        console.log('✅ Login successful, navigating to:', from);
         navigate(from, { replace: true });
       } else {
+        console.log('❌ Login failed:', result.error);
         setError(result.error || 'Login failed. Please try again.');
       }
     } catch (err) {
+      console.error('💥 Login exception:', err);
       setError(err.message || 'Login failed. Please try again.');
     } finally {
       setIsLoading(false);
+      console.log('✅ Login process complete');
     }
   };
 

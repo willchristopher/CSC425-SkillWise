@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// TODO: Implement database migration script
+// Database migration script
 
 const fs = require('fs');
 const path = require('path');
@@ -15,7 +15,7 @@ async function runMigrations() {
   try {
     console.log('Starting database migrations...');
     
-    // TODO: Create migrations table if not exists
+    // Create migrations table if not exists
     await pool.query(`
       CREATE TABLE IF NOT EXISTS migrations (
         id SERIAL PRIMARY KEY,
@@ -24,12 +24,12 @@ async function runMigrations() {
       )
     `);
 
-    // TODO: Read migration files and execute in order
+    // Read migration files and execute in order
     const files = fs.readdirSync(migrationsDir).sort();
     
     for (const file of files) {
       if (file.endsWith('.sql')) {
-        // TODO: Check if migration already executed
+        // Check if migration already executed
         const result = await pool.query('SELECT * FROM migrations WHERE filename = $1', [file]);
         
         if (result.rows.length === 0) {

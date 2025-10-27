@@ -1,8 +1,8 @@
-// TODO: User service for database operations and business logic
+// User service for database operations and business logic
 const db = require('../database/connection');
 
 const userService = {
-  // TODO: Get user by ID
+  // Get user by ID
   getUserById: async (userId) => {
     const { rows } = await db.query(
       'SELECT id, first_name, last_name, email, created_at, updated_at FROM users WHERE id = $1',
@@ -11,7 +11,7 @@ const userService = {
     return rows[0];
   },
 
-  // TODO: Update user profile
+  // Update user profile
   updateProfile: async (userId, profileData) => {
     const fields = [];
     const values = [];
@@ -44,12 +44,12 @@ const userService = {
     return rows[0];
   },
 
-  // TODO: Delete user account
+  // Delete user account
   deleteUser: async (userId) => {
     await db.query('DELETE FROM users WHERE id = $1', [userId]);
   },
 
-  // TODO: Get user statistics
+  // Get user statistics
   getUserStats: async (userId) => {
     // This would integrate with user_statistics table
     const { rows } = await db.query(

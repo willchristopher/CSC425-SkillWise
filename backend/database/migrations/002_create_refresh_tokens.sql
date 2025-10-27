@@ -1,5 +1,4 @@
--- TODO: Create refresh tokens table for JWT token management
--- Migration 002: Create refresh tokens table
+-- Migration 002: Create refresh tokens table for JWT token management
 
 CREATE TABLE IF NOT EXISTS refresh_tokens (
   id SERIAL PRIMARY KEY,

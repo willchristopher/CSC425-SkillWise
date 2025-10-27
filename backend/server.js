@@ -1,5 +1,8 @@
 #!/usr/bin/env node
-// TODO: Server entry point with graceful shutdown and error handling
+// Server entry point with graceful shutdown and error handling
+
+// Load environment variables first
+require('dotenv').config();
 
 const app = require('./src/app');
 const logger = app.get('logger');
@@ -45,12 +48,17 @@ process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
+  console.error('💥 Uncaught Exception:');
+  console.error(err);
+  console.error(err.stack);
   logger.error('💥 Uncaught Exception:', err);
   process.exit(1);
 });
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
+  console.error('💥 Unhandled Rejection at:', promise);
+  console.error('Reason:', reason);
   logger.error('💥 Unhandled Rejection at:', promise, 'reason:', reason);
   process.exit(1);
 });

@@ -86,8 +86,13 @@ api.interceptors.response.use(
       console.log(`❌ API Error: ${originalRequest?.method?.toUpperCase()} ${originalRequest?.url} - ${error.response?.status}`);
     }
     
-    // Handle 401 Unauthorized errors
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Don't attempt token refresh on auth endpoints
+    const isAuthEndpoint = originalRequest?.url?.includes('/auth/login') || 
+                          originalRequest?.url?.includes('/auth/register') ||
+                          originalRequest?.url?.includes('/auth/refresh');
+    
+    // Handle 401 Unauthorized errors (but not for auth endpoints)
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       if (isRefreshing) {
         // If already refreshing, queue this request
         return new Promise((resolve, reject) => {

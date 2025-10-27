@@ -1,8 +1,9 @@
-// TODO: Main Express application setup with middleware and routing
+// Main Express application setup with middleware and routing
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
 const pino = require('pino');
 const pinoHttp = require('pino-http');
 
@@ -82,6 +83,9 @@ const limiter = rateLimit({
 });
 
 app.use(limiter);
+
+// Cookie parsing middleware
+app.use(cookieParser());
 
 // Body parsing middleware
 app.use(express.json({ 

@@ -1,5 +1,4 @@
--- TODO: Create users table with authentication fields
--- Migration 001: Create users table
+-- Migration 001: Create users table with authentication fields
 
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,

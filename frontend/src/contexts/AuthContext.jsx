@@ -124,8 +124,12 @@ export const AuthProvider = ({ children }) => {
     dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
 
     try {
+      console.log('🔐 Login attempt:', { email: credentials.email });
       const response = await apiService.auth.login(credentials);
-      const { user, accessToken } = response.data;
+      console.log('✅ Login response:', response);
+      
+      // Backend returns { status: "success", data: { user, accessToken } }
+      const { user, accessToken } = response.data.data;
 
       // Store access token
       setAccessToken(accessToken);
@@ -137,12 +141,19 @@ export const AuthProvider = ({ children }) => {
 
       return { success: true, user };
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Login failed';
+      console.error('❌ Login error:', error);
+      console.error('❌ Error response:', error.response);
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error?.message || 
+                          error.message || 
+                          'Login failed';
       dispatch({
         type: AUTH_ACTIONS.SET_ERROR,
         payload: errorMessage,
       });
       return { success: false, error: errorMessage };
+    } finally {
+      dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
     }
   };
 
@@ -153,7 +164,8 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const response = await apiService.auth.register(userData);
-      const { user, accessToken } = response.data;
+      // Backend returns { status: "success", data: { user, accessToken } }
+      const { user, accessToken } = response.data.data;
 
       // Store access token
       setAccessToken(accessToken);
@@ -165,7 +177,9 @@ export const AuthProvider = ({ children }) => {
 
       return { success: true, user };
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Registration failed';
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error?.message || 
+                          'Registration failed';
       dispatch({
         type: AUTH_ACTIONS.SET_ERROR,
         payload: errorMessage,

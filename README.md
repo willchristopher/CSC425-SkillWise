@@ -2,7 +2,24 @@
 
 An intelligent AI-powered tutoring platform built with React, Node.js, and PostgreSQL.
 
-## 🚀 Quick Start
+## � Authentication System
+
+**SkillWise implements a secure JWT-based authentication system with bcrypt password hashing.**
+
+For detailed authentication flow diagrams and security implementation:
+📖 **[View Authentication Flow Documentation](./AUTHENTICATION_FLOW.md)**
+
+### Security Features
+- ✅ bcrypt password hashing (12 rounds)
+- ✅ JWT access tokens (15 minute expiration)
+- ✅ Refresh tokens (7 day expiration, httpOnly cookies)
+- ✅ Protected routes with middleware
+- ✅ Automatic token refresh
+- ✅ Secure session management
+
+---
+
+## �🚀 Quick Start
 
 ### Prerequisites
 

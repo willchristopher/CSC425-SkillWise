@@ -17,17 +17,11 @@ import ProfilePage from './pages/ProfilePage';
 import NotFoundPage from './pages/NotFoundPage';
 import ErrorPage from './pages/ErrorPage';
 
-// Import layout components (TODO: Create these)
-// import Navbar from './components/layout/Navbar';
-// import Footer from './components/layout/Footer';
-
 function App() {
   return (
     <AuthProvider>
       <Router>
         <div className="App">
-          {/* TODO: Add Navbar component */}
-          {/* <Navbar /> */}
           
           <main className="main-content">
             <Routes>
