@@ -1,5 +1,8 @@
 #!/usr/bin/env node
-// TODO: Server entry point with graceful shutdown and error handling
+// Server entry point with graceful shutdown and error handling
+
+// Load environment variables
+require('dotenv').config();
 
 const app = require('./src/app');
 const logger = app.get('logger');

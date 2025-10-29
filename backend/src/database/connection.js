@@ -1,10 +1,17 @@
-// TODO: PostgreSQL database connection and configuration
+// PostgreSQL database connection and configuration
 const { Pool } = require('pg');
 const pino = require('pino');
 
 const logger = pino({
   name: 'skillwise-db'
 });
+
+// Check if we should use mock database for testing
+if (!process.env.DATABASE_URL) {
+  console.log('No DATABASE_URL found, using mock database for testing...');
+  module.exports = require('./mockConnection');
+  return;
+}
 
 // Database configuration
 const dbConfig = {

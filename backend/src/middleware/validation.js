@@ -1,8 +1,8 @@
-// TODO: Request validation middleware using Zod schemas
+// Request validation middleware using Zod schemas
 const { z } = require('zod');
 const { AppError } = require('./errorHandler');
 
-// TODO: Validation schemas
+// Validation schemas
 const loginSchema = z.object({
   body: z.object({
     email: z.string().email('Invalid email format'),
@@ -48,7 +48,7 @@ const challengeSchema = z.object({
   })
 });
 
-// TODO: Generic validation middleware
+// Generic validation middleware
 const validate = (schema) => {
   return (req, res, next) => {
     try {
@@ -82,7 +82,7 @@ const validate = (schema) => {
   };
 };
 
-// TODO: Specific validation middleware functions
+// Specific validation middleware functions
 const loginValidation = validate(loginSchema);
 const registerValidation = validate(registerSchema);
 const goalValidation = validate(goalSchema);

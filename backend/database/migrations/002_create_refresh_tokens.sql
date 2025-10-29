@@ -1,4 +1,4 @@
--- TODO: Create refresh tokens table for JWT token management
+-- Create refresh tokens table for JWT token management
 -- Migration 002: Create refresh tokens table
 
 CREATE TABLE IF NOT EXISTS refresh_tokens (

@@ -1,4 +1,4 @@
-// TODO: Centralized error handling middleware
+// Centralized error handling middleware
 const logger = require('pino')({
   name: 'skillwise-error-handler'
 });
