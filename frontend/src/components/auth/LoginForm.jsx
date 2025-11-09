@@ -16,6 +16,8 @@ const loginSchema = z.object({
 });
 
 const LoginForm = ({ onSubmit, error, isLoading }) => {
+  console.log('LoginForm rendered, onSubmit prop:', typeof onSubmit);
+  
   const {
     register,
     handleSubmit,
@@ -25,13 +27,20 @@ const LoginForm = ({ onSubmit, error, isLoading }) => {
   });
 
   const submitHandler = async (data) => {
+    console.log('LoginForm submitHandler called with data:', data);
     if (onSubmit) {
+      console.log('Calling onSubmit from LoginForm');
       await onSubmit(data);
+    } else {
+      console.log('No onSubmit prop provided to LoginForm');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(submitHandler)} className="space-y-6">
+    <form onSubmit={(e) => {
+      console.log('Form onSubmit fired!', e);
+      handleSubmit(submitHandler)(e);
+    }} className="space-y-6">
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
           Email Address
@@ -77,6 +86,7 @@ const LoginForm = ({ onSubmit, error, isLoading }) => {
       <button
         type="submit"
         disabled={isSubmitting || isLoading}
+        onClick={() => console.log('Sign In button clicked! Errors:', errors)}
         className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
           isSubmitting || isLoading
             ? 'bg-gray-400 cursor-not-allowed'

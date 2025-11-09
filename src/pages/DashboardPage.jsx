@@ -4,7 +4,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const DashboardPage = () => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState({ 
+    firstName: 'Test', 
+    lastName: 'User', 
+    email: 'test@test.com' 
+  }); // Temporary test user
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -12,10 +16,11 @@ const DashboardPage = () => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
-    } else {
-      // Redirect to login if no user found
-      navigate('/login');
     }
+    // Temporarily removed redirect to allow access
+    // else {
+    //   navigate('/login');
+    // }
   }, [navigate]);
 
   const handleLogout = async () => {

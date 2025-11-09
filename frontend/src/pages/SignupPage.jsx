@@ -10,36 +10,15 @@ const SignupPage = () => {
   const navigate = useNavigate();
 
   const handleSignup = async (formData) => {
-    try {
-      setIsLoading(true);
-      setError('');
-      
-      const response = await axios.post('http://localhost:3001/api/auth/register', {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        password: formData.password
-      });
-      
-      if (response.data.success) {
-        // Redirect to login with success message
-        navigate('/login', { 
-          state: { 
-            message: 'Account created successfully! Please sign in with your credentials.' 
-          }
-        });
-      }
-    } catch (err) {
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else if (err.response?.status === 409) {
-        setError('An account with this email already exists. Please try logging in instead.');
-      } else {
-        setError('Registration failed. Please check your internet connection and try again.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    // Just redirect immediately for testing
+    const testUser = {
+      id: 1,
+      firstName: formData.firstName || 'John',
+      lastName: formData.lastName || 'Doe',
+      email: formData.email || 'test@test.com'
+    };
+    localStorage.setItem('user', JSON.stringify(testUser));
+    window.location.href = '/dashboard';
   };
 
   return (

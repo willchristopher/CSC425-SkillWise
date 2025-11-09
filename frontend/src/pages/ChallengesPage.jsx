@@ -1,7 +1,9 @@
 // TODO: Implement challenges browsing and participation page
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import ChallengeCard from '../components/challenges/ChallengeCard';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import './ChallengesPage.css';
 
 const ChallengesPage = () => {
   const [challenges, setChallenges] = useState([]);
@@ -92,6 +94,9 @@ const ChallengesPage = () => {
   return (
     <div className="challenges-page">
       <div className="page-header">
+        <Link to="/dashboard" className="back-button">
+          ← Back to Dashboard
+        </Link>
         <h1>Learning Challenges</h1>
         <p>Enhance your skills with hands-on learning experiences</p>
       </div>
