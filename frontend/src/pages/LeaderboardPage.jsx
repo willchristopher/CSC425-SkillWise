@@ -1,253 +1,110 @@
-// TODO: Implement leaderboard and rankings page
 import React, { useState, useEffect } from 'react';
-import LoadingSpinner from '../components/common/LoadingSpinner';
+import { apiService } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 
 const LeaderboardPage = () => {
-  const [leaderboardData, setLeaderboardData] = useState([]);
+  const { user } = useAuth();
+  const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
   const [timeframe, setTimeframe] = useState('all-time');
-  const [category, setCategory] = useState('overall');
-  const { user } = useAuth();
 
-  // Mock data - TODO: Replace with API call
   useEffect(() => {
-    const mockLeaderboardData = [
-      {
-        id: 1,
-        rank: 1,
-        name: 'Alex Johnson',
-        avatar: '👨‍💻',
-        points: 2450,
-        level: 8,
-        completedChallenges: 45,
-        isCurrentUser: false
-      },
-      {
-        id: 2,
-        rank: 2,
-        name: 'Sarah Kim',
-        avatar: '👩‍🎨',
-        points: 2380,
-        level: 8,
-        completedChallenges: 42,
-        isCurrentUser: false
-      },
-      {
-        id: 3,
-        rank: 3,
-        name: 'Mike Chen',
-        avatar: '👨‍🔬',
-        points: 2290,
-        level: 7,
-        completedChallenges: 38,
-        isCurrentUser: false
-      },
-      {
-        id: 4,
-        rank: 4,
-        name: 'Emma Rodriguez',
-        avatar: '👩‍💼',
-        points: 2150,
-        level: 7,
-        completedChallenges: 35,
-        isCurrentUser: false
-      },
-      {
-        id: 5,
-        rank: 5,
-        name: user?.firstName + ' ' + user?.lastName || 'You',
-        avatar: '👤',
-        points: 1850,
-        level: 6,
-        completedChallenges: 28,
-        isCurrentUser: true
-      },
-      {
-        id: 6,
-        rank: 6,
-        name: 'David Park',
-        avatar: '👨‍🎓',
-        points: 1720,
-        level: 6,
-        completedChallenges: 25,
-        isCurrentUser: false
-      },
-      {
-        id: 7,
-        rank: 7,
-        name: 'Lisa Zhang',
-        avatar: '👩‍🔧',
-        points: 1650,
-        level: 5,
-        completedChallenges: 23,
-        isCurrentUser: false
-      }
-    ];
+    fetchLeaderboard();
+  }, [timeframe]);
 
-    setTimeout(() => {
-      setLeaderboardData(mockLeaderboardData);
+  const fetchLeaderboard = async () => {
+    try {
+      setLoading(true);
+      const response = await apiService.leaderboard.get(timeframe);
+      setLeaderboard(response.data.data || response.data || []);
+    } catch (err) {
+      console.error('Error fetching leaderboard:', err);
+      setLeaderboard([]);
+    } finally {
       setLoading(false);
-    }, 1000);
-  }, [timeframe, category, user]);
-
-  const getRankIcon = (rank) => {
-    switch (rank) {
-      case 1: return '🥇';
-      case 2: return '🥈';
-      case 3: return '🥉';
-      default: return `#${rank}`;
     }
   };
 
-  const currentUserRank = leaderboardData.find(user => user.isCurrentUser)?.rank || 0;
+  const getRankIcon = (rank) => {
+    if (rank === 1) return '🥇';
+    if (rank === 2) return '🥈';
+    if (rank === 3) return '🥉';
+    return `#${rank}`;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-indigo-600 border-t-transparent"></div>
+          <p className="mt-4 text-gray-600">Loading leaderboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="leaderboard-page">
-      <div className="page-header">
-        <h1>Leaderboard</h1>
-        <p>See how you compare with other learners</p>
-      </div>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Leaderboard</h1>
+          <p className="text-lg text-gray-600">See how you rank against other learners</p>
+        </div>
 
-      <div className="leaderboard-filters">
-        <div className="filters-row">
-          <div className="filter-group">
-            <label htmlFor="timeframe">Timeframe</label>
-            <select
-              id="timeframe"
-              value={timeframe}
-              onChange={(e) => setTimeframe(e.target.value)}
-            >
-              <option value="all-time">All Time</option>
-              <option value="this-month">This Month</option>
-              <option value="this-week">This Week</option>
-              <option value="today">Today</option>
-            </select>
-          </div>
-
-          <div className="filter-group">
-            <label htmlFor="category">Category</label>
-            <select
-              id="category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-            >
-              <option value="overall">Overall Points</option>
-              <option value="challenges">Challenges Completed</option>
-              <option value="goals">Goals Achieved</option>
-              <option value="streak">Learning Streak</option>
-            </select>
+        <div className="bg-white rounded-2xl p-4 shadow-lg mb-6">
+          <div className="flex gap-2">
+            {['all-time', 'monthly', 'weekly'].map(tf => (
+              <button
+                key={tf}
+                onClick={() => setTimeframe(tf)}
+                className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
+                  timeframe === tf
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {tf.charAt(0).toUpperCase() + tf.slice(1).replace('-', ' ')}
+              </button>
+            ))}
           </div>
         </div>
-      </div>
 
-      {currentUserRank > 0 && (
-        <div className="user-rank-summary">
-          <div className="rank-card current-user">
-            <h3>Your Ranking</h3>
-            <div className="rank-info">
-              <span className="rank-number">#{currentUserRank}</span>
-              <div className="rank-details">
-                <p>You're in the top {Math.round((currentUserRank / leaderboardData.length) * 100)}% of learners!</p>
-                <small>Keep learning to climb higher!</small>
+        {leaderboard.length > 0 ? (
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+            {leaderboard.map((entry, index) => (
+              <div
+                key={entry.id || index}
+                className={`flex items-center gap-4 p-6 border-b border-gray-100 last:border-b-0 ${
+                  entry.userId === user?.id ? 'bg-indigo-50' : ''
+                }`}
+              >
+                <div className="text-2xl font-bold w-12 text-center">
+                  {getRankIcon(index + 1)}
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-gray-900">
+                    {entry.userName || `User ${entry.userId}`}
+                    {entry.userId === user?.id && <span className="text-indigo-600 ml-2">(You)</span>}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {entry.completedGoals || 0} goals • {entry.totalSubmissions || 0} submissions
+                  </p>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-indigo-600">{entry.totalPoints || 0}</div>
+                  <div className="text-sm text-gray-500">points</div>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
-        </div>
-      )}
-
-      <div className="leaderboard-content">
-        {loading ? (
-          <LoadingSpinner message="Loading leaderboard..." />
         ) : (
-          <>
-            <div className="podium-section">
-              <h2>Top Performers</h2>
-              <div className="podium">
-                {leaderboardData.slice(0, 3).map((user, index) => (
-                  <div key={user.id} className={`podium-position position-${index + 1}`}>
-                    <div className="podium-user">
-                      <div className="user-avatar">{user.avatar}</div>
-                      <h4>{user.name}</h4>
-                      <p>{user.points} points</p>
-                      <span className="level-badge">Level {user.level}</span>
-                    </div>
-                    <div className="podium-rank">
-                      {getRankIcon(user.rank)}
-                    </div>
-                  </div>
-                ))}
-              </div>
+          <div className="bg-white rounded-2xl p-12 text-center shadow-lg">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="text-4xl">🏆</span>
             </div>
-
-            <div className="full-rankings">
-              <h2>Complete Rankings</h2>
-              <div className="rankings-table">
-                <div className="table-header">
-                  <div className="col-rank">Rank</div>
-                  <div className="col-user">User</div>
-                  <div className="col-points">Points</div>
-                  <div className="col-level">Level</div>
-                  <div className="col-challenges">Challenges</div>
-                </div>
-
-                {leaderboardData.map((user) => (
-                  <div 
-                    key={user.id} 
-                    className={`table-row ${user.isCurrentUser ? 'current-user' : ''}`}
-                  >
-                    <div className="col-rank">
-                      <span className="rank-icon">{getRankIcon(user.rank)}</span>
-                    </div>
-                    <div className="col-user">
-                      <div className="user-info">
-                        <span className="user-avatar">{user.avatar}</span>
-                        <span className="user-name">
-                          {user.name}
-                          {user.isCurrentUser && <small> (You)</small>}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="col-points">
-                      <strong>{user.points.toLocaleString()}</strong>
-                    </div>
-                    <div className="col-level">
-                      <span className="level-badge">Level {user.level}</span>
-                    </div>
-                    <div className="col-challenges">
-                      {user.completedChallenges}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="achievements-section">
-              <h2>Top Achievements This Week</h2>
-              <div className="achievements-grid">
-                <div className="achievement-card">
-                  <div className="achievement-icon">🚀</div>
-                  <h4>Challenge Master</h4>
-                  <p>Completed 5 challenges in one day</p>
-                  <small>Earned by Alex Johnson</small>
-                </div>
-
-                <div className="achievement-card">
-                  <div className="achievement-icon">🔥</div>
-                  <h4>Streak Legend</h4>
-                  <p>30-day learning streak</p>
-                  <small>Earned by Sarah Kim</small>
-                </div>
-
-                <div className="achievement-card">
-                  <div className="achievement-icon">🎯</div>
-                  <h4>Goal Crusher</h4>
-                  <p>Completed 3 learning goals</p>
-                  <small>Earned by Mike Chen</small>
-                </div>
-              </div>
-            </div>
-          </>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">No rankings yet</h2>
+            <p className="text-gray-600">Complete goals and challenges to appear on the leaderboard!</p>
+          </div>
         )}
       </div>
     </div>

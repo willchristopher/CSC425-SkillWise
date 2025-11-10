@@ -18,10 +18,6 @@ const registerSchema = z.object({
       .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain at least one lowercase letter, one uppercase letter, and one number'),
     firstName: z.string().min(1, 'First name is required').max(50, 'First name too long'),
     lastName: z.string().min(1, 'Last name is required').max(50, 'Last name too long'),
-    confirmPassword: z.string()
-  }).refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"]
   })
 });
 
@@ -31,7 +27,7 @@ const goalSchema = z.object({
     description: z.string().optional(),
     category: z.string().optional(),
     difficulty: z.enum(['easy', 'medium', 'hard']).default('medium'),
-    targetCompletionDate: z.string().datetime().optional()
+    targetCompletionDate: z.string().optional().or(z.literal(''))
   })
 });
 

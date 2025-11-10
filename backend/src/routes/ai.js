@@ -1,19 +1,37 @@
-// TODO: Implement AI routes
+// AI routes for feedback, hints, and learning analysis
 const express = require('express');
 const router = express.Router();
 const aiController = require('../controllers/aiController');
 const auth = require('../middleware/auth');
 
-// TODO: Add POST /feedback route for generating AI feedback
+// Generate AI feedback for code submission
+// POST /api/ai/feedback
+// Body: { submissionText, challengeContext: { title, description, difficulty } }
 router.post('/feedback', auth, aiController.generateFeedback);
 
-// TODO: Add GET /hints/:challengeId route for getting hints
-router.get('/hints/:challengeId', auth, aiController.getHints);
+// Get AI-generated hints for a challenge
+// POST /api/ai/hints
+// Body: { challengeTitle, challengeDescription, userProgress }
+router.post('/hints', auth, aiController.getHints);
 
-// TODO: Add GET /suggestions route for challenge suggestions
-router.get('/suggestions', auth, aiController.suggestChallenges);
+// Get personalized challenge suggestions
+// POST /api/ai/suggestions
+// Body: { skillLevel, completedTopics, languages, goals }
+router.post('/suggestions', auth, aiController.suggestChallenges);
 
-// TODO: Add GET /analysis route for progress analysis
-router.get('/analysis', auth, aiController.analyzeProgress);
+// Analyze learning progress and patterns
+// POST /api/ai/analysis
+// Body: { completedChallenges, successRate, strengths, weaknesses, recentActivity }
+router.post('/analysis', auth, aiController.analyzeProgress);
+
+// Generate practice questions for a learning goal
+// POST /api/ai/practice-questions
+// Body: { title, description, difficulty, category }
+router.post('/practice-questions', auth, aiController.generatePracticeQuestions);
+
+// Generate study plan for a learning goal
+// POST /api/ai/study-plan
+// Body: { title, description, difficulty, targetCompletionDate, currentProgress }
+router.post('/study-plan', auth, aiController.generateStudyPlan);
 
 module.exports = router;

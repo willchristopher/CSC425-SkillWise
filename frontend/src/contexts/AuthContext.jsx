@@ -81,22 +81,27 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       const token = getAccessToken();
-      
-      if (token) {
+      const storedUser = localStorage.getItem('user');
+
+      if (token && storedUser) {
         try {
-          // Validate token by fetching user profile
-          const response = await apiService.user.getProfile();
+          // Use stored user data instead of API call
+          const user = JSON.parse(storedUser);
           dispatch({
             type: AUTH_ACTIONS.LOGIN_SUCCESS,
-            payload: { user: response.data },
+            payload: { user },
           });
         } catch (error) {
-          console.error('Token validation failed:', error);
-          // Token is invalid, clear it
+          console.error('Failed to parse stored user:', error);
+          // Clear invalid data
           clearTokens();
+          localStorage.removeItem('user');
           dispatch({ type: AUTH_ACTIONS.LOGOUT });
         }
       } else {
+        // No valid session
+        clearTokens();
+        localStorage.removeItem('user');
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
       }
     };
@@ -112,7 +117,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     window.addEventListener('auth:logout', handleLogout);
-    
+
     return () => {
       window.removeEventListener('auth:logout', handleLogout);
     };
@@ -127,8 +132,9 @@ export const AuthProvider = ({ children }) => {
       const response = await apiService.auth.login(credentials);
       const { user, accessToken } = response.data;
 
-      // Store access token
+      // Store access token and user data
       setAccessToken(accessToken);
+      localStorage.setItem('user', JSON.stringify(user));
 
       dispatch({
         type: AUTH_ACTIONS.LOGIN_SUCCESS,
@@ -155,8 +161,9 @@ export const AuthProvider = ({ children }) => {
       const response = await apiService.auth.register(userData);
       const { user, accessToken } = response.data;
 
-      // Store access token
+      // Store access token and user data
       setAccessToken(accessToken);
+      localStorage.setItem('user', JSON.stringify(user));
 
       dispatch({
         type: AUTH_ACTIONS.LOGIN_SUCCESS,
@@ -185,8 +192,9 @@ export const AuthProvider = ({ children }) => {
       // Continue with logout even if API call fails
       console.error('Logout API call failed:', error);
     } finally {
-      // Clear tokens and update state
+      // Clear tokens, user data, and update state
       clearTokens();
+      localStorage.removeItem('user');
       dispatch({ type: AUTH_ACTIONS.LOGOUT });
     }
   };
@@ -308,11 +316,11 @@ export const AuthProvider = ({ children }) => {
 // Custom hook to use auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  
+
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
-  
+
   return context;
 };
 

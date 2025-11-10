@@ -59,6 +59,31 @@ SENTRY_DSN=your-sentry-dsn-url
 
 ### 3. Start Development Environment
 
+#### Option 1: Simple Startup Script (Recommended for Local Development)
+
+```bash
+# Install dependencies for both frontend and backend
+cd backend && npm install && cd ..
+cd frontend && npm install && cd ..
+
+# Start both servers with a single command
+npm start
+
+# Or use the shell script directly
+./start.sh
+```
+
+This will start both backend (port 3001) and frontend (port 3000) servers.
+
+To stop both servers:
+```bash
+npm stop
+# Or
+./stop.sh
+```
+
+#### Option 2: Docker (Full Environment)
+
 ```bash
 # Install root dependencies (for linting and git hooks)
 npm install
@@ -74,6 +99,20 @@ This single command will:
 - Build and start Node.js backend API
 - Build and start React frontend
 - Set up all networking between services
+
+#### Option 3: Manual Startup (Individual Terminals)
+
+```bash
+# Terminal 1 - Backend
+cd backend
+npm install
+npm start
+
+# Terminal 2 - Frontend
+cd frontend
+npm install
+npm start
+```
 
 ### 4. Access the Applications
 

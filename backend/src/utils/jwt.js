@@ -1,7 +1,7 @@
-// TODO: JWT utility functions for token generation and verification
+// JWT utility functions for token generation and verification
 const jwt = require('jsonwebtoken');
 
-const generateToken = (payload) => {
+const generateAccessToken = (payload) => {
   return jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || '15m'
   });
@@ -13,7 +13,7 @@ const generateRefreshToken = (payload) => {
   });
 };
 
-const verifyToken = (token) => {
+const verifyAccessToken = (token) => {
   return jwt.verify(token, process.env.JWT_SECRET);
 };
 
@@ -26,9 +26,12 @@ const decodeToken = (token) => {
 };
 
 module.exports = {
-  generateToken,
+  generateAccessToken,
   generateRefreshToken,
-  verifyToken,
+  verifyAccessToken,
   verifyRefreshToken,
-  decodeToken
+  decodeToken,
+  // Legacy aliases
+  generateToken: generateAccessToken,
+  verifyToken: verifyAccessToken,
 };

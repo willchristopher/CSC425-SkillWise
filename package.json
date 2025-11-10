@@ -6,6 +6,9 @@
     "doc": "docs"
   },
   "scripts": {
+    "start": "./start.sh",
+    "stop": "./stop.sh",
+    "dev": "concurrently \"npm start --prefix backend\" \"npm start --prefix frontend\" --names \"backend,frontend\" --prefix-colors \"blue,green\"",
     "dev:all": "docker-compose up -d && echo 'Dev environment is up! Frontend: http://localhost:3000 | Backend: http://localhost:3001/api'",
     "down": "docker-compose down -v",
     "logs": "docker-compose logs -f",

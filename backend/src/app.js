@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const pino = require('pino');
 const pinoHttp = require('pino-http');
+const cookieParser = require('cookie-parser');
 
 // Import middleware
 const errorHandler = require('./middleware/errorHandler');
@@ -83,8 +84,11 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
+// Cookie parsing middleware
+app.use(cookieParser());
+
 // Body parsing middleware
-app.use(express.json({ 
+app.use(express.json({
   limit: '10mb',
   strict: true
 }));
