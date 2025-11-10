@@ -33,10 +33,13 @@ const SignupPage = () => {
         navigate('/dashboard', { replace: true });
       }
     } catch (err) {
+      console.error('Signup error:', err.response?.data);
       if (err.response?.data?.message) {
         setError(err.response.data.message);
       } else if (err.response?.status === 409) {
         setError('An account with this email already exists. Please try logging in instead.');
+      } else if (err.response?.status === 400) {
+        setError(`Registration failed: ${err.response.data?.message || 'Please check all required fields and try again.'}`);
       } else {
         setError('Registration failed. Please check your internet connection and try again.');
       }

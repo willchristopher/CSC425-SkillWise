@@ -1,10 +1,10 @@
 // TODO: Test environment setup and configuration
 const { Pool } = require('pg');
 
-// Test database configuration
+// Test database configuration - use development database for now
 const testDbConfig = {
   connectionString: process.env.TEST_DATABASE_URL || 
-    'postgresql://skillwise_user:skillwise_pass@localhost:5432/skillwise_test_db',
+    'postgresql://skillwise_user:skillwise_pass@localhost:5433/skillwise_db',
   // Reduce connections for test environment
   max: 5,
   idleTimeoutMillis: 10000,
