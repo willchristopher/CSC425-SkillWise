@@ -109,7 +109,33 @@ const DashboardPage = () => {
         </div>
 
         {/* Dashboard Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* AI Tutor Section - NEW */}
+          <div className="bg-gradient-to-br from-purple-50 to-blue-50 overflow-hidden shadow-lg rounded-lg border-2 border-purple-200">
+            <div className="p-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <span className="text-3xl">🤖</span>
+                </div>
+                <div className="ml-4">
+                  <h3 className="text-lg font-medium text-gray-900">AI Tutor</h3>
+                  <p className="text-sm text-gray-500">Get instant AI feedback</p>
+                </div>
+              </div>
+              <div className="mt-4">
+                <div className="bg-white rounded-md p-4 border border-purple-200">
+                  <p className="text-purple-700 text-sm font-medium">✨ Powered by Gemini AI</p>
+                  <Link 
+                    to="/ai-tutor" 
+                    className="mt-2 inline-flex text-purple-600 hover:text-purple-500 text-sm font-bold"
+                  >
+                    Try AI Tutor →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Goals Section Placeholder */}
           <div className="bg-white overflow-hidden shadow rounded-lg">
             <div className="p-6">
@@ -193,7 +219,14 @@ const DashboardPage = () => {
         <div className="bg-white shadow rounded-lg">
           <div className="p-6">
             <h2 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              <Link
+                to="/ai-tutor"
+                className="bg-purple-50 hover:bg-purple-100 p-4 rounded-lg text-center transition-colors border-2 border-purple-200"
+              >
+                <span className="text-2xl block mb-2">🤖</span>
+                <span className="text-sm font-medium text-purple-900">AI Tutor</span>
+              </Link>
               <Link
                 to="/goals"
                 className="bg-blue-50 hover:bg-blue-100 p-4 rounded-lg text-center transition-colors"

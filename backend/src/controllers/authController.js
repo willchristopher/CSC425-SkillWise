@@ -15,7 +15,7 @@ const authController = {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
 
       res.status(200).json({
@@ -23,15 +23,15 @@ const authController = {
         message: 'Login successful',
         data: {
           user: result.user,
-          accessToken: result.accessToken
-        }
+          accessToken: result.accessToken,
+        },
       });
     } catch (error) {
       next(error);
     }
   },
 
-  // Register endpoint  
+  // Register endpoint
   register: async (req, res, next) => {
     try {
       const { email, password, firstName, lastName } = req.validated.body;
@@ -40,7 +40,7 @@ const authController = {
         email,
         password,
         firstName,
-        lastName
+        lastName,
       });
 
       // Set refresh token as httpOnly cookie
@@ -48,7 +48,7 @@ const authController = {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
 
       res.status(201).json({
@@ -56,8 +56,8 @@ const authController = {
         message: 'Registration successful',
         data: {
           user: result.user,
-          accessToken: result.accessToken
-        }
+          accessToken: result.accessToken,
+        },
       });
     } catch (error) {
       next(error);
@@ -75,12 +75,12 @@ const authController = {
       res.clearCookie('refreshToken', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict'
+        sameSite: 'strict',
       });
 
       res.status(200).json({
         success: true,
-        message: 'Logout successful'
+        message: 'Logout successful',
       });
     } catch (error) {
       next(error);
@@ -102,13 +102,13 @@ const authController = {
         success: true,
         message: 'Token refreshed successfully',
         data: {
-          accessToken: result.accessToken
-        }
+          accessToken: result.accessToken,
+        },
       });
     } catch (error) {
       next(error);
     }
-  }
+  },
 };
 
 module.exports = authController;

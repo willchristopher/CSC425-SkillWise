@@ -2,43 +2,33 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import SignupForm from '../components/auth/SignupForm';
-import axios from 'axios';
+import { useAuth } from '../hooks/useAuth';
 
 const SignupPage = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const handleSignup = async (formData) => {
-    try {
-      setIsLoading(true);
-      setError('');
-      
-      const response = await axios.post('http://localhost:3001/api/auth/register', {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        password: formData.password
-      });
-      
-      if (response.data.success) {
-        // Redirect to login with success message
-        navigate('/login', { 
-          state: { 
-            message: 'Account created successfully! Please sign in with your credentials.' 
-          }
-        });
-      }
-    } catch (err) {
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else if (err.response?.status === 409) {
-        setError('An account with this email already exists. Please try logging in instead.');
-      } else {
-        setError('Registration failed. Please check your internet connection and try again.');
-      }
-    } finally {
-      setIsLoading(false);
+    setIsLoading(true);
+    setError('');
+    
+    const result = await register({
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      password: formData.password,
+      confirmPassword: formData.confirmPassword
+    });
+    
+    setIsLoading(false);
+    
+    if (result.success) {
+      // Redirect to dashboard
+      navigate('/dashboard');
+    } else {
+      setError(result.error || 'Registration failed. Please try again.');
     }
   };
 

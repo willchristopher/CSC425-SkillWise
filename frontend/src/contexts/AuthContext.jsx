@@ -125,7 +125,7 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const response = await apiService.auth.login(credentials);
-      const { user, accessToken } = response.data;
+      const { user, accessToken } = response.data.data; // Backend returns data in response.data.data
 
       // Store access token
       setAccessToken(accessToken);
@@ -153,7 +153,7 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const response = await apiService.auth.register(userData);
-      const { user, accessToken } = response.data;
+      const { user, accessToken } = response.data.data; // Backend returns data in response.data.data
 
       // Store access token
       setAccessToken(accessToken);

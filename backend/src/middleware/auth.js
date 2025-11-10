@@ -7,7 +7,7 @@ const auth = async (req, res, next) => {
   try {
     // Get token from header
     let token;
-    
+
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
     }
@@ -22,7 +22,7 @@ const auth = async (req, res, next) => {
     // Check if user still exists and is active
     const userResult = await query(
       'SELECT id, email, first_name, last_name, role, is_active FROM users WHERE id = $1',
-      [decoded.userId]
+      [decoded.userId],
     );
 
     if (userResult.rows.length === 0) {
@@ -41,9 +41,9 @@ const auth = async (req, res, next) => {
       email: currentUser.email,
       firstName: currentUser.first_name,
       lastName: currentUser.last_name,
-      role: currentUser.role
+      role: currentUser.role,
     };
-    
+
     next();
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
@@ -73,17 +73,17 @@ const restrictTo = (...roles) => {
 const optionalAuth = async (req, res, next) => {
   try {
     let token;
-    
+
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
     }
 
     if (token) {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      
+
       const userResult = await query(
         'SELECT id, email, first_name, last_name, role, is_active FROM users WHERE id = $1',
-        [decoded.userId]
+        [decoded.userId],
       );
 
       if (userResult.rows.length > 0 && userResult.rows[0].is_active) {
@@ -93,11 +93,11 @@ const optionalAuth = async (req, res, next) => {
           email: currentUser.email,
           firstName: currentUser.first_name,
           lastName: currentUser.last_name,
-          role: currentUser.role
+          role: currentUser.role,
         };
       }
     }
-    
+
     next();
   } catch (error) {
     // For optional auth, we don't throw errors, just continue without user

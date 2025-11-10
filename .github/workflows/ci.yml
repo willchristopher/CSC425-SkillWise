@@ -1,0 +1,208 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
+      
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+      
+      - name: Run backend linter
+        working-directory: ./backend
+        run: npm run lint
+      
+      - name: Run frontend linter
+        working-directory: ./frontend
+        run: npm run lint
+
+  unit-test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: skillwise_test
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: skillwise_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
+      
+      - name: Run database migrations
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql://skillwise_test:test_password@localhost:5432/skillwise_test
+          NODE_ENV: test
+        run: npm run migrate
+      
+      - name: Run backend unit tests
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql://skillwise_test:test_password@localhost:5432/skillwise_test
+          REDIS_URL: redis://localhost:6379
+          NODE_ENV: test
+          JWT_SECRET: test_jwt_secret_key_for_ci
+          JWT_REFRESH_SECRET: test_jwt_refresh_secret_key_for_ci
+        run: npm test
+      
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+      
+      - name: Run frontend unit tests
+        working-directory: ./frontend
+        run: npm test -- --coverage --watchAll=false
+
+  e2e-test:
+    name: E2E Tests (Cypress)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: skillwise_test
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: skillwise_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
+      
+      - name: Run database migrations
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql://skillwise_test:test_password@localhost:5432/skillwise_test
+          NODE_ENV: test
+        run: npm run migrate
+      
+      - name: Start backend server
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql://skillwise_test:test_password@localhost:5432/skillwise_test
+          REDIS_URL: redis://localhost:6379
+          NODE_ENV: test
+          PORT: 3001
+          JWT_SECRET: test_jwt_secret_key_for_ci
+          JWT_REFRESH_SECRET: test_jwt_refresh_secret_key_for_ci
+          CORS_ORIGIN: http://localhost:3002
+        run: |
+          npm start &
+          echo $! > backend.pid
+      
+      - name: Wait for backend
+        run: |
+          npx wait-on http://localhost:3001/healthz --timeout 60000
+      
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+      
+      - name: Run Cypress E2E tests
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: ./frontend
+          start: npm start
+          wait-on: 'http://localhost:3002'
+          wait-on-timeout: 120
+          browser: chrome
+          config-file: cypress.config.js
+        env:
+          REACT_APP_API_URL: http://localhost:3001/api
+      
+      - name: Upload Cypress screenshots
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: frontend/cypress/screenshots
+      
+      - name: Upload Cypress videos
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: cypress-videos
+          path: frontend/cypress/videos
+      
+      - name: Stop backend server
+        if: always()
+        run: |
+          if [ -f backend.pid ]; then
+            kill $(cat backend.pid) || true
+          fi

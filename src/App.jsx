@@ -14,6 +14,7 @@ import ProgressPage from './pages/ProgressPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import PeerReviewPage from './pages/PeerReviewPage';
 import ProfilePage from './pages/ProfilePage';
+import AITutorPage from './pages/AITutorPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ErrorPage from './pages/ErrorPage';
 
@@ -91,6 +92,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <ProfilePage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/ai-tutor" 
+                element={
+                  <ProtectedRoute>
+                    <AITutorPage />
                   </ProtectedRoute>
                 } 
               />

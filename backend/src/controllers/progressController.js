@@ -1,26 +1,26 @@
 // TODO: Implement progress tracking controller
-const progressService = require('../services/progressService');
+// const progressService = require('../services/progressService'); // TODO: Use this when implementing
 
 const progressController = {
   // TODO: Get user progress overview
-  getProgress: async (req, res, next) => {
+  getProgress: async (/* req, res, next */) => {
     // Implementation needed
   },
 
   // TODO: Update progress event
-  updateProgress: async (req, res, next) => {
+  updateProgress: async (/* req, res, next */) => {
     // Implementation needed
   },
 
   // TODO: Get progress analytics
-  getAnalytics: async (req, res, next) => {
+  getAnalytics: async (/* req, res, next */) => {
     // Implementation needed
   },
 
   // TODO: Get milestones
-  getMilestones: async (req, res, next) => {
+  getMilestones: async (/* req, res, next */) => {
     // Implementation needed
-  }
+  },
 };
 
 module.exports = progressController;

@@ -1,25 +1,25 @@
 #!/usr/bin/env node
 // TODO: Implement deployment script
 
-const { exec } = require('child_process');
-const path = require('path');
+// const { exec } = require('child_process'); // TODO: Use this when implementing deployment
+// const path = require('path'); // TODO: Use this when implementing deployment
 
-async function deploy() {
+async function deploy () {
   try {
     console.log('Starting deployment process...');
-    
+
     // TODO: Run tests
     console.log('Running tests...');
-    
+
     // TODO: Build application
     console.log('Building application...');
-    
+
     // TODO: Run migrations
     console.log('Running database migrations...');
-    
+
     // TODO: Deploy to production
     console.log('Deploying to production...');
-    
+
     console.log('Deployment completed successfully!');
   } catch (error) {
     console.error('Deployment failed:', error);
@@ -27,7 +27,9 @@ async function deploy() {
   }
 }
 
-function runCommand(command) {
+// TODO: Uncomment and use this function when implementing deployment
+/*
+function runCommand (command) {
   return new Promise((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {
       if (error) {
@@ -40,6 +42,7 @@ function runCommand(command) {
     });
   });
 }
+*/
 
 if (require.main === module) {
   deploy();

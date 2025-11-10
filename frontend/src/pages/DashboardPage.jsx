@@ -1,34 +1,19 @@
 // Dashboard shell page with navigation, goals and challenges sections
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useAuth } from '../hooks/useAuth';
 
 const DashboardPage = () => {
-  const [user, setUser] = useState(null);
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Get user from localStorage
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    } else {
-      // Redirect to login if no user found
-      navigate('/login');
-    }
-  }, [navigate]);
 
   const handleLogout = async () => {
     try {
-      await axios.post('http://localhost:3001/api/auth/logout', {}, {
-        withCredentials: true
-      });
+      await logout();
+      navigate('/login');
     } catch (error) {
       console.error('Logout error:', error);
-    } finally {
-      // Clear local storage and redirect
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('user');
+      // Still navigate to login even if logout fails
       navigate('/login');
     }
   };
@@ -43,6 +28,7 @@ const DashboardPage = () => {
     { path: '/profile', label: 'Profile', icon: '👤' },
   ];
 
+  // ProtectedRoute already handles the loading/auth check
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -83,7 +69,7 @@ const DashboardPage = () => {
             {/* User Menu */}
             <div className="flex items-center space-x-4">
               <span className="text-gray-700 text-sm">
-                Welcome, {user.first_name}!
+                Welcome, {user?.firstName || user?.first_name || 'User'}!
               </span>
               <button
                 onClick={handleLogout}
@@ -101,7 +87,7 @@ const DashboardPage = () => {
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, {user.first_name}!
+            Welcome back, {user?.firstName || user?.first_name || 'User'}!
           </h1>
           <p className="mt-2 text-gray-600">
             Continue your learning journey and track your progress.
@@ -109,7 +95,33 @@ const DashboardPage = () => {
         </div>
 
         {/* Dashboard Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* AI Tutor Section - NEW */}
+          <div className="bg-gradient-to-br from-purple-50 to-blue-50 overflow-hidden shadow-lg rounded-lg border-2 border-purple-200">
+            <div className="p-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <span className="text-3xl">🤖</span>
+                </div>
+                <div className="ml-4">
+                  <h3 className="text-lg font-medium text-gray-900">AI Tutor</h3>
+                  <p className="text-sm text-gray-500">Get instant AI feedback</p>
+                </div>
+              </div>
+              <div className="mt-4">
+                <div className="bg-white rounded-md p-4 border border-purple-200">
+                  <p className="text-purple-700 text-sm font-medium">✨ Powered by Gemini AI</p>
+                  <Link 
+                    to="/ai-tutor" 
+                    className="mt-2 inline-flex text-purple-600 hover:text-purple-500 text-sm font-bold"
+                  >
+                    Try AI Tutor →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Goals Section Placeholder */}
           <div className="bg-white overflow-hidden shadow rounded-lg">
             <div className="p-6">
@@ -193,7 +205,14 @@ const DashboardPage = () => {
         <div className="bg-white shadow rounded-lg">
           <div className="p-6">
             <h2 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              <Link
+                to="/ai-tutor"
+                className="bg-purple-50 hover:bg-purple-100 p-4 rounded-lg text-center transition-colors border-2 border-purple-300"
+              >
+                <span className="text-2xl block mb-2">🤖</span>
+                <span className="text-sm font-medium text-purple-900">AI Tutor</span>
+              </Link>
               <Link
                 to="/goals"
                 className="bg-blue-50 hover:bg-blue-100 p-4 rounded-lg text-center transition-colors"
