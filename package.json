@@ -18,17 +18,31 @@
     "build": "docker-compose build",
     "rebuild": "docker-compose build --no-cache",
     "reset": "docker-compose down -v && docker-compose up -d",
-    "test": "echo \"Run tests in individual services\" && exit 0",
+    "test": "npm test --prefix backend",
+    "test:unit": "npm test --prefix backend -- tests/unit/",
+    "test:integration": "npm test --prefix backend -- tests/integration/",
+    "cypress": "cypress open",
+    "cypress:run": "cypress run",
+    "test:e2e": "cypress run",
     "prepare": "husky install"
   },
-  "keywords": ["ai", "tutor", "education", "react", "node", "postgresql"],
+  "keywords": [
+    "ai",
+    "tutor",
+    "education",
+    "react",
+    "node",
+    "postgresql"
+  ],
   "author": "",
   "license": "ISC",
   "description": "SkillWise AI Tutor - An intelligent tutoring system",
   "devDependencies": {
+    "@testing-library/cypress": "^10.1.0",
+    "cypress": "^15.6.0",
+    "eslint": "^8.44.0",
     "husky": "^8.0.3",
     "lint-staged": "^13.2.3",
-    "eslint": "^8.44.0",
     "prettier": "^2.8.8"
   }
 }

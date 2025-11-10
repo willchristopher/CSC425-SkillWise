@@ -26,16 +26,18 @@ const DashboardPage = () => {
 
       // Fetch real goal statistics
       const statsResponse = await apiService.goals.getStats();
+      const statsData = statsResponse.data.data || statsResponse.data;
       setStats({
-        goalsCompleted: statsResponse.data.goalsCompleted,
-        goalsActive: statsResponse.data.goalsActive,
+        goalsCompleted: statsData.goalsCompleted || 0,
+        goalsActive: statsData.goalsActive || 0,
         challengesCompleted: 0, // TODO: Implement challenges
         totalPoints: 0, // TODO: Implement points system
       });
 
       // Fetch recent goals
       const goalsResponse = await apiService.goals.getAll();
-      setRecentGoals(goalsResponse.data.slice(0, 3)); // Show only 3 most recent
+      const goalsData = goalsResponse.data.data || goalsResponse.data;
+      setRecentGoals(Array.isArray(goalsData) ? goalsData.slice(0, 3) : []); // Show only 3 most recent
 
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);

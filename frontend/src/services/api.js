@@ -214,8 +214,17 @@ export const apiService = {
   challenges: {
     getAll: (params) => api.get('/challenges', { params }),
     getById: (id) => api.get(`/challenges/${id}`),
-    submit: (id, submission) => api.post(`/challenges/${id}/submit`, submission),
+    start: (id) => api.post(`/challenges/${id}/start`),
+    submit: (id, submission) => api.post(`/submissions`, { ...submission, challenge_id: id }),
     getSubmissions: (id) => api.get(`/challenges/${id}/submissions`),
+  },
+
+  // Submissions methods
+  submissions: {
+    getAll: () => api.get('/submissions'),
+    getById: (id) => api.get(`/submissions/${id}`),
+    create: (data) => api.post('/submissions', data),
+    update: (id, data) => api.put(`/submissions/${id}`, data),
   },
 
   // Progress methods

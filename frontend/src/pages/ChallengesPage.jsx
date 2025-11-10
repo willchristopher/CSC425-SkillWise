@@ -3,6 +3,7 @@ import { apiService } from '../services/api';
 
 const ChallengesPage = () => {
   const [challenges, setChallenges] = useState([]);
+  const [userSubmissions, setUserSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
@@ -12,19 +13,24 @@ const ChallengesPage = () => {
   });
 
   useEffect(() => {
-    fetchChallenges();
+    fetchData();
   }, []);
 
-  const fetchChallenges = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await apiService.challenges.getAll();
-      setChallenges(response.data.data || response.data || []);
+      const [challengesRes, submissionsRes] = await Promise.all([
+        apiService.challenges.getAll(),
+        apiService.submissions.getAll().catch(() => ({ data: { data: [] } }))
+      ]);
+      setChallenges(challengesRes.data.data || challengesRes.data || []);
+      setUserSubmissions(submissionsRes.data.data || submissionsRes.data || []);
       setError(null);
     } catch (err) {
       setError('Failed to load challenges');
-      console.error('Error fetching challenges:', err);
+      console.error('Error fetching data:', err);
       setChallenges([]);
+      setUserSubmissions([]);
     } finally {
       setLoading(false);
     }
@@ -34,11 +40,42 @@ const ChallengesPage = () => {
     try {
       await apiService.challenges.start(challenge.id);
       alert(`Started challenge: ${challenge.title}`);
-      fetchChallenges();
+      fetchData();
     } catch (err) {
       alert('Failed to start challenge');
     }
   };
+
+  const handleCompleteChallenge = async (challenge) => {
+    try {
+      await apiService.challenges.submit(challenge.id, {
+        submission_text: 'Challenge completed',
+        status: 'completed'
+      });
+      alert(`Completed challenge: ${challenge.title}`);
+      fetchData();
+    } catch (err) {
+      alert('Failed to complete challenge');
+      console.error(err);
+    }
+  };
+
+  const isCompleted = (challengeId) => {
+    return userSubmissions.some(
+      sub => sub.challenge_id === challengeId && sub.status === 'completed'
+    );
+  };
+
+  const isInProgress = (challengeId) => {
+    return userSubmissions.some(
+      sub => sub.challenge_id === challengeId && sub.status === 'in_progress'
+    );
+  };
+
+  // Calculate progress
+  const completedCount = challenges.filter(c => isCompleted(c.id)).length;
+  const totalCount = challenges.length;
+  const progressPercentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   const filteredChallenges = challenges.filter(challenge => {
     const matchesCategory = !filters.category || challenge.category?.toLowerCase() === filters.category.toLowerCase();
@@ -78,6 +115,33 @@ const ChallengesPage = () => {
           <p className="text-lg text-gray-600">Test your skills with hands-on coding challenges</p>
         </div>
 
+        {/* Progress Bar */}
+        <div className="bg-white rounded-2xl p-6 shadow-lg mb-8">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">Your Progress</h3>
+              <p className="text-sm text-gray-600">
+                {completedCount} of {totalCount} challenges completed
+              </p>
+            </div>
+            <div className="text-right">
+              <span className="text-3xl font-bold text-indigo-600">{progressPercentage}%</span>
+            </div>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-4">
+            <div
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 h-4 rounded-full transition-all duration-500"
+              style={{ width: `${progressPercentage}%` }}
+            ></div>
+          </div>
+          {completedCount > 0 && (
+            <p className="text-sm text-green-600 mt-2">
+              🎉 Great work! Keep going!
+            </p>
+          )}
+        </div>
+
+        {/* Filters */}
         <div className="bg-white rounded-2xl p-6 shadow-lg mb-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
@@ -122,30 +186,67 @@ const ChallengesPage = () => {
 
         {filteredChallenges.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredChallenges.map((challenge) => (
-              <div key={challenge.id} className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-xl font-bold text-gray-900">{challenge.title}</h3>
-                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${getDifficultyColor(challenge.difficulty)}`}>
-                    {challenge.difficulty}
-                  </span>
-                </div>
-                
-                <p className="text-gray-600 mb-4 line-clamp-3">{challenge.description}</p>
-                
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-500">⏱️ {challenge.estimatedTime || 30} min</span>
-                  <span className="text-sm font-semibold text-indigo-600">🏆 {challenge.points || 50} pts</span>
-                </div>
+            {filteredChallenges.map((challenge) => {
+              const completed = isCompleted(challenge.id);
+              const inProgress = isInProgress(challenge.id);
+              
+              return (
+                <div key={challenge.id} className={`bg-white rounded-2xl p-6 shadow-lg border-2 hover:shadow-xl transition-all ${completed ? 'border-green-500 bg-green-50' : 'border-gray-100'}`}>
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-xl font-bold text-gray-900">{challenge.title}</h3>
+                    <div className="flex gap-2">
+                      <span className={`text-xs font-semibold px-3 py-1 rounded-full ${getDifficultyColor(challenge.difficulty)}`}>
+                        {challenge.difficulty}
+                      </span>
+                      {completed && (
+                        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-green-100 text-green-800">
+                          ✓ Done
+                        </span>
+                      )}
+                      {inProgress && !completed && (
+                        <span className="text-xs font-semibold px-3 py-1 rounded-full bg-blue-100 text-blue-800">
+                          In Progress
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <p className="text-gray-600 mb-4 line-clamp-3">{challenge.description}</p>
+                  
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm text-gray-500">⏱️ {challenge.timeEstimate || 30} min</span>
+                    <span className="text-sm font-semibold text-indigo-600">🏆 {challenge.points || 50} pts</span>
+                  </div>
 
-                <button
-                  onClick={() => handleStartChallenge(challenge)}
-                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-3 rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg"
-                >
-                  Start Challenge
-                </button>
-              </div>
-            ))}
+                  <div className="flex gap-2">
+                    {!completed && !inProgress && (
+                      <button
+                        onClick={() => handleStartChallenge(challenge)}
+                        className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all"
+                      >
+                        Start Challenge
+                      </button>
+                    )}
+                    {inProgress && !completed && (
+                      <button
+                        onClick={() => handleCompleteChallenge(challenge)}
+                        className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all"
+                      >
+                        Mark Complete
+                      </button>
+                    )}
+                    {completed && (
+                      <button
+                        disabled
+                        className="flex-1 bg-gray-300 text-gray-600 px-4 py-2 rounded-lg font-semibold cursor-not-allowed"
+                      >
+                        ✓ Completed
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div className="bg-white rounded-2xl p-12 text-center shadow-lg">
