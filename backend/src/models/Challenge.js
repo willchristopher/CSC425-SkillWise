@@ -43,20 +43,50 @@ class Challenge {
 
   static async create(challengeData) {
     try {
-      const { title, description, difficulty, subject, points, type, content, goal_id } = challengeData;
-      // Map difficulty to difficulty_level, default to 'medium'
-      const difficulty_level = difficulty || 'medium';
+      const { 
+        title, 
+        description, 
+        instructions,
+        difficulty, 
+        difficulty_level,
+        subject, 
+        category,
+        points, 
+        points_reward,
+        type, 
+        content, 
+        goal_id,
+        created_by
+      } = challengeData;
+      
+      // Use provided fields or fall back to legacy field names
+      const finalDifficulty = difficulty_level || difficulty || 'medium';
+      const finalCategory = category || subject || 'general';
+      const finalPoints = points_reward || points || 10;
+      
       const query = `
-        INSERT INTO challenges (title, description, difficulty_level, category, points_reward, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+        INSERT INTO challenges (
+          title, 
+          description, 
+          instructions,
+          difficulty_level, 
+          category, 
+          points_reward,
+          created_by,
+          created_at, 
+          updated_at
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
         RETURNING *
       `;
       const result = await db.query(query, [
         title, 
-        description, 
-        difficulty_level, 
-        subject || 'general',
-        points || 10
+        description,
+        instructions,
+        finalDifficulty, 
+        finalCategory,
+        finalPoints,
+        created_by
       ]);
       return result.rows[0];
     } catch (error) {

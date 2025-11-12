@@ -89,6 +89,7 @@ describe('Goals and Challenges Integration Workflow', () => {
         .send({
           title: 'Build a Todo App with Tests',
           description: 'Create a React todo application with full test coverage',
+          instructions: 'Step 1: Set up React project. Step 2: Create components. Step 3: Write tests with Jest and React Testing Library.',
           difficulty: 'medium',
           subject: 'React',
           category: 'programming',
@@ -221,7 +222,9 @@ describe('Goals and Challenges Integration Workflow', () => {
         .send({
           title: 'CRUD Test Challenge',
           description: 'Testing CRUD operations for challenges',
-          difficulty: 'easy'
+          instructions: 'Follow these steps to complete the challenge',
+          difficulty: 'easy',
+          category: 'testing'
         });
       expect(createResponse.status).toBe(201);
       const testChallengeId = createResponse.body.data.id;

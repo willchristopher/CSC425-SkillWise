@@ -23,13 +23,13 @@ class Goal {
 
   static async create(goalData) {
     try {
-      const { title, description, user_id, target_date, type } = goalData;
+      const { title, description, user_id, target_date, type, category } = goalData;
       const query = `
-        INSERT INTO goals (title, description, user_id, target_completion_date, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, NOW(), NOW())
+        INSERT INTO goals (title, description, user_id, category, target_completion_date, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
         RETURNING *
       `;
-      const result = await db.query(query, [title, description, user_id, target_date || null]);
+      const result = await db.query(query, [title, description, user_id, category || null, target_date || null]);
       return result.rows[0];
     } catch (error) {
       throw new Error(`Error creating goal: ${error.message}`);

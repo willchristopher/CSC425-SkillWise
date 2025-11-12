@@ -57,22 +57,24 @@ const challengeController = {
   // Create new challenge (admin only)
   createChallenge: async (req, res, next) => {
     try {
-      const { title, description, difficulty, subject, points, type, content } = req.body;
+      const { title, description, instructions, difficulty, subject, points, type, content, category } = req.body;
 
       // Validate required fields
-      if (!title || !description) {
+      if (!title || !description || !instructions) {
         return res.status(400).json({
           success: false,
-          message: 'Title and description are required'
+          message: 'Title, description, and instructions are required'
         });
       }
 
       const challengeData = {
         title,
         description,
-        difficulty: difficulty || 'medium',
-        subject,
-        points: points || 10,
+        instructions,
+        category: category || subject || 'general',
+        difficulty_level: difficulty || 'medium',
+        points_reward: points || 10,
+        created_by: req.user?.userId || null,
         type: type || 'coding',
         content
       };
