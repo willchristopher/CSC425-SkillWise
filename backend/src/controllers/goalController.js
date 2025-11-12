@@ -22,7 +22,14 @@ const goalController = {
   // Get single goal by ID
   getGoalById: async (req, res, next) => {
     try {
-      const { id } = req.params;
+      const id = Number.parseInt(req.params.id, 10);
+      if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid goal ID'
+        });
+      }
+
       const goal = await Goal.findById(id);
       
       if (!goal) {
@@ -86,7 +93,14 @@ const goalController = {
   // Update existing goal
   updateGoal: async (req, res, next) => {
     try {
-      const { id } = req.params;
+      const id = Number.parseInt(req.params.id, 10);
+      if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid goal ID'
+        });
+      }
+
       const { title, description, target_date, progress, status } = req.body;
 
       // Check if goal exists and belongs to user
@@ -128,7 +142,13 @@ const goalController = {
   // Delete goal
   deleteGoal: async (req, res, next) => {
     try {
-      const { id } = req.params;
+      const id = Number.parseInt(req.params.id, 10);
+      if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid goal ID'
+        });
+      }
 
       // Check if goal exists and belongs to user
       const existingGoal = await Goal.findById(id);

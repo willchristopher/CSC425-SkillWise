@@ -28,7 +28,14 @@ const challengeController = {
   // Get challenge by ID
   getChallengeById: async (req, res, next) => {
     try {
-      const { id } = req.params;
+      const id = Number.parseInt(req.params.id, 10);
+      if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid challenge ID'
+        });
+      }
+
       const challenge = await Challenge.findById(id);
       
       if (!challenge) {
@@ -85,7 +92,14 @@ const challengeController = {
   // Update challenge (admin only)
   updateChallenge: async (req, res, next) => {
     try {
-      const { id } = req.params;
+      const id = Number.parseInt(req.params.id, 10);
+      if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid challenge ID'
+        });
+      }
+
       const { title, description, difficulty, subject, points, type, content } = req.body;
 
       // Check if challenge exists
@@ -122,7 +136,13 @@ const challengeController = {
   // Delete challenge (admin only)
   deleteChallenge: async (req, res, next) => {
     try {
-      const { id } = req.params;
+      const id = Number.parseInt(req.params.id, 10);
+      if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid challenge ID'
+        });
+      }
 
       // Check if challenge exists
       const existingChallenge = await Challenge.findById(id);

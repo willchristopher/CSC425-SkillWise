@@ -156,6 +156,11 @@ jobs:
           DATABASE_URL: postgresql://skillwise_user:skillwise_pass@localhost:5432/skillwise_test_db
           NODE_ENV: test
       
+      - name: Build frontend
+        run: cd frontend && npm run build
+        env:
+          REACT_APP_API_URL: http://localhost:3001/api
+      
       - name: Start backend server
         run: cd backend && npm start &
         env:
@@ -165,23 +170,14 @@ jobs:
           JWT_SECRET: test-secret
           JWT_REFRESH_SECRET: test-refresh-secret
       
-      - name: Start frontend server
-        run: cd frontend && npm start &
-        env:
-          REACT_APP_API_URL: http://localhost:3001/api
-          PORT: 3000
-      
-      - name: Wait for servers to be ready
-        run: |
-          npx wait-on http://localhost:3001/api/health
-          npx wait-on http://localhost:3000
-        timeout-minutes: 5
+      - name: Serve frontend build
+        run: cd frontend && npx serve -s build -l 3000 &
       
       - name: Run Cypress E2E tests
         uses: cypress-io/github-action@v5
         with:
           wait-on: 'http://localhost:3000, http://localhost:3001/api/health'
-          wait-on-timeout: 120
+          wait-on-timeout: 60
           browser: chrome
           record: false
       
