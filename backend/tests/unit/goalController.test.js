@@ -1,8 +1,10 @@
 const goalController = require('../../src/controllers/goalController');
 const Goal = require('../../src/models/Goal');
+const goalService = require('../../src/services/goalService');
 
-// Mock the Goal model
+// Mock the Goal model and goalService
 jest.mock('../../src/models/Goal');
+jest.mock('../../src/services/goalService');
 
 describe('Goal Controller', () => {
   let mockReq;
@@ -38,11 +40,11 @@ describe('Goal Controller', () => {
         { id: 2, title: 'Master Node.js', user_id: 1, progress_percentage: 30 }
       ];
 
-      Goal.findByUserId.mockResolvedValue(mockGoals);
+      goalService.getUserGoals.mockResolvedValue(mockGoals);
 
       await goalController.getGoals(mockReq, mockRes, mockNext);
 
-      expect(Goal.findByUserId).toHaveBeenCalledWith(1);
+      expect(goalService.getUserGoals).toHaveBeenCalledWith(1);
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({
         success: true,
@@ -53,7 +55,7 @@ describe('Goal Controller', () => {
 
     it('should handle errors', async () => {
       const error = new Error('Database error');
-      Goal.findByUserId.mockRejectedValue(error);
+      goalService.getUserGoals.mockRejectedValue(error);
 
       await goalController.getGoals(mockReq, mockRes, mockNext);
 

@@ -84,6 +84,11 @@ const goalService = {
       `;
       const result = await db.query(query, [goalId]);
       
+      // Handle case when result is undefined or empty
+      if (!result || !result.rows || result.rows.length === 0) {
+        return 0;
+      }
+      
       const { total, completed } = result.rows[0];
       
       // Convert to numbers since PostgreSQL returns strings

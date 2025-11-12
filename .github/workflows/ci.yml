@@ -71,8 +71,16 @@ jobs:
           NODE_ENV: test
       
       - name: Run unit tests
-        run: cd backend && npm test
+        run: cd backend && npm run test:unit
         env:
+          NODE_ENV: test
+          JWT_SECRET: test-secret
+          JWT_REFRESH_SECRET: test-refresh-secret
+      
+      - name: Run integration tests
+        run: cd backend && npm run test:integration
+        env:
+          TEST_DATABASE_URL: postgresql://skillwise_user:skillwise_pass@localhost:5432/skillwise_test_db
           DATABASE_URL: postgresql://skillwise_user:skillwise_pass@localhost:5432/skillwise_test_db
           NODE_ENV: test
           JWT_SECRET: test-secret
