@@ -5,8 +5,8 @@ const { AppError } = require('./errorHandler');
 // Validation schemas
 const loginSchema = z.object({
   body: z.object({
-    email: z.string().email('Invalid email format'),
-    password: z.string().min(1, 'Password is required')
+    email: z.string({ required_error: 'Email is required' }).email('Invalid email format'),
+    password: z.string({ required_error: 'Password is required' }).min(1, 'Password is required')
   })
 });
 
@@ -16,8 +16,12 @@ const registerSchema = z.object({
     password: z.string()
       .min(8, 'Password must be at least 8 characters')
       .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain at least one lowercase letter, one uppercase letter, and one number'),
+    confirmPassword: z.string().min(1, 'Password confirmation is required'),
     firstName: z.string().min(1, 'First name is required').max(50, 'First name too long'),
     lastName: z.string().min(1, 'Last name is required').max(50, 'Last name too long')
+  }).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword']
   })
 });
 

@@ -53,7 +53,7 @@ const authService = {
       expiresAt.setDate(expiresAt.getDate() + 7); // 7 days from now
 
       await query(
-        'INSERT INTO refresh_tokens (token, user_id, expires_at) VALUES ($1, $2, $3)',
+        'INSERT INTO refresh_tokens (token, user_id, expires_at) VALUES ($1, $2, $3) ON CONFLICT (token) DO NOTHING',
         [refreshToken, user.id, expiresAt]
       );
 
@@ -117,7 +117,7 @@ const authService = {
       expiresAt.setDate(expiresAt.getDate() + 7); // 7 days from now
 
       await query(
-        'INSERT INTO refresh_tokens (token, user_id, expires_at) VALUES ($1, $2, $3)',
+        'INSERT INTO refresh_tokens (token, user_id, expires_at) VALUES ($1, $2, $3) ON CONFLICT (token) DO NOTHING',
         [refreshToken, newUser.id, expiresAt]
       );
 

@@ -21,7 +21,7 @@ if (!process.env.DATABASE_URL && !process.env.TEST_DATABASE_URL) {
     }
   }),
   // Connection pool settings
-  max: 20, // Maximum number of clients in pool
+  max: process.env.NODE_ENV === 'test' ? 5 : 20, // Smaller pool for tests
   idleTimeoutMillis: 30000, // How long a client is allowed to remain idle
   connectionTimeoutMillis: 2000, // How long to wait when connecting
 };
@@ -195,6 +195,9 @@ module.exports = {
   getClient,
   healthCheck,
   testConnection,
-  closePool
+  closePool,
+  
+  // Alias for tests
+  end: closePool
 };
 }

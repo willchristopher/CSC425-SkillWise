@@ -12,10 +12,11 @@ describe('Goals API Integration Tests', () => {
     const signupResponse = await request(app)
       .post('/api/auth/register')
       .send({
-        username: 'testuser_goals',
         email: 'testgoals@example.com',
         password: 'TestPassword123!',
-        full_name: 'Test User'
+        confirmPassword: 'TestPassword123!',
+        firstName: 'Test',
+        lastName: 'User'
       });
 
     if (signupResponse.status === 201) {
@@ -26,8 +27,8 @@ describe('Goals API Integration Tests', () => {
           password: 'TestPassword123!'
         });
 
-      authToken = loginResponse.body.accessToken;
-      userId = loginResponse.body.user.id;
+      authToken = loginResponse.body.data.accessToken;
+      userId = loginResponse.body.data.user.id;
     }
   });
 
@@ -37,7 +38,6 @@ describe('Goals API Integration Tests', () => {
       await db.query('DELETE FROM goals WHERE user_id = $1', [userId]);
       await db.query('DELETE FROM users WHERE id = $1', [userId]);
     }
-    await db.end();
   });
 
   describe('POST /api/goals', () => {

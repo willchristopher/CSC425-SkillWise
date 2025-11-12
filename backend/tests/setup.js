@@ -1,28 +1,11 @@
-// TODO: Test environment setup and configuration
-const { Pool } = require('pg');
-
-// Test database configuration
-const testDbConfig = {
-  connectionString: process.env.TEST_DATABASE_URL || 
-    'postgresql://skillwise_user:skillwise_pass@localhost:5432/skillwise_test_db',
-  // Reduce connections for test environment
-  max: 5,
-  idleTimeoutMillis: 10000,
-  connectionTimeoutMillis: 1000,
-};
-
-const testPool = new Pool(testDbConfig);
+// Test environment setup and configuration
+const db = require('../src/database/connection');
 
 // Global test setup
 beforeAll(async () => {
-  // Set test environment
-  process.env.NODE_ENV = 'test';
-  process.env.JWT_SECRET = 'test-jwt-secret-key-for-testing-only';
-  process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-for-testing-only';
-  
   // Test database connection (skip if not available for unit tests)
   try {
-    await testPool.query('SELECT 1');
+    await db.query('SELECT 1');
     console.log('✅ Test database connected');
   } catch (err) {
     console.warn('⚠️  Test database not available, skipping integration tests:', err.message);
@@ -34,10 +17,10 @@ beforeAll(async () => {
 afterAll(async () => {
   try {
     // Clean up test data if needed
-    // await testPool.query('TRUNCATE TABLE users CASCADE');
+    // await db.query('TRUNCATE TABLE users CASCADE');
     
     // Close database connections
-    await testPool.end();
+    await db.end();
     console.log('✅ Test database cleanup completed');
   } catch (err) {
     console.error('❌ Test cleanup failed:', err.message);
@@ -45,8 +28,9 @@ afterAll(async () => {
 });
 
 // Helper function to clear test data between tests
-const clearTestData = async () => {
-  const tables = [
+const clearTestData = async (tables = []) => {
+  // Default tables if none provided
+  const tablesToClear = tables.length > 0 ? tables : [
     'user_achievements',
     'achievements', 
     'leaderboard',
@@ -60,9 +44,9 @@ const clearTestData = async () => {
     'users'
   ];
 
-  for (const table of tables) {
+  for (const table of tablesToClear) {
     try {
-      await testPool.query(`TRUNCATE TABLE ${table} RESTART IDENTITY CASCADE`);
+      await db.query(`TRUNCATE TABLE ${table} RESTART IDENTITY CASCADE`);
     } catch (err) {
       // Table might not exist, continue
       console.warn(`Warning: Could not truncate table ${table}:`, err.message);
@@ -72,6 +56,7 @@ const clearTestData = async () => {
 
 // Export test utilities
 module.exports = {
-  testPool,
-  clearTestData
+  testPool: db.pool, // For backwards compatibility
+  clearTestData,
+  db
 };

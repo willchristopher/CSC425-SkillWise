@@ -14,10 +14,11 @@ describe('Goals and Challenges Integration Workflow', () => {
     const signupResponse = await request(app)
       .post('/api/auth/register')
       .send({
-        username: 'workflow_test_user',
         email: 'workflow@test.com',
         password: 'TestPassword123!',
-        full_name: 'Workflow Test User'
+        confirmPassword: 'TestPassword123!',
+        firstName: 'Workflow',
+        lastName: 'TestUser'
       });
 
     if (signupResponse.status === 201 || signupResponse.status === 400) {
@@ -29,8 +30,8 @@ describe('Goals and Challenges Integration Workflow', () => {
           password: 'TestPassword123!'
         });
 
-      authToken = loginResponse.body.accessToken;
-      userId = loginResponse.body.user.id;
+      authToken = loginResponse.body.data.accessToken;
+      userId = loginResponse.body.data.user.id;
     }
   });
 
@@ -42,7 +43,6 @@ describe('Goals and Challenges Integration Workflow', () => {
       await db.query('DELETE FROM challenges WHERE created_by = $1', [userId]);
       await db.query('DELETE FROM users WHERE id = $1', [userId]);
     }
-    await db.end();
   });
 
   describe('Complete Workflow: Create Goal → Add Challenge → Link Together → Mark Complete', () => {
