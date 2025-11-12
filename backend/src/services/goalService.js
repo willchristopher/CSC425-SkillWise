@@ -1,29 +1,102 @@
-// TODO: Implement goal business logic and calculations
+// Implement goal business logic and calculations
 const Goal = require('../models/Goal');
+const db = require('../database/connection');
 
 const goalService = {
-  // TODO: Get user goals with progress
+  // Get user goals with progress
   getUserGoals: async (userId) => {
-    // Implementation needed
-    throw new Error('Not implemented');
+    try {
+      const goals = await Goal.findByUserId(userId);
+      
+      // Calculate progress for each goal
+      const goalsWithProgress = await Promise.all(
+        goals.map(async (goal) => {
+          const progress = await goalService.calculateCompletion(goal.id);
+          return {
+            ...goal,
+            progress_percentage: progress
+          };
+        })
+      );
+      
+      return goalsWithProgress;
+    } catch (error) {
+      throw new Error(`Error getting user goals: ${error.message}`);
+    }
   },
 
-  // TODO: Create new goal with validation
+  // Create new goal with validation
   createGoal: async (goalData, userId) => {
-    // Implementation needed
-    throw new Error('Not implemented');
+    try {
+      // Validate required fields
+      if (!goalData.title) {
+        throw new Error('Goal title is required');
+      }
+
+      // Set defaults
+      const goal = {
+        ...goalData,
+        user_id: userId,
+        progress_percentage: 0,
+        is_completed: false
+      };
+
+      const newGoal = await Goal.create(goal);
+      return newGoal;
+    } catch (error) {
+      throw new Error(`Error creating goal: ${error.message}`);
+    }
   },
 
-  // TODO: Update goal progress
+  // Update goal progress
   updateProgress: async (goalId, progress) => {
-    // Implementation needed
-    throw new Error('Not implemented');
+    try {
+      const goal = await Goal.findById(goalId);
+      if (!goal) {
+        throw new Error('Goal not found');
+      }
+
+      const updateData = {
+        progress_percentage: progress,
+        is_completed: progress >= 100
+      };
+
+      if (progress >= 100) {
+        updateData.completion_date = new Date();
+      }
+
+      const updatedGoal = await Goal.update(goalId, updateData);
+      return updatedGoal;
+    } catch (error) {
+      throw new Error(`Error updating progress: ${error.message}`);
+    }
   },
 
-  // TODO: Calculate goal completion percentage
-  calculateCompletion: (goal) => {
-    // Implementation needed
-    return 0;
+  // Calculate goal completion percentage based on challenges
+  calculateCompletion: async (goalId) => {
+    try {
+      // Get all challenges linked to this goal
+      const query = `
+        SELECT COUNT(*) as total,
+               SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
+        FROM user_goal_challenges
+        WHERE goal_id = $1
+      `;
+      const result = await db.query(query, [goalId]);
+      
+      const { total, completed } = result.rows[0];
+      
+      // Convert to numbers since PostgreSQL returns strings
+      const totalNum = parseInt(total, 10) || 0;
+      const completedNum = parseInt(completed, 10) || 0;
+      
+      if (totalNum === 0) return 0;
+      
+      return Math.round((completedNum / totalNum) * 100);
+    } catch (error) {
+      console.error('Error calculating completion:', error);
+      return 0;
+    }
   }
 };
 

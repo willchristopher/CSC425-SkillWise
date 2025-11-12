@@ -43,13 +43,13 @@ class Challenge {
 
   static async create(challengeData) {
     try {
-      const { title, description, difficulty, subject, points, type, content } = challengeData;
+      const { title, description, difficulty, subject, points, type, content, goal_id } = challengeData;
       const query = `
-        INSERT INTO challenges (title, description, difficulty, subject, points, type, content, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
+        INSERT INTO challenges (title, description, difficulty, subject, points, type, content, goal_id, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
         RETURNING *
       `;
-      const result = await db.query(query, [title, description, difficulty, subject, points, type, content]);
+      const result = await db.query(query, [title, description, difficulty, subject, points, type, content, goal_id]);
       return result.rows[0];
     } catch (error) {
       throw new Error(`Error creating challenge: ${error.message}`);
@@ -58,7 +58,7 @@ class Challenge {
 
   static async update(challengeId, updateData) {
     try {
-      const { title, description, difficulty, subject, points, type, content } = updateData;
+      const { title, description, difficulty, subject, points, type, content, goal_id } = updateData;
       const query = `
         UPDATE challenges 
         SET title = COALESCE($2, title),
@@ -68,11 +68,12 @@ class Challenge {
             points = COALESCE($6, points),
             type = COALESCE($7, type),
             content = COALESCE($8, content),
+            goal_id = COALESCE($9, goal_id),
             updated_at = NOW()
         WHERE id = $1
         RETURNING *
       `;
-      const result = await db.query(query, [challengeId, title, description, difficulty, subject, points, type, content]);
+      const result = await db.query(query, [challengeId, title, description, difficulty, subject, points, type, content, goal_id]);
       return result.rows[0];
     } catch (error) {
       throw new Error(`Error updating challenge: ${error.message}`);
@@ -86,6 +87,16 @@ class Challenge {
       return result.rows[0];
     } catch (error) {
       throw new Error(`Error deleting challenge: ${error.message}`);
+    }
+  }
+
+  static async findByGoalId(goalId) {
+    try {
+      const query = 'SELECT * FROM challenges WHERE goal_id = $1 ORDER BY difficulty, created_at DESC';
+      const result = await db.query(query, [goalId]);
+      return result.rows;
+    } catch (error) {
+      throw new Error(`Error finding challenges by goal: ${error.message}`);
     }
   }
 }

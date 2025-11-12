@@ -7,17 +7,15 @@ const logger = pino({
 });
 
 // Check if we should use mock database for testing
-if (!process.env.DATABASE_URL) {
+if (!process.env.DATABASE_URL && !process.env.TEST_DATABASE_URL) {
   console.log('No DATABASE_URL found, using mock database for testing...');
   module.exports = require('./mockConnection');
-  return;
-}
-
-// Database configuration
-const dbConfig = {
-  connectionString: process.env.DATABASE_URL,
-  // Additional configuration for production
-  ...(process.env.NODE_ENV === 'production' && {
+} else {
+  // Database configuration
+  const dbConfig = {
+    connectionString: process.env.TEST_DATABASE_URL || process.env.DATABASE_URL,
+    // Additional configuration for production
+    ...(process.env.NODE_ENV === 'production' && {
     ssl: {
       rejectUnauthorized: false
     }
@@ -199,3 +197,4 @@ module.exports = {
   testConnection,
   closePool
 };
+}

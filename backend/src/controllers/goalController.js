@@ -1,11 +1,13 @@
 const Goal = require('../models/Goal');
+const goalService = require('../services/goalService');
 
 const goalController = {
   // Get all goals for authenticated user
   getGoals: async (req, res, next) => {
     try {
       const userId = req.user.userId;
-      const goals = await Goal.findByUserId(userId);
+      // Use goalService to get goals with calculated progress
+      const goals = await goalService.getUserGoals(userId);
       
       res.status(200).json({
         success: true,

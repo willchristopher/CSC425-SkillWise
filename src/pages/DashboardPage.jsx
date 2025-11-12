@@ -1,14 +1,22 @@
-// Dashboard shell page with navigation, goals and challenges sections
+// Dashboard page with real data from backend API
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { apiService } from '../services/api';
+import ProgressBar from '../components/common/ProgressBar';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const DashboardPage = () => {
-  const [user, setUser] = useState({ 
-    firstName: 'Test', 
-    lastName: 'User', 
-    email: 'test@test.com' 
-  }); // Temporary test user
+  const [user, setUser] = useState(null);
+  const [goals, setGoals] = useState([]);
+  const [challenges, setChallenges] = useState([]);
+  const [stats, setStats] = useState({
+    totalGoals: 0,
+    activeGoals: 0,
+    completedGoals: 0,
+    totalChallenges: 0,
+    completedChallenges: 0
+  });
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,25 +25,48 @@ const DashboardPage = () => {
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
-    // Temporarily removed redirect to allow access
-    // else {
-    //   navigate('/login');
-    // }
-  }, [navigate]);
+    
+    // Fetch dashboard data
+    fetchDashboardData();
+  }, []);
 
-  const handleLogout = async () => {
+  const fetchDashboardData = async () => {
     try {
-      await axios.post('http://localhost:3001/api/auth/logout', {}, {
-        withCredentials: true
+      setLoading(true);
+      
+      // Fetch goals and challenges in parallel
+      const [goalsResponse, challengesResponse] = await Promise.all([
+        apiService.goals.getAll().catch(err => ({ data: { data: [] } })),
+        apiService.challenges.getAll().catch(err => ({ data: { data: [] } }))
+      ]);
+      
+      const goalsData = goalsResponse.data.data || [];
+      const challengesData = challengesResponse.data.data || [];
+      
+      setGoals(goalsData.slice(0, 3)); // Show top 3 goals
+      setChallenges(challengesData.slice(0, 3)); // Show top 3 challenges
+      
+      // Calculate stats
+      setStats({
+        totalGoals: goalsData.length,
+        activeGoals: goalsData.filter(g => !g.is_completed).length,
+        completedGoals: goalsData.filter(g => g.is_completed).length,
+        totalChallenges: challengesData.length,
+        completedChallenges: 0 // TODO: Track user's completed challenges
       });
+      
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Error fetching dashboard data:', error);
     } finally {
-      // Clear local storage and redirect
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('user');
-      navigate('/login');
+      setLoading(false);
     }
+  };
+
+  const handleLogout = () => {
+    // Clear local storage and redirect
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('user');
+    navigate('/login');
   };
 
   const navigationItems = [
@@ -47,6 +78,14 @@ const DashboardPage = () => {
     { path: '/leaderboard', label: 'Leaderboard', icon: '🏆' },
     { path: '/profile', label: 'Profile', icon: '👤' },
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   if (!user) {
     return (
@@ -115,7 +154,7 @@ const DashboardPage = () => {
 
         {/* Dashboard Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {/* Goals Section Placeholder */}
+          {/* Goals Section with Real Data */}
           <div className="bg-white overflow-hidden shadow rounded-lg">
             <div className="p-6">
               <div className="flex items-center">
@@ -124,24 +163,44 @@ const DashboardPage = () => {
                 </div>
                 <div className="ml-4">
                   <h3 className="text-lg font-medium text-gray-900">Your Goals</h3>
-                  <p className="text-sm text-gray-500">Track your learning objectives</p>
+                  <p className="text-sm text-gray-500">{stats.activeGoals} active of {stats.totalGoals} total</p>
                 </div>
               </div>
               <div className="mt-4">
-                <div className="bg-gray-50 rounded-md p-4">
-                  <p className="text-gray-600 text-sm">No goals set yet</p>
-                  <Link 
-                    to="/goals" 
-                    className="mt-2 inline-flex text-blue-600 hover:text-blue-500 text-sm font-medium"
-                  >
-                    Create your first goal →
-                  </Link>
-                </div>
+                {goals.length > 0 ? (
+                  <div className="space-y-3">
+                    {goals.map(goal => (
+                      <div key={goal.id} className="bg-gray-50 rounded-md p-3">
+                        <div className="flex justify-between items-start mb-2">
+                          <h4 className="text-sm font-medium text-gray-900 line-clamp-1">{goal.title}</h4>
+                          <span className="text-xs text-gray-600">{goal.progress_percentage || 0}%</span>
+                        </div>
+                        <ProgressBar progress={goal.progress_percentage || 0} height="h-1" />
+                      </div>
+                    ))}
+                    <Link 
+                      to="/goals" 
+                      className="mt-2 inline-flex text-blue-600 hover:text-blue-500 text-sm font-medium"
+                    >
+                      View all goals →
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 rounded-md p-4">
+                    <p className="text-gray-600 text-sm">No goals set yet</p>
+                    <Link 
+                      to="/goals" 
+                      className="mt-2 inline-flex text-blue-600 hover:text-blue-500 text-sm font-medium"
+                    >
+                      Create your first goal →
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Challenges Section Placeholder */}
+          {/* Challenges Section with Real Data */}
           <div className="bg-white overflow-hidden shadow rounded-lg">
             <div className="p-6">
               <div className="flex items-center">
@@ -150,24 +209,49 @@ const DashboardPage = () => {
                 </div>
                 <div className="ml-4">
                   <h3 className="text-lg font-medium text-gray-900">Challenges</h3>
-                  <p className="text-sm text-gray-500">Practice with coding challenges</p>
+                  <p className="text-sm text-gray-500">{stats.totalChallenges} available</p>
                 </div>
               </div>
               <div className="mt-4">
-                <div className="bg-gray-50 rounded-md p-4">
-                  <p className="text-gray-600 text-sm">No challenges completed</p>
-                  <Link 
-                    to="/challenges" 
-                    className="mt-2 inline-flex text-blue-600 hover:text-blue-500 text-sm font-medium"
-                  >
-                    Start a challenge →
-                  </Link>
-                </div>
+                {challenges.length > 0 ? (
+                  <div className="space-y-3">
+                    {challenges.map(challenge => (
+                      <div key={challenge.id} className="bg-gray-50 rounded-md p-3 hover:bg-gray-100 transition-colors">
+                        <div className="flex justify-between items-start">
+                          <h4 className="text-sm font-medium text-gray-900 line-clamp-1">{challenge.title}</h4>
+                          <span className={`text-xs px-2 py-1 rounded ${
+                            challenge.difficulty_level === 'easy' ? 'bg-green-100 text-green-700' :
+                            challenge.difficulty_level === 'hard' ? 'bg-red-100 text-red-700' :
+                            'bg-yellow-100 text-yellow-700'
+                          }`}>
+                            {challenge.difficulty_level}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                    <Link 
+                      to="/challenges" 
+                      className="mt-2 inline-flex text-blue-600 hover:text-blue-500 text-sm font-medium"
+                    >
+                      Browse all challenges →
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 rounded-md p-4">
+                    <p className="text-gray-600 text-sm">No challenges available</p>
+                    <Link 
+                      to="/challenges" 
+                      className="mt-2 inline-flex text-blue-600 hover:text-blue-500 text-sm font-medium"
+                    >
+                      Explore challenges →
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Progress Section Placeholder */}
+          {/* Stats Section */}
           <div className="bg-white overflow-hidden shadow rounded-lg">
             <div className="p-6">
               <div className="flex items-center">
@@ -175,20 +259,29 @@ const DashboardPage = () => {
                   <span className="text-3xl">📈</span>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">Progress</h3>
-                  <p className="text-sm text-gray-500">View your learning analytics</p>
+                  <h3 className="text-lg font-medium text-gray-900">Your Stats</h3>
+                  <p className="text-sm text-gray-500">Overview of your progress</p>
                 </div>
               </div>
-              <div className="mt-4">
-                <div className="bg-gray-50 rounded-md p-4">
-                  <p className="text-gray-600 text-sm">Start learning to see progress</p>
-                  <Link 
-                    to="/progress" 
-                    className="mt-2 inline-flex text-blue-600 hover:text-blue-500 text-sm font-medium"
-                  >
-                    View progress →
-                  </Link>
+              <div className="mt-4 space-y-3">
+                <div className="bg-green-50 rounded-md p-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-green-900">Completed Goals</span>
+                    <span className="text-lg font-bold text-green-700">{stats.completedGoals}</span>
+                  </div>
                 </div>
+                <div className="bg-blue-50 rounded-md p-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-blue-900">Active Goals</span>
+                    <span className="text-lg font-bold text-blue-700">{stats.activeGoals}</span>
+                  </div>
+                </div>
+                <Link 
+                  to="/progress" 
+                  className="mt-2 inline-flex text-blue-600 hover:text-blue-500 text-sm font-medium"
+                >
+                  View detailed progress →
+                </Link>
               </div>
             </div>
           </div>
