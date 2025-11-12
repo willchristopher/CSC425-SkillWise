@@ -72,7 +72,7 @@ describe('Goal Controller', () => {
 
       await goalController.getGoalById(mockReq, mockRes, mockNext);
 
-      expect(Goal.findById).toHaveBeenCalledWith('1');
+      expect(Goal.findById).toHaveBeenCalledWith(1);
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({
         success: true,
@@ -171,8 +171,8 @@ describe('Goal Controller', () => {
 
       await goalController.updateGoal(mockReq, mockRes, mockNext);
 
-      expect(Goal.findById).toHaveBeenCalledWith('1');
-      expect(Goal.update).toHaveBeenCalledWith('1', updateData);
+      expect(Goal.findById).toHaveBeenCalledWith(1);
+      expect(Goal.update).toHaveBeenCalledWith(1, updateData);
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({
         success: true,
@@ -207,8 +207,8 @@ describe('Goal Controller', () => {
 
       await goalController.deleteGoal(mockReq, mockRes, mockNext);
 
-      expect(Goal.findById).toHaveBeenCalledWith('1');
-      expect(Goal.delete).toHaveBeenCalledWith('1');
+      expect(Goal.findById).toHaveBeenCalledWith(1);
+      expect(Goal.delete).toHaveBeenCalledWith(1);
       expect(mockRes.status).toHaveBeenCalledWith(200);
       expect(mockRes.json).toHaveBeenCalledWith({
         success: true,
