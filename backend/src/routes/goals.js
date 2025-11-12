@@ -1,22 +1,32 @@
-// TODO: Implement goal routes
+// Goal routes
 const express = require('express');
 const router = express.Router();
 const goalController = require('../controllers/goalController');
 const auth = require('../middleware/auth');
+const validation = require('../middleware/validation');
 
-// TODO: Add GET / route for user goals
+// GET / route for user goals (with optional filters)
 router.get('/', auth, goalController.getGoals);
 
-// TODO: Add GET /:id route for single goal
+// GET /statistics route for goal statistics
+router.get('/statistics', auth, goalController.getGoalStatistics);
+
+// GET /categories route for popular categories
+router.get('/categories', goalController.getPopularCategories);
+
+// GET /:id route for single goal
 router.get('/:id', auth, goalController.getGoalById);
 
-// TODO: Add POST / route for creating goal
-router.post('/', auth, goalController.createGoal);
+// POST / route for creating goal
+router.post('/', auth, validation.goalValidation, goalController.createGoal);
 
-// TODO: Add PUT /:id route for updating goal
+// PUT /:id route for updating goal
 router.put('/:id', auth, goalController.updateGoal);
 
-// TODO: Add DELETE /:id route for deleting goal
+// PUT /:id/progress route for updating goal progress
+router.put('/:id/progress', auth, goalController.updateProgress);
+
+// DELETE /:id route for deleting goal
 router.delete('/:id', auth, goalController.deleteGoal);
 
 module.exports = router;

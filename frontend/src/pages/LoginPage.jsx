@@ -2,47 +2,34 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import LoginForm from '../components/auth/LoginForm';
-import axios from 'axios';
+import { useAuth } from '../hooks/useAuth';
 
 const LoginPage = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { login } = useAuth();
 
   // Redirect to intended page after login
   const from = location.state?.from?.pathname || '/dashboard';
 
   const handleLogin = async (formData) => {
-    try {
-      setIsLoading(true);
-      setError('');
-      
-      const response = await axios.post('http://localhost:3001/api/auth/login', {
-        email: formData.email,
-        password: formData.password
-      }, {
-        withCredentials: true // Important for httpOnly cookies
-      });
-      
-      if (response.data.success) {
-        // Store access token in localStorage
-        localStorage.setItem('accessToken', response.data.data.accessToken);
-        localStorage.setItem('user', JSON.stringify(response.data.data.user));
-        
-        // Redirect to dashboard
-        navigate(from, { replace: true });
-      }
-    } catch (err) {
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else if (err.response?.status === 401) {
-        setError('Invalid email or password. Please try again.');
-      } else {
-        setError('Login failed. Please check your internet connection and try again.');
-      }
-    } finally {
-      setIsLoading(false);
+    setIsLoading(true);
+    setError('');
+    
+    const result = await login({
+      email: formData.email,
+      password: formData.password
+    });
+    
+    setIsLoading(false);
+    
+    if (result.success) {
+      // Redirect to dashboard or intended page
+      navigate(from, { replace: true });
+    } else {
+      setError(result.error || 'Login failed. Please try again.');
     }
   };
 

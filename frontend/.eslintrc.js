@@ -2,6 +2,12 @@ module.exports = {
   "extends": [
     "react-app"
   ],
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "plugins": [],
   "rules": {
     // Disable all linting rules to prevent build failures
     "indent": "off",

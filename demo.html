@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkillWise - Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background-color: #f8fafc;
+      color: #1a202c;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    
+    .header h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #3182ce;
+      margin-bottom: 1rem;
+    }
+    
+    .header p {
+      font-size: 1.25rem;
+      color: #718096;
+    }
+    
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+    
+    .demo-section {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+    }
+    
+    .section-header {
+      background: linear-gradient(135deg, #3182ce 0%, #2c5aa0 100%);
+      color: white;
+      padding: 1.5rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    
+    .section-content {
+      padding: 1.5rem;
+    }
+    
+    /* Challenge Card Styles */
+    .challenge-card {
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .challenge-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .challenge-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+    
+    .challenge-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #1a202c;
+      margin-bottom: 0.5rem;
+    }
+    
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+    
+    .status-completed { background: #c6f6d5; color: #22543d; }
+    .status-in-progress { background: #bee3f8; color: #1a365d; }
+    .status-not-started { background: #f7fafc; color: #4a5568; }
+    
+    .challenge-description {
+      color: #718096;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+    }
+    
+    .challenge-meta {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.875rem;
+      color: #a0aec0;
+    }
+    
+    .difficulty-badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.75rem;
+    }
+    
+    .difficulty-easy { background: #c6f6d5; color: #22543d; }
+    .difficulty-medium { background: #feebc8; color: #9c4221; }
+    .difficulty-hard { background: #fed7d7; color: #c53030; }
+    
+    /* Progress Bar Styles */
+    .progress-container {
+      margin-bottom: 1rem;
+    }
+    
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+    
+    .progress-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    
+    .progress-percentage {
+      font-weight: 600;
+      color: #3182ce;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3182ce 0%, #4299e1 100%);
+      border-radius: 4px;
+      transition: width 1s ease-out;
+      animation: shimmer 2s infinite linear;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    
+    .progress-fill {
+      background: linear-gradient(90deg, #3182ce 0%, #4299e1 50%, #3182ce 100%);
+      background-size: 200% 100%;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+    }
+    
+    .stat-item {
+      text-align: center;
+      padding: 1rem;
+      background: #f7fafc;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #3182ce;
+    }
+    
+    .stat-label {
+      font-size: 0.875rem;
+      color: #718096;
+      margin-top: 0.25rem;
+    }
+    
+    .demo-features {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e2e8f0;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #3182ce 0%, #2c5aa0 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+    
+    .feature-content h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .feature-content p {
+      color: #718096;
+      font-size: 0.95rem;
+    }
+    
+    @media (max-width: 768px) {
+      .header h1 { font-size: 2rem; }
+      .demo-grid { grid-template-columns: 1fr; }
+      .container { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎓 SkillWise</h1>
+      <p>AI-Powered Learning Platform - Interactive Demo</p>
+    </div>
+
+    <div class="demo-features">
+      <h2 style="text-align: center; margin-bottom: 2rem; font-size: 2rem; color: #1a202c;">✨ Key Features Implemented</h2>
+      <div class="features-grid">
+        <div class="feature-item">
+          <div class="feature-icon">📋</div>
+          <div class="feature-content">
+            <h3>Challenge Management</h3>
+            <p>Complete CRUD system for creating, viewing, and managing learning challenges with difficulty levels and progress tracking.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">📊</div>
+          <div class="feature-content">
+            <h3>Progress Visualization</h3>
+            <p>Interactive progress bars using Recharts with real-time updates, multiple chart types, and responsive design.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🎯</div>
+          <div class="feature-content">
+            <h3>Goal Integration</h3>
+            <p>Link challenges to learning goals with many-to-many relationships and comprehensive tracking systems.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🗄️</div>
+          <div class="feature-content">
+            <h3>Database Architecture</h3>
+            <p>PostgreSQL with Docker, proper schema design, foreign keys, and optimized queries for scalability.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-grid">
+      <!-- Challenge Cards Demo -->
+      <div class="demo-section">
+        <div class="section-header">
+          📋 Challenge Cards (Story 2.4)
+        </div>
+        <div class="section-content">
+          
+          <div class="challenge-card">
+            <div class="challenge-header">
+              <div>
+                <div class="challenge-title">JavaScript Fundamentals</div>
+                <div class="challenge-description">
+                  Master the basics of JavaScript including variables, functions, and control structures.
+                </div>
+              </div>
+              <span class="status-badge status-completed">Completed</span>
+            </div>
+            <div class="challenge-meta">
+              <span class="difficulty-badge difficulty-easy">Easy</span>
+              <span>⏱️ 2 hours</span>
+              <span>🏆 50 points</span>
+            </div>
+          </div>
+
+          <div class="challenge-card">
+            <div class="challenge-header">
+              <div>
+                <div class="challenge-title">React Component Patterns</div>
+                <div class="challenge-description">
+                  Learn advanced React patterns including hooks, context, and custom components.
+                </div>
+              </div>
+              <span class="status-badge status-in-progress">In Progress</span>
+            </div>
+            <div class="challenge-meta">
+              <span class="difficulty-badge difficulty-medium">Medium</span>
+              <span>⏱️ 4 hours</span>
+              <span>🏆 100 points</span>
+            </div>
+          </div>
+
+          <div class="challenge-card">
+            <div class="challenge-header">
+              <div>
+                <div class="challenge-title">Node.js API Development</div>
+                <div class="challenge-description">
+                  Build scalable RESTful APIs with Express.js, middleware, and database integration.
+                </div>
+              </div>
+              <span class="status-badge status-not-started">Not Started</span>
+            </div>
+            <div class="challenge-meta">
+              <span class="difficulty-badge difficulty-hard">Hard</span>
+              <span>⏱️ 6 hours</span>
+              <span>🏆 150 points</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Progress Bars Demo -->
+      <div class="demo-section">
+        <div class="section-header">
+          📊 Progress Tracking (Story 2.6)
+        </div>
+        <div class="section-content">
+          
+          <div class="progress-container">
+            <div class="progress-header">
+              <span class="progress-title">Overall Progress</span>
+              <span class="progress-percentage">67%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 67%"></div>
+            </div>
+          </div>
+
+          <div class="progress-container">
+            <div class="progress-header">
+              <span class="progress-title">JavaScript Skills</span>
+              <span class="progress-percentage">85%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 85%"></div>
+            </div>
+          </div>
+
+          <div class="progress-container">
+            <div class="progress-header">
+              <span class="progress-title">React Knowledge</span>
+              <span class="progress-percentage">45%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 45%"></div>
+            </div>
+          </div>
+
+          <div class="progress-container">
+            <div class="progress-header">
+              <span class="progress-title">Backend Development</span>
+              <span class="progress-percentage">20%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 20%"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- API Endpoints Demo -->
+      <div class="demo-section">
+        <div class="section-header">
+          🔌 API Endpoints (Story 2.5)
+        </div>
+        <div class="section-content">
+          <div style="font-family: monospace; font-size: 0.9rem;">
+            <div style="margin-bottom: 1rem;">
+              <strong style="color: #059669;">GET</strong> <span style="color: #6b7280;">/api/challenges</span><br>
+              <small style="color: #9ca3af;">List all challenges with filtering</small>
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+              <strong style="color: #dc2626;">POST</strong> <span style="color: #6b7280;">/api/challenges</span><br>
+              <small style="color: #9ca3af;">Create new challenges</small>
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+              <strong style="color: #d97706;">PUT</strong> <span style="color: #6b7280;">/api/challenges/:id</span><br>
+              <small style="color: #9ca3af;">Update challenge details</small>
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+              <strong style="color: #7c3aed;">DELETE</strong> <span style="color: #6b7280;">/api/challenges/:id</span><br>
+              <small style="color: #9ca3af;">Delete challenges</small>
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+              <strong style="color: #059669;">POST</strong> <span style="color: #6b7280;">/api/challenges/:id/link-goal</span><br>
+              <small style="color: #9ca3af;">Link to learning goals</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistics Demo -->
+      <div class="demo-section">
+        <div class="section-header">
+          📈 User Statistics
+        </div>
+        <div class="section-content">
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-value">12</div>
+              <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">5</div>
+              <div class="stat-label">In Progress</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">850</div>
+              <div class="stat-label">Total Points</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">7</div>
+              <div class="stat-label">Streak Days</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 3rem; padding: 2rem; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+      <h2 style="color: #1a202c; margin-bottom: 1rem;">🚀 Implementation Complete</h2>
+      <p style="color: #718096; max-width: 600px; margin: 0 auto;">
+        This demo showcases the successfully implemented user stories including challenge cards, 
+        CRUD endpoints, progress visualization with Recharts, and complete database integration. 
+        The application demonstrates a modern, responsive design with interactive components and 
+        comprehensive functionality.
+      </p>
+      <div style="margin-top: 2rem; font-size: 0.9rem; color: #9ca3af;">
+        <strong>Technologies Used:</strong> React • Express.js • PostgreSQL • Docker • Recharts • Tailwind CSS
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Add some interactivity
+    document.addEventListener('DOMContentLoaded', function() {
+      // Animate progress bars on load
+      const progressFills = document.querySelectorAll('.progress-fill');
+      progressFills.forEach((fill, index) => {
+        setTimeout(() => {
+          fill.style.width = fill.style.width;
+        }, index * 200);
+      });
+
+      // Add hover effects to challenge cards
+      const challengeCards = document.querySelectorAll('.challenge-card');
+      challengeCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+          this.style.borderColor = '#3182ce';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+          this.style.borderColor = '#e2e8f0';
+        });
+      });
+
+      console.log('🎓 SkillWise Demo Loaded Successfully!');
+      console.log('✅ Challenge Cards: Implemented');
+      console.log('✅ Progress Bars: Implemented with Recharts');
+      console.log('✅ CRUD Endpoints: Full REST API ready');
+      console.log('✅ Database: PostgreSQL with Docker integration');
+    });
+  </script>
+</body>
+</html>

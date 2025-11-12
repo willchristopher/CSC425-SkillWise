@@ -27,7 +27,7 @@ describe('Authentication Integration', () => {
         password: 'TestPassword123',
         confirmPassword: 'TestPassword123',
         firstName: 'Test',
-        lastName: 'User'
+        lastName: 'User',
       };
 
       const response = await request(app)
@@ -41,15 +41,15 @@ describe('Authentication Integration', () => {
       expect(response.body.data.user.email).toBe(userData.email);
       expect(response.body.data.user.first_name).toBe(userData.firstName);
       expect(response.body.data.accessToken).toBeDefined();
-      
+
       // Store for cleanup
       testUser = response.body.data.user;
       authToken = response.body.data.accessToken;
 
       // Check that refresh token is set as cookie
       expect(response.headers['set-cookie']).toBeDefined();
-      const refreshCookie = response.headers['set-cookie'].find(cookie => 
-        cookie.startsWith('refreshToken=')
+      const refreshCookie = response.headers['set-cookie'].find(cookie =>
+        cookie.startsWith('refreshToken='),
       );
       expect(refreshCookie).toBeDefined();
       expect(refreshCookie).toContain('HttpOnly');
@@ -61,7 +61,7 @@ describe('Authentication Integration', () => {
         password: 'TestPassword123',
         confirmPassword: 'TestPassword123',
         firstName: 'Test',
-        lastName: 'User'
+        lastName: 'User',
       };
 
       const response = await request(app)
@@ -79,7 +79,7 @@ describe('Authentication Integration', () => {
         password: 'weak',
         confirmPassword: 'weak',
         firstName: 'Test',
-        lastName: 'User'
+        lastName: 'User',
       };
 
       const response = await request(app)
@@ -96,7 +96,7 @@ describe('Authentication Integration', () => {
         password: 'TestPassword123',
         confirmPassword: 'DifferentPassword123',
         firstName: 'Test',
-        lastName: 'User'
+        lastName: 'User',
       };
 
       const response = await request(app)
@@ -104,7 +104,7 @@ describe('Authentication Integration', () => {
         .send(userData)
         .expect(400);
 
-      expect(response.body.message).toContain("Passwords don't match");
+      expect(response.body.message).toContain('Passwords don\'t match');
     });
 
     test('should fail registration with duplicate email', async () => {
@@ -113,7 +113,7 @@ describe('Authentication Integration', () => {
         password: 'TestPassword123',
         confirmPassword: 'TestPassword123',
         firstName: 'Test',
-        lastName: 'User'
+        lastName: 'User',
       };
 
       const response = await request(app)
@@ -129,7 +129,7 @@ describe('Authentication Integration', () => {
     test('should login registered user', async () => {
       const loginData = {
         email: 'test@example.com',
-        password: 'TestPassword123'
+        password: 'TestPassword123',
       };
 
       const response = await request(app)
@@ -148,8 +148,8 @@ describe('Authentication Integration', () => {
 
       // Check that refresh token is set as cookie
       expect(response.headers['set-cookie']).toBeDefined();
-      const refreshCookie = response.headers['set-cookie'].find(cookie => 
-        cookie.startsWith('refreshToken=')
+      const refreshCookie = response.headers['set-cookie'].find(cookie =>
+        cookie.startsWith('refreshToken='),
       );
       expect(refreshCookie).toBeDefined();
 
@@ -160,7 +160,7 @@ describe('Authentication Integration', () => {
     test('should fail login with invalid email', async () => {
       const loginData = {
         email: 'nonexistent@example.com',
-        password: 'TestPassword123'
+        password: 'TestPassword123',
       };
 
       const response = await request(app)
@@ -174,7 +174,7 @@ describe('Authentication Integration', () => {
     test('should fail login with invalid password', async () => {
       const loginData = {
         email: 'test@example.com',
-        password: 'WrongPassword123'
+        password: 'WrongPassword123',
       };
 
       const response = await request(app)
@@ -187,7 +187,7 @@ describe('Authentication Integration', () => {
 
     test('should fail login with missing fields', async () => {
       const loginData = {
-        email: 'test@example.com'
+        email: 'test@example.com',
         // Missing password
       };
 
@@ -243,8 +243,8 @@ describe('Authentication Integration', () => {
 
       // Check that refresh token cookie is cleared
       expect(response.headers['set-cookie']).toBeDefined();
-      const clearCookie = response.headers['set-cookie'].find(cookie => 
-        cookie.startsWith('refreshToken=;')
+      const clearCookie = response.headers['set-cookie'].find(cookie =>
+        cookie.startsWith('refreshToken=;'),
       );
       expect(clearCookie).toBeDefined();
     });
@@ -266,7 +266,7 @@ describe('Authentication Integration', () => {
         .post('/api/auth/login')
         .send({
           email: 'test@example.com',
-          password: 'TestPassword123'
+          password: 'TestPassword123',
         })
         .expect(200);
 
@@ -281,7 +281,7 @@ describe('Authentication Integration', () => {
         .expect(200);
 
       expect(refreshResponse.body.data.accessToken).toBeDefined();
-      
+
       // Verify the new token works (this would require a protected route)
       // For now, just verify the token format
       expect(refreshResponse.body.data.accessToken.split('.').length).toBe(3); // JWT format

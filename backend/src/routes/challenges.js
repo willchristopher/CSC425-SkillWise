@@ -1,22 +1,43 @@
-// TODO: Implement challenge routes
+// Challenge routes
 const express = require('express');
 const router = express.Router();
 const challengeController = require('../controllers/challengeController');
 const auth = require('../middleware/auth');
 
-// TODO: Add GET / route for all challenges
-router.get('/', auth, challengeController.getChallenges);
+// GET / route for all challenges with filtering
+router.get('/', challengeController.getChallenges);
 
-// TODO: Add GET /:id route for single challenge
-router.get('/:id', auth, challengeController.getChallengeById);
+// GET /categories route for popular categories (public)
+router.get('/categories', challengeController.getPopularCategories);
 
-// TODO: Add POST / route for creating challenge (admin only)
+// GET /my route for user's created challenges
+router.get('/my', auth, challengeController.getUserChallenges);
+
+// GET /recommended route for personalized recommendations
+router.get('/recommended', auth, challengeController.getRecommendedChallenges);
+
+// GET /by-goal/:goalId route for challenges linked to a specific goal
+router.get('/by-goal/:goalId', auth, challengeController.getChallengesByGoal);
+
+// GET /:id route for single challenge
+router.get('/:id', challengeController.getChallengeById);
+
+// GET /:id/statistics route for challenge statistics
+router.get('/:id/statistics', challengeController.getChallengeStatistics);
+
+// POST / route for creating challenge
 router.post('/', auth, challengeController.createChallenge);
 
-// TODO: Add PUT /:id route for updating challenge (admin only)
+// POST /:id/link-goal route for linking challenge to goal
+router.post('/:id/link-goal', auth, challengeController.linkChallengeToGoal);
+
+// PUT /:id route for updating challenge
 router.put('/:id', auth, challengeController.updateChallenge);
 
-// TODO: Add DELETE /:id route for deleting challenge (admin only)
+// DELETE /:id route for deleting challenge
 router.delete('/:id', auth, challengeController.deleteChallenge);
+
+// DELETE /:id/unlink-goal route for unlinking challenge from goal
+router.delete('/:id/unlink-goal', auth, challengeController.unlinkChallengeFromGoal);
 
 module.exports = router;

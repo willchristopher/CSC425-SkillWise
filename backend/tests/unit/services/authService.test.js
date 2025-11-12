@@ -23,13 +23,13 @@ describe('AuthService', () => {
         first_name: 'Test',
         last_name: 'User',
         is_active: true,
-        is_verified: false
+        is_verified: false,
       };
 
       query.mockResolvedValueOnce({ rows: [mockUser] }); // User lookup
       query.mockResolvedValueOnce({ rows: [] }); // Update last login
       query.mockResolvedValueOnce({ rows: [] }); // Store refresh token
-      
+
       bcrypt.compare.mockResolvedValue(true);
       jwt.generateToken.mockReturnValue('access_token');
       jwt.generateRefreshToken.mockReturnValue('refresh_token');
@@ -43,15 +43,15 @@ describe('AuthService', () => {
           first_name: 'Test',
           last_name: 'User',
           is_active: true,
-          is_verified: false
+          is_verified: false,
         },
         accessToken: 'access_token',
-        refreshToken: 'refresh_token'
+        refreshToken: 'refresh_token',
       });
 
       expect(query).toHaveBeenCalledWith(
         'SELECT id, email, password_hash, first_name, last_name, is_active, is_verified FROM users WHERE email = $1',
-        ['test@example.com']
+        ['test@example.com'],
       );
       expect(bcrypt.compare).toHaveBeenCalledWith('password123', 'hashedpassword');
     });
@@ -64,7 +64,7 @@ describe('AuthService', () => {
         first_name: 'Test',
         last_name: 'User',
         is_active: true,
-        is_verified: false
+        is_verified: false,
       };
 
       query.mockResolvedValueOnce({ rows: [mockUser] });
@@ -91,7 +91,7 @@ describe('AuthService', () => {
         first_name: 'Test',
         last_name: 'User',
         is_active: false,
-        is_verified: false
+        is_verified: false,
       };
 
       query.mockResolvedValueOnce({ rows: [mockUser] });
@@ -108,7 +108,7 @@ describe('AuthService', () => {
         email: 'test@example.com',
         password: 'password123',
         firstName: 'Test',
-        lastName: 'User'
+        lastName: 'User',
       };
 
       const mockNewUser = {
@@ -118,7 +118,7 @@ describe('AuthService', () => {
         last_name: 'User',
         is_active: true,
         is_verified: false,
-        created_at: new Date()
+        created_at: new Date(),
       };
 
       query.mockResolvedValueOnce({ rows: [] }); // Check existing user
@@ -134,7 +134,7 @@ describe('AuthService', () => {
       expect(result).toEqual({
         user: mockNewUser,
         accessToken: 'access_token',
-        refreshToken: 'refresh_token'
+        refreshToken: 'refresh_token',
       });
 
       expect(bcrypt.hash).toHaveBeenCalledWith('password123', 12);
@@ -145,7 +145,7 @@ describe('AuthService', () => {
         email: 'test@example.com',
         password: 'password123',
         firstName: 'Test',
-        lastName: 'User'
+        lastName: 'User',
       };
 
       query.mockResolvedValueOnce({ rows: [] }); // Check existing user
@@ -166,7 +166,7 @@ describe('AuthService', () => {
         email: 'test@example.com',
         password: 'password123',
         firstName: 'Test',
-        lastName: 'User'
+        lastName: 'User',
       };
 
       query.mockResolvedValueOnce({ rows: [{ id: 1 }] }); // User exists
@@ -187,7 +187,7 @@ describe('AuthService', () => {
         email: 'test@example.com',
         first_name: 'Test',
         last_name: 'User',
-        is_active: true
+        is_active: true,
       };
 
       jwt.verifyRefreshToken.mockReturnValue({ userId: 1 });
@@ -197,7 +197,7 @@ describe('AuthService', () => {
       const result = await authService.refreshToken('valid_refresh_token');
 
       expect(result).toEqual({
-        accessToken: 'new_access_token'
+        accessToken: 'new_access_token',
       });
 
       expect(jwt.verifyRefreshToken).toHaveBeenCalledWith('valid_refresh_token');
@@ -234,7 +234,7 @@ describe('AuthService', () => {
       expect(result).toEqual({ success: true });
       expect(query).toHaveBeenCalledWith(
         'UPDATE refresh_tokens SET is_revoked = true, updated_at = CURRENT_TIMESTAMP WHERE token = $1',
-        ['refresh_token']
+        ['refresh_token'],
       );
     });
 

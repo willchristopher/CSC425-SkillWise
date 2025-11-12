@@ -205,6 +205,7 @@ export const apiService = {
     getAll: () => api.get('/goals'),
     create: (goal) => api.post('/goals', goal),
     update: (id, goal) => api.put(`/goals/${id}`, goal),
+    updateProgress: (id, progressData) => api.put(`/goals/${id}/progress`, progressData),
     delete: (id) => api.delete(`/goals/${id}`),
     getById: (id) => api.get(`/goals/${id}`),
   },
@@ -213,6 +214,9 @@ export const apiService = {
   challenges: {
     getAll: (params) => api.get('/challenges', { params }),
     getById: (id) => api.get(`/challenges/${id}`),
+    create: (challenge) => api.post('/challenges', challenge),
+    update: (id, challenge) => api.put(`/challenges/${id}`, challenge),
+    delete: (id) => api.delete(`/challenges/${id}`),
     submit: (id, submission) => api.post(`/challenges/${id}/submit`, submission),
     getSubmissions: (id) => api.get(`/challenges/${id}/submissions`),
   },
@@ -244,6 +248,18 @@ export const apiService = {
     getAll: () => api.get('/notifications'),
     markAsRead: (id) => api.put(`/notifications/${id}/read`),
     markAllAsRead: () => api.put('/notifications/read-all'),
+  },
+
+  // AI methods
+  ai: {
+    generateFeedback: (submissionText, challengeContext) => 
+      api.post('/ai/feedback', { submissionText, challengeContext }),
+    getHints: (challengeId, challenge, userProgress) => 
+      api.post(`/ai/hints/${challengeId}`, { challenge }, { params: userProgress }),
+    getSuggestions: (userProfile) => 
+      api.post('/ai/suggestions', { userProfile }),
+    analyzeProgress: (userId, learningData) => 
+      api.post('/ai/analysis', { userId, learningData }),
   },
 };
 

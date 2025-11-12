@@ -5,7 +5,6 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 // Import all pages
 import HomePage from './pages/HomePage';
-import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import DashboardPage from './pages/DashboardPage';
@@ -15,6 +14,7 @@ import ProgressPage from './pages/ProgressPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import PeerReviewPage from './pages/PeerReviewPage';
 import ProfilePage from './pages/ProfilePage';
+import AITutorPage from './pages/AITutorPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ErrorPage from './pages/ErrorPage';
 
@@ -33,8 +33,7 @@ function App() {
           <main className="main-content">
             <Routes>
               {/* Public routes */}
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/home" element={<HomePage />} />
+              <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/error" element={<ErrorPage />} />
@@ -93,6 +92,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <ProfilePage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/ai-tutor" 
+                element={
+                  <ProtectedRoute>
+                    <AITutorPage />
                   </ProtectedRoute>
                 } 
               />

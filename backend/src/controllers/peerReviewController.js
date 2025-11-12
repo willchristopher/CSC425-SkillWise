@@ -1,26 +1,26 @@
 // TODO: Implement peer review system controller
-const peerReviewService = require('../services/peerReviewService');
+// const peerReviewService = require('../services/peerReviewService'); // TODO: Use this when implementing
 
 const peerReviewController = {
   // TODO: Get reviews to complete
-  getReviewAssignments: async (req, res, next) => {
+  getReviewAssignments: async (/* req, res, next */) => {
     // Implementation needed
   },
 
   // TODO: Submit peer review
-  submitReview: async (req, res, next) => {
+  submitReview: async (/* req, res, next */) => {
     // Implementation needed
   },
 
   // TODO: Get received reviews
-  getReceivedReviews: async (req, res, next) => {
+  getReceivedReviews: async (/* req, res, next */) => {
     // Implementation needed
   },
 
   // TODO: Get review history
-  getReviewHistory: async (req, res, next) => {
+  getReviewHistory: async (/* req, res, next */) => {
     // Implementation needed
-  }
+  },
 };
 
 module.exports = peerReviewController;

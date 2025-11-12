@@ -11,7 +11,7 @@ const authService = {
       // Find user by email
       const userResult = await query(
         'SELECT id, email, password_hash, first_name, last_name, is_active, is_verified FROM users WHERE email = $1',
-        [email.toLowerCase()]
+        [email.toLowerCase()],
       );
 
       if (userResult.rows.length === 0) {
@@ -34,7 +34,7 @@ const authService = {
       // Update last login
       await query(
         'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1',
-        [user.id]
+        [user.id],
       );
 
       // Generate tokens
@@ -42,7 +42,7 @@ const authService = {
         userId: user.id,
         email: user.email,
         firstName: user.first_name,
-        lastName: user.last_name
+        lastName: user.last_name,
       };
 
       const accessToken = jwt.generateToken(tokenPayload);
@@ -54,7 +54,7 @@ const authService = {
 
       await query(
         'INSERT INTO refresh_tokens (token, user_id, expires_at) VALUES ($1, $2, $3)',
-        [refreshToken, user.id, expiresAt]
+        [refreshToken, user.id, expiresAt],
       );
 
       // Return user data and tokens (excluding password)
@@ -62,7 +62,7 @@ const authService = {
       return {
         user: userWithoutPassword,
         accessToken,
-        refreshToken
+        refreshToken,
       };
     } catch (error) {
       if (error instanceof AppError) {
@@ -80,7 +80,7 @@ const authService = {
       // Check if user already exists
       const existingUser = await query(
         'SELECT id FROM users WHERE email = $1',
-        [email.toLowerCase()]
+        [email.toLowerCase()],
       );
 
       if (existingUser.rows.length > 0) {
@@ -96,7 +96,7 @@ const authService = {
         `INSERT INTO users (email, password_hash, first_name, last_name) 
          VALUES ($1, $2, $3, $4) 
          RETURNING id, email, first_name, last_name, is_active, is_verified, created_at`,
-        [email.toLowerCase(), passwordHash, firstName, lastName]
+        [email.toLowerCase(), passwordHash, firstName, lastName],
       );
 
       const newUser = userResult.rows[0];
@@ -106,7 +106,7 @@ const authService = {
         userId: newUser.id,
         email: newUser.email,
         firstName: newUser.first_name,
-        lastName: newUser.last_name
+        lastName: newUser.last_name,
       };
 
       const accessToken = jwt.generateToken(tokenPayload);
@@ -118,13 +118,13 @@ const authService = {
 
       await query(
         'INSERT INTO refresh_tokens (token, user_id, expires_at) VALUES ($1, $2, $3)',
-        [refreshToken, newUser.id, expiresAt]
+        [refreshToken, newUser.id, expiresAt],
       );
 
       return {
         user: newUser,
         accessToken,
-        refreshToken
+        refreshToken,
       };
     } catch (error) {
       if (error instanceof AppError) {
@@ -150,7 +150,7 @@ const authService = {
          FROM refresh_tokens rt
          JOIN users u ON rt.user_id = u.id
          WHERE rt.token = $1 AND rt.is_revoked = false AND rt.expires_at > CURRENT_TIMESTAMP`,
-        [refreshToken]
+        [refreshToken],
       );
 
       if (tokenResult.rows.length === 0) {
@@ -169,13 +169,13 @@ const authService = {
         userId: tokenData.user_id,
         email: tokenData.email,
         firstName: tokenData.first_name,
-        lastName: tokenData.last_name
+        lastName: tokenData.last_name,
       };
 
       const newAccessToken = jwt.generateToken(tokenPayload);
 
       return {
-        accessToken: newAccessToken
+        accessToken: newAccessToken,
       };
     } catch (error) {
       if (error instanceof AppError) {
@@ -201,7 +201,7 @@ const authService = {
       // Revoke refresh token
       await query(
         'UPDATE refresh_tokens SET is_revoked = true, updated_at = CURRENT_TIMESTAMP WHERE token = $1',
-        [refreshToken]
+        [refreshToken],
       );
 
       return { success: true };
@@ -214,7 +214,7 @@ const authService = {
   resetPassword: async (email) => {
     // Implementation needed for future sprint
     throw new AppError('Password reset not implemented yet', 501, 'NOT_IMPLEMENTED');
-  }
+  },
 };
 
 module.exports = authService;

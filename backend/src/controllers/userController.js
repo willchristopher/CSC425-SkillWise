@@ -1,26 +1,26 @@
 // TODO: Implement user management controller for profile, settings, statistics
-const userService = require('../services/userService');
+// const userService = require('../services/userService'); // TODO: Use this when implementing
 
 const userController = {
   // TODO: Get user profile
-  getProfile: async (req, res, next) => {
+  getProfile: async (/* req, res, next */) => {
     // Implementation needed
   },
 
   // TODO: Update user profile
-  updateProfile: async (req, res, next) => {
+  updateProfile: async (/* req, res, next */) => {
     // Implementation needed
   },
 
   // TODO: Get user statistics
-  getStatistics: async (req, res, next) => {
+  getStatistics: async (/* req, res, next */) => {
     // Implementation needed
   },
 
   // TODO: Delete user account
-  deleteAccount: async (req, res, next) => {
+  deleteAccount: async (/* req, res, next */) => {
     // Implementation needed
-  }
+  },
 };
 
 module.exports = userController;
