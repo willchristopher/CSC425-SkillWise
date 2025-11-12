@@ -18,11 +18,16 @@ const auth = async (req, res, next) => {
 
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Support multiple token payload shapes (userId, id, or user.id)
+    const jwtUserId = decoded.userId || decoded.id || (decoded.user && decoded.user.id);
+    if (!jwtUserId) {
+      return next(new AppError('Invalid token payload. Please log in again.', 401, 'INVALID_TOKEN_PAYLOAD'));
+    }
 
     // Check if user still exists and is active
     const userResult = await query(
       'SELECT id, email, first_name, last_name, role, is_active FROM users WHERE id = $1',
-      [decoded.userId]
+      [jwtUserId]
     );
 
     if (userResult.rows.length === 0) {
@@ -38,6 +43,7 @@ const auth = async (req, res, next) => {
     // Grant access to protected route
     req.user = {
       id: currentUser.id,
+      userId: currentUser.id, // Add userId for backward compatibility
       email: currentUser.email,
       firstName: currentUser.first_name,
       lastName: currentUser.last_name,
@@ -80,21 +86,24 @@ const optionalAuth = async (req, res, next) => {
 
     if (token) {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      
-      const userResult = await query(
-        'SELECT id, email, first_name, last_name, role, is_active FROM users WHERE id = $1',
-        [decoded.userId]
-      );
-
-      if (userResult.rows.length > 0 && userResult.rows[0].is_active) {
-        const currentUser = userResult.rows[0];
-        req.user = {
-          id: currentUser.id,
-          email: currentUser.email,
-          firstName: currentUser.first_name,
-          lastName: currentUser.last_name,
-          role: currentUser.role
-        };
+      const jwtUserId = decoded.userId || decoded.id || (decoded.user && decoded.user.id);
+      if (jwtUserId) {
+        const userResult = await query(
+          'SELECT id, email, first_name, last_name, role, is_active FROM users WHERE id = $1',
+          [jwtUserId]
+        );
+        
+        if (userResult.rows.length > 0 && userResult.rows[0].is_active) {
+          const currentUser = userResult.rows[0];
+          req.user = {
+            id: currentUser.id,
+            userId: currentUser.id, // Add userId for backward compatibility
+            email: currentUser.email,
+            firstName: currentUser.first_name,
+            lastName: currentUser.last_name,
+            role: currentUser.role
+          };
+        }
       }
     }
     

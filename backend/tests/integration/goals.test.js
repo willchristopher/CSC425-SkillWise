@@ -19,7 +19,8 @@ describe('Goals API Integration Tests', () => {
         lastName: 'User'
       });
 
-    if (signupResponse.status === 201) {
+    // Try to login whether registration created the user or user already exists
+    if (signupResponse.status === 201 || signupResponse.status === 400 || signupResponse.status === 409) {
       const loginResponse = await request(app)
         .post('/api/auth/login')
         .send({
@@ -27,8 +28,8 @@ describe('Goals API Integration Tests', () => {
           password: 'TestPassword123!'
         });
 
-      authToken = loginResponse.body.data.accessToken;
-      userId = loginResponse.body.data.user.id;
+      authToken = loginResponse.body.data?.accessToken;
+      userId = loginResponse.body.data?.user?.id;
     }
   });
 

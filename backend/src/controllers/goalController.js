@@ -59,8 +59,16 @@ const goalController = {
   // Create new goal
   createGoal: async (req, res, next) => {
     try {
-      const userId = req.user.userId;
-      const { title, description, target_date, type } = req.body;
+      // Ensure user is authenticated and req.user is present
+      const userId = req.user && (req.user.userId || req.user.id);
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required to create a goal'
+        });
+      }
+
+      const { title, description, target_date, type, category } = req.body;
 
       // Validate required fields
       if (!title) {
@@ -70,10 +78,12 @@ const goalController = {
         });
       }
 
+      // Pass explicit user_id to model
       const goalData = {
         title,
         description,
         user_id: userId,
+        category,
         target_date,
         type: type || 'personal'
       };

@@ -24,6 +24,11 @@ class Goal {
   static async create(goalData) {
     try {
       const { title, description, user_id, target_date, type, category } = goalData;
+      
+      if (!user_id) {
+        throw new Error('Missing user_id for creating goal');
+      }
+
       const query = `
         INSERT INTO goals (title, description, user_id, category, target_completion_date, created_at, updated_at)
         VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
