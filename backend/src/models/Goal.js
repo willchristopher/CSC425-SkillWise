@@ -23,13 +23,18 @@ class Goal {
 
   static async create(goalData) {
     try {
-      const { title, description, user_id, target_date, type } = goalData;
+      const { title, description, user_id, target_date, type, category } = goalData;
+      
+      if (!user_id) {
+        throw new Error('Missing user_id for creating goal');
+      }
+
       const query = `
-        INSERT INTO goals (title, description, user_id, target_date, type, created_at, updated_at)
+        INSERT INTO goals (title, description, user_id, category, target_completion_date, created_at, updated_at)
         VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
         RETURNING *
       `;
-      const result = await db.query(query, [title, description, user_id, target_date, type]);
+      const result = await db.query(query, [title, description, user_id, category || null, target_date || null]);
       return result.rows[0];
     } catch (error) {
       throw new Error(`Error creating goal: ${error.message}`);
@@ -39,18 +44,59 @@ class Goal {
   static async update(goalId, updateData) {
     try {
       const { title, description, target_date, progress, status } = updateData;
+      
+      // Build dynamic UPDATE query
+      const updates = [];
+      const values = [goalId];
+      let paramCount = 1;
+      
+      if (title !== undefined) {
+        paramCount++;
+        updates.push(`title = $${paramCount}`);
+        values.push(title);
+      }
+      
+      if (description !== undefined) {
+        paramCount++;
+        updates.push(`description = $${paramCount}`);
+        values.push(description);
+      }
+      
+      if (target_date !== undefined) {
+        paramCount++;
+        updates.push(`target_completion_date = $${paramCount}`);
+        values.push(target_date);
+      }
+      
+      if (progress !== undefined) {
+        paramCount++;
+        updates.push(`progress_percentage = $${paramCount}`);
+        values.push(progress);
+      }
+      
+      if (status !== undefined) {
+        paramCount++;
+        updates.push(`is_completed = $${paramCount}`);
+        values.push(status);
+      }
+      
+      if (updates.length === 0) {
+        // No updates, just return the existing goal
+        const query = 'SELECT * FROM goals WHERE id = $1';
+        const result = await db.query(query, [goalId]);
+        return result.rows[0];
+      }
+      
+      updates.push('updated_at = NOW()');
+      
       const query = `
         UPDATE goals 
-        SET title = COALESCE($2, title),
-            description = COALESCE($3, description),
-            target_date = COALESCE($4, target_date),
-            progress = COALESCE($5, progress),
-            status = COALESCE($6, status),
-            updated_at = NOW()
+        SET ${updates.join(', ')}
         WHERE id = $1
         RETURNING *
       `;
-      const result = await db.query(query, [goalId, title, description, target_date, progress, status]);
+      
+      const result = await db.query(query, values);
       return result.rows[0];
     } catch (error) {
       throw new Error(`Error updating goal: ${error.message}`);

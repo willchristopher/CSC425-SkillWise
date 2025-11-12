@@ -1,7 +1,9 @@
 // TODO: Implement peer review and collaboration features
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { useAuth } from '../hooks/useAuth';
+import './PeerReviewPage.css';
 
 const PeerReviewPage = () => {
   const [reviews, setReviews] = useState([]);
@@ -133,6 +135,9 @@ const PeerReviewPage = () => {
   return (
     <div className="peer-review-page">
       <div className="page-header">
+        <Link to="/dashboard" className="back-button">
+          ← Back to Dashboard
+        </Link>
         <h1>Peer Review</h1>
         <p>Collaborate with fellow learners and improve together</p>
       </div>

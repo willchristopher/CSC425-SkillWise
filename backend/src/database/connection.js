@@ -7,23 +7,21 @@ const logger = pino({
 });
 
 // Check if we should use mock database for testing
-if (!process.env.DATABASE_URL) {
+if (!process.env.DATABASE_URL && !process.env.TEST_DATABASE_URL) {
   console.log('No DATABASE_URL found, using mock database for testing...');
   module.exports = require('./mockConnection');
-  return;
-}
-
-// Database configuration
-const dbConfig = {
-  connectionString: process.env.DATABASE_URL,
-  // Additional configuration for production
-  ...(process.env.NODE_ENV === 'production' && {
+} else {
+  // Database configuration
+  const dbConfig = {
+    connectionString: process.env.TEST_DATABASE_URL || process.env.DATABASE_URL,
+    // Additional configuration for production
+    ...(process.env.NODE_ENV === 'production' && {
     ssl: {
       rejectUnauthorized: false
     }
   }),
   // Connection pool settings
-  max: 20, // Maximum number of clients in pool
+  max: process.env.NODE_ENV === 'test' ? 5 : 20, // Smaller pool for tests
   idleTimeoutMillis: 30000, // How long a client is allowed to remain idle
   connectionTimeoutMillis: 2000, // How long to wait when connecting
 };
@@ -197,5 +195,9 @@ module.exports = {
   getClient,
   healthCheck,
   testConnection,
-  closePool
+  closePool,
+  
+  // Alias for tests
+  end: closePool
 };
+}

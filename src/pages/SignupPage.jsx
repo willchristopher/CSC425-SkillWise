@@ -14,13 +14,12 @@ const SignupPage = () => {
       setIsLoading(true);
       setError('');
       
-      const response = await axios.post('http://localhost:3001/api/auth/signup', {
-        email: formData.email,
-        password: formData.password,
-        confirmPassword: formData.confirmPassword,
-        firstName: formData.firstName,
-        lastName: formData.lastName
-      }, {
+      console.log('Form data received:', formData);
+      console.log('Form data keys:', Object.keys(formData));
+      console.log('confirmPassword value:', formData.confirmPassword);
+      
+      // Send the entire formData object as-is
+      const response = await axios.post('http://localhost:3001/api/auth/register', formData, {
         withCredentials: true // Important for httpOnly cookies
       });
       

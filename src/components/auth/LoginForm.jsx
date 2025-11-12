@@ -12,6 +12,8 @@ const loginSchema = z.object({
 });
 
 const LoginForm = ({ onSubmit, error, isLoading }) => {
+  console.log('LoginForm rendered, onSubmit prop:', typeof onSubmit);
+  
   const {
     register,
     handleSubmit,
@@ -21,8 +23,12 @@ const LoginForm = ({ onSubmit, error, isLoading }) => {
   });
 
   const submitHandler = async (data) => {
+    console.log('LoginForm submitHandler called with data:', data);
     if (onSubmit) {
+      console.log('Calling onSubmit from LoginForm');
       await onSubmit(data);
+    } else {
+      console.log('No onSubmit prop provided to LoginForm');
     }
   };
 

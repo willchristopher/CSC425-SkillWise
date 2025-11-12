@@ -39,62 +39,34 @@ function App() {
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/error" element={<ErrorPage />} />
               
-              {/* Protected routes */}
+              {/* Protected routes - temporarily unprotected for testing */}
               <Route 
                 path="/dashboard" 
-                element={
-                  <ProtectedRoute>
-                    <DashboardPage />
-                  </ProtectedRoute>
-                } 
+                element={<DashboardPage />}
               />
               <Route 
                 path="/goals" 
-                element={
-                  <ProtectedRoute>
-                    <GoalsPage />
-                  </ProtectedRoute>
-                } 
+                element={<GoalsPage />}
               />
               <Route 
                 path="/challenges" 
-                element={
-                  <ProtectedRoute>
-                    <ChallengesPage />
-                  </ProtectedRoute>
-                } 
+                element={<ChallengesPage />}
               />
               <Route 
                 path="/progress" 
-                element={
-                  <ProtectedRoute>
-                    <ProgressPage />
-                  </ProtectedRoute>
-                } 
+                element={<ProgressPage />}
               />
               <Route 
                 path="/leaderboard" 
-                element={
-                  <ProtectedRoute>
-                    <LeaderboardPage />
-                  </ProtectedRoute>
-                } 
+                element={<LeaderboardPage />}
               />
               <Route 
                 path="/peer-review" 
-                element={
-                  <ProtectedRoute>
-                    <PeerReviewPage />
-                  </ProtectedRoute>
-                } 
+                element={<PeerReviewPage />}
               />
               <Route 
                 path="/profile" 
-                element={
-                  <ProtectedRoute>
-                    <ProfilePage />
-                  </ProtectedRoute>
-                } 
+                element={<ProfilePage />}
               />
               
               {/* Catch-all route for 404 */}

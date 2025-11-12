@@ -1,7 +1,9 @@
 // TODO: Implement user profile management and settings
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { useAuth } from '../hooks/useAuth';
+import './ProfilePage.css';
 
 const ProfilePage = () => {
   const [profileData, setProfileData] = useState(null);
@@ -143,6 +145,12 @@ const ProfilePage = () => {
 
   return (
     <div className="profile-page">
+      <div className="page-header">
+        <Link to="/dashboard" className="back-button">
+          ← Back to Dashboard
+        </Link>
+      </div>
+      
       <div className="profile-header">
         <div className="profile-banner">
           <div className="profile-info">

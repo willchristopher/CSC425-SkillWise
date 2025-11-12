@@ -1,59 +1,39 @@
-// TODO: Implement challenges browsing and participation page
 import React, { useState, useEffect } from 'react';
 import ChallengeCard from '../components/challenges/ChallengeCard';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import { apiService } from '../services/api';
 
 const ChallengesPage = () => {
   const [challenges, setChallenges] = useState([]);
   const [filteredChallenges, setFilteredChallenges] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
     category: '',
     difficulty: '',
     search: ''
   });
 
-  // Mock data - TODO: Replace with API call
+  // Fetch challenges on component mount
   useEffect(() => {
-    const mockChallenges = [
-      {
-        id: 1,
-        title: 'Build a React Component',
-        description: 'Create a reusable React component with props and state management.',
-        category: 'Programming',
-        difficulty: 'Medium',
-        points: 50,
-        estimatedTime: 45,
-        tags: ['React', 'JavaScript', 'Frontend']
-      },
-      {
-        id: 2,
-        title: 'Design a Logo',
-        description: 'Design a professional logo using design principles and color theory.',
-        category: 'Design',
-        difficulty: 'Easy',
-        points: 30,
-        estimatedTime: 60,
-        tags: ['Design', 'Branding', 'Creative']
-      },
-      {
-        id: 3,
-        title: 'Database Optimization',
-        description: 'Optimize a slow database query and improve performance metrics.',
-        category: 'Backend',
-        difficulty: 'Hard',
-        points: 100,
-        estimatedTime: 120,
-        tags: ['SQL', 'Database', 'Performance']
-      }
-    ];
-
-    setTimeout(() => {
-      setChallenges(mockChallenges);
-      setFilteredChallenges(mockChallenges);
-      setLoading(false);
-    }, 1000);
+    fetchChallenges();
   }, []);
+
+  const fetchChallenges = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await apiService.challenges.getAll();
+      const challengesData = response.data.data || [];
+      setChallenges(challengesData);
+      setFilteredChallenges(challengesData);
+    } catch (err) {
+      console.error('Error fetching challenges:', err);
+      setError(err.response?.data?.message || 'Failed to load challenges');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Filter challenges based on current filters
   useEffect(() => {
@@ -61,21 +41,22 @@ const ChallengesPage = () => {
 
     if (filters.category) {
       filtered = filtered.filter(challenge => 
-        challenge.category.toLowerCase() === filters.category.toLowerCase()
+        challenge.category?.toLowerCase() === filters.category.toLowerCase()
       );
     }
 
     if (filters.difficulty) {
       filtered = filtered.filter(challenge => 
-        challenge.difficulty.toLowerCase() === filters.difficulty.toLowerCase()
+        challenge.difficulty_level?.toLowerCase() === filters.difficulty.toLowerCase()
       );
     }
 
     if (filters.search) {
+      const searchTerm = filters.search.toLowerCase();
       filtered = filtered.filter(challenge =>
-        challenge.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-        challenge.description.toLowerCase().includes(filters.search.toLowerCase()) ||
-        challenge.tags.some(tag => tag.toLowerCase().includes(filters.search.toLowerCase()))
+        challenge.title?.toLowerCase().includes(searchTerm) ||
+        challenge.description?.toLowerCase().includes(searchTerm) ||
+        (challenge.tags && challenge.tags.some(tag => tag.toLowerCase().includes(searchTerm)))
       );
     }
 
@@ -89,32 +70,73 @@ const ChallengesPage = () => {
     }));
   };
 
+  const handleStartChallenge = (challenge) => {
+    // TODO: Navigate to challenge detail page or start modal
+    console.log('Starting challenge:', challenge);
+    alert(`Starting challenge: ${challenge.title}`);
+  };
+
+  const handleViewChallenge = (challenge) => {
+    // TODO: Navigate to challenge detail page
+    console.log('Viewing challenge:', challenge);
+    alert(`Viewing challenge details: ${challenge.title}`);
+  };
+
+  const clearFilters = () => {
+    setFilters({ category: '', difficulty: '', search: '' });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
   return (
-    <div className="challenges-page">
-      <div className="page-header">
-        <h1>Learning Challenges</h1>
-        <p>Enhance your skills with hands-on learning experiences</p>
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      {/* Page Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Learning Challenges</h1>
+        <p className="text-gray-600">Enhance your skills with hands-on learning experiences</p>
       </div>
 
-      <div className="challenges-filters">
-        <div className="filters-row">
-          <div className="filter-group">
-            <label htmlFor="search">Search Challenges</label>
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+          {error}
+        </div>
+      )}
+
+      {/* Filters Section */}
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8 border border-gray-200">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          {/* Search Input */}
+          <div className="md:col-span-3">
+            <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">
+              Search Challenges
+            </label>
             <input
               type="text"
               id="search"
               placeholder="Search by title, description, or tags..."
               value={filters.search}
               onChange={(e) => handleFilterChange('search', e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
-          <div className="filter-group">
-            <label htmlFor="category">Category</label>
+          {/* Category Filter */}
+          <div>
+            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+              Category
+            </label>
             <select
               id="category"
               value={filters.category}
               onChange={(e) => handleFilterChange('category', e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Categories</option>
               <option value="programming">Programming</option>
@@ -125,12 +147,16 @@ const ChallengesPage = () => {
             </select>
           </div>
 
-          <div className="filter-group">
-            <label htmlFor="difficulty">Difficulty</label>
+          {/* Difficulty Filter */}
+          <div>
+            <label htmlFor="difficulty" className="block text-sm font-medium text-gray-700 mb-2">
+              Difficulty
+            </label>
             <select
               id="difficulty"
               value={filters.difficulty}
               onChange={(e) => handleFilterChange('difficulty', e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Levels</option>
               <option value="easy">Easy</option>
@@ -138,35 +164,64 @@ const ChallengesPage = () => {
               <option value="hard">Hard</option>
             </select>
           </div>
-        </div>
 
-        <div className="results-summary">
-          <p>Showing {filteredChallenges.length} of {challenges.length} challenges</p>
-        </div>
-      </div>
-
-      <div className="challenges-content">
-        {loading ? (
-          <LoadingSpinner message="Loading challenges..." />
-        ) : filteredChallenges.length > 0 ? (
-          <div className="challenges-grid">
-            {filteredChallenges.map(challenge => (
-              <ChallengeCard key={challenge.id} challenge={challenge} />
-            ))}
-          </div>
-        ) : (
-          <div className="empty-state">
-            <h3>No challenges found</h3>
-            <p>Try adjusting your filters or search terms.</p>
-            <button 
-              className="btn-secondary"
-              onClick={() => setFilters({ category: '', difficulty: '', search: '' })}
+          {/* Clear Filters Button */}
+          <div className="flex items-end">
+            <button
+              onClick={clearFilters}
+              className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors font-medium"
             >
               Clear Filters
             </button>
           </div>
-        )}
+        </div>
+
+        {/* Results Summary */}
+        <div className="text-sm text-gray-600">
+          Showing {filteredChallenges.length} of {challenges.length} challenges
+        </div>
       </div>
+
+      {/* Challenges Grid */}
+      {filteredChallenges.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredChallenges.map(challenge => (
+            <ChallengeCard
+              key={challenge.id}
+              challenge={challenge}
+              onStart={handleStartChallenge}
+              onView={handleViewChallenge}
+              status="not_started"
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow-md p-12 text-center border border-gray-200">
+          <svg
+            className="w-16 h-16 mx-auto text-gray-400 mb-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+            />
+          </svg>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No challenges found</h3>
+          <p className="text-gray-600 mb-4">
+            Try adjusting your filters or search terms.
+          </p>
+          <button
+            onClick={clearFilters}
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          >
+            Clear Filters
+          </button>
+        </div>
+      )}
     </div>
   );
 };

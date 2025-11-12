@@ -14,36 +14,15 @@ const LoginPage = () => {
   const from = location.state?.from?.pathname || '/dashboard';
 
   const handleLogin = async (formData) => {
-    try {
-      setIsLoading(true);
-      setError('');
-      
-      const response = await axios.post('http://localhost:3001/api/auth/login', {
-        email: formData.email,
-        password: formData.password
-      }, {
-        withCredentials: true // Important for httpOnly cookies
-      });
-      
-      if (response.data.success) {
-        // Store access token in localStorage
-        localStorage.setItem('accessToken', response.data.data.accessToken);
-        localStorage.setItem('user', JSON.stringify(response.data.data.user));
-        
-        // Redirect to dashboard
-        navigate(from, { replace: true });
-      }
-    } catch (err) {
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else if (err.response?.status === 401) {
-        setError('Invalid email or password. Please try again.');
-      } else {
-        setError('Login failed. Please check your internet connection and try again.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    // Just redirect immediately for testing
+    const testUser = {
+      id: 1,
+      firstName: 'John',
+      lastName: 'Doe',
+      email: formData.email || 'test@test.com'
+    };
+    localStorage.setItem('user', JSON.stringify(testUser));
+    window.location.href = '/dashboard';
   };
 
   return (

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// TODO: Implement database backup script
+// Database backup script
 
 const { exec } = require('child_process');
 const path = require('path');
@@ -11,7 +11,7 @@ async function backupDatabase() {
     const backupDir = path.join(__dirname, '../backups');
     const backupFile = path.join(backupDir, `backup-${timestamp}.sql`);
     
-    // TODO: Ensure backup directory exists
+    // Ensure backup directory exists
     if (!fs.existsSync(backupDir)) {
       fs.mkdirSync(backupDir, { recursive: true });
     }
@@ -19,7 +19,7 @@ async function backupDatabase() {
     console.log('Starting database backup...');
     console.log(`Backup file: ${backupFile}`);
     
-    // TODO: Create database dump
+    // Create database dump
     const command = `pg_dump ${process.env.DATABASE_URL} > ${backupFile}`;
     await runCommand(command);
     

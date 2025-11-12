@@ -1,7 +1,9 @@
 // TODO: Implement leaderboard and rankings page
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { useAuth } from '../hooks/useAuth';
+import './LeaderboardPage.css';
 
 const LeaderboardPage = () => {
   const [leaderboardData, setLeaderboardData] = useState([]);
@@ -105,6 +107,9 @@ const LeaderboardPage = () => {
   return (
     <div className="leaderboard-page">
       <div className="page-header">
+        <Link to="/dashboard" className="back-button">
+          ← Back to Dashboard
+        </Link>
         <h1>Leaderboard</h1>
         <p>See how you compare with other learners</p>
       </div>
