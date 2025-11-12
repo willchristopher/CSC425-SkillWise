@@ -8,18 +8,9 @@ const goalService = {
     try {
       const goals = await Goal.findByUserId(userId);
       
-      // Calculate progress for each goal
-      const goalsWithProgress = await Promise.all(
-        goals.map(async (goal) => {
-          const progress = await goalService.calculateCompletion(goal.id);
-          return {
-            ...goal,
-            progress_percentage: progress
-          };
-        })
-      );
-      
-      return goalsWithProgress;
+      // Return goals as-is with their stored progress_percentage
+      // The progress_percentage can be manually updated or automatically calculated
+      return goals;
     } catch (error) {
       throw new Error(`Error getting user goals: ${error.message}`);
     }

@@ -7,8 +7,10 @@ beforeAll(async () => {
   try {
     await db.query('SELECT 1');
     console.log('✅ Test database connected');
+    global.__TEST_DB_AVAILABLE__ = true;
   } catch (err) {
     console.warn('⚠️  Test database not available, skipping integration tests:', err.message);
+    global.__TEST_DB_AVAILABLE__ = false;
     // Don't throw - allow unit tests to run without database
   }
 });

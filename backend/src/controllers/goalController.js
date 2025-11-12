@@ -111,7 +111,7 @@ const goalController = {
         });
       }
 
-      const { title, description, target_date, progress, status } = req.body;
+      const { title, description, target_date, progress, progress_percentage, status, is_completed } = req.body;
 
       // Check if goal exists and belongs to user
       const existingGoal = await Goal.findById(id);
@@ -133,8 +133,8 @@ const goalController = {
         title,
         description,
         target_date,
-        progress,
-        status
+        progress: progress_percentage !== undefined ? progress_percentage : progress,
+        status: is_completed !== undefined ? is_completed : status
       };
 
       const updatedGoal = await Goal.update(id, updateData);

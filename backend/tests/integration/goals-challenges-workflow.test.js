@@ -10,6 +10,12 @@ describe('Goals and Challenges Integration Workflow', () => {
   let challengeId;
 
   beforeAll(async () => {
+    // Skip if database not available
+    if (global.__TEST_DB_AVAILABLE__ === false) {
+      console.log('⚠️  Skipping integration tests - database not available');
+      return;
+    }
+
     // Create a test user and authenticate
     const signupResponse = await request(app)
       .post('/api/auth/register')
@@ -21,7 +27,7 @@ describe('Goals and Challenges Integration Workflow', () => {
         lastName: 'TestUser'
       });
 
-    if (signupResponse.status === 201 || signupResponse.status === 400) {
+    if (signupResponse.status === 201 || signupResponse.status === 400 || signupResponse.status === 409) {
       // Login even if user already exists
       const loginResponse = await request(app)
         .post('/api/auth/login')
@@ -30,14 +36,18 @@ describe('Goals and Challenges Integration Workflow', () => {
           password: 'TestPassword123!'
         });
 
-      authToken = loginResponse.body.data.accessToken;
-      userId = loginResponse.body.data.user.id;
+      authToken = loginResponse.body.data?.accessToken;
+      userId = loginResponse.body.data?.user?.id;
+      
+      if (!authToken || !userId) {
+        throw new Error('Failed to authenticate test user. Token or userId is missing.');
+      }
     }
   });
 
   afterAll(async () => {
     // Cleanup test data
-    if (userId) {
+    if (userId && global.__TEST_DB_AVAILABLE__ !== false) {
       await db.query('DELETE FROM user_goal_challenges WHERE user_id = $1', [userId]);
       await db.query('DELETE FROM goals WHERE user_id = $1', [userId]);
       await db.query('DELETE FROM challenges WHERE created_by = $1', [userId]);

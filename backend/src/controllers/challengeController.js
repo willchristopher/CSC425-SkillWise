@@ -57,7 +57,7 @@ const challengeController = {
   // Create new challenge (admin only)
   createChallenge: async (req, res, next) => {
     try {
-      const { title, description, instructions, difficulty, subject, points, type, content, category } = req.body;
+      const { title, description, instructions, difficulty, subject, points, type, content, category, goal_id } = req.body;
 
       // Validate required fields
       if (!title || !description || !instructions) {
@@ -74,6 +74,7 @@ const challengeController = {
         category: category || subject || 'general',
         difficulty_level: difficulty || 'medium',
         points_reward: points || 10,
+        goal_id: goal_id || null,
         created_by: req.user?.userId || null,
         type: type || 'coding',
         content

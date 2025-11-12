@@ -72,11 +72,12 @@ class Challenge {
           difficulty_level, 
           category, 
           points_reward,
+          goal_id,
           created_by,
           created_at, 
           updated_at
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
         RETURNING *
       `;
       const result = await db.query(query, [
@@ -86,6 +87,7 @@ class Challenge {
         finalDifficulty, 
         finalCategory,
         finalPoints,
+        goal_id || null,
         created_by
       ]);
       return result.rows[0];
