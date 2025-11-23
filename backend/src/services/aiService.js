@@ -124,6 +124,34 @@ Please provide 2-3 helpful hints that will guide the student without revealing t
   },
 
   /**
+   * Generate a new programming challenge using AI
+   * @param {object} opts - { topic, difficulty }
+   * @returns {Promise<string|object>} AI-generated challenge text or object
+   */
+  generateChallenge: async (opts = {}) => {
+    const { topic = 'algorithms', difficulty = 'medium' } = opts;
+
+    const systemPrompt = `You are an educational content writer creating concise programming challenges. Output a short title and a clear description with requirements and example input/output when appropriate. Keep the difficulty level consistent with the requested difficulty.`;
+
+    const userPrompt = `Please create one programming challenge about: ${topic}
+Difficulty: ${difficulty}
+
+Provide a short title on the first line, then a clear description, requirements, and one example (input -> output) if applicable. Do not include extraneous commentary.`;
+
+    const response = await callGemini(systemPrompt, userPrompt, {
+      maxOutputTokens: 800,
+      temperature: 0.7,
+    });
+
+    // Try to return structured object if possible (best-effort)
+    if (typeof response === 'string') {
+      return response;
+    }
+
+    return response;
+  },
+
+  /**
    * Analyze user's learning patterns and provide insights
    * @param {string} userId - User ID
    * @param {object} learningData - User's learning history and statistics

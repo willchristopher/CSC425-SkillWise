@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import ChallengeCard from '../components/challenges/ChallengeCard';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import AIChallengeModal from '../components/challenges/AIChallengeModal';
+import { apiService } from '../services/api';
 
 const ChallengesPage = () => {
   const [challenges, setChallenges] = useState([]);
@@ -12,6 +14,8 @@ const ChallengesPage = () => {
     difficulty: '',
     search: ''
   });
+  const [isAIChallengeOpen, setIsAIChallengeOpen] = useState(false);
+  const [generatedChallenge, setGeneratedChallenge] = useState(null);
 
   // Mock data - TODO: Replace with API call
   useEffect(() => {
@@ -94,6 +98,20 @@ const ChallengesPage = () => {
       <div className="page-header">
         <h1>Learning Challenges</h1>
         <p>Enhance your skills with hands-on learning experiences</p>
+        <div style={{ marginTop: 12 }}>
+          <button className="btn-secondary" onClick={async () => {
+            setIsAIChallengeOpen(true);
+            setGeneratedChallenge(null);
+            try {
+              const res = await apiService.ai.generateChallenge({ topic: 'algorithms', difficulty: 'medium' });
+              const challenge = res.data?.data?.challenge || res.data?.challenge || res.data;
+              setGeneratedChallenge(challenge);
+            } catch (err) {
+              console.error('AI generate error', err);
+              setGeneratedChallenge({ title: 'Error', description: 'Failed to generate challenge' });
+            }
+          }}>🤖 Generate Challenge</button>
+        </div>
       </div>
 
       <div className="challenges-filters">
@@ -167,6 +185,11 @@ const ChallengesPage = () => {
           </div>
         )}
       </div>
+      <AIChallengeModal
+        isOpen={isAIChallengeOpen}
+        onClose={() => { setIsAIChallengeOpen(false); setGeneratedChallenge(null); }}
+        challenge={generatedChallenge}
+      />
     </div>
   );
 };

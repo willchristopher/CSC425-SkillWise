@@ -6,6 +6,8 @@ const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
 const pino = require('pino');
 const pinoHttp = require('pino-http');
+const Sentry = require('@sentry/node');
+const Tracing = require('@sentry/tracing');
 
 // Import middleware
 const errorHandler = require('./middleware/errorHandler');
@@ -15,6 +17,19 @@ const routes = require('./routes/index');
 
 // Create Express app
 const app = express();
+
+// Initialize Sentry if DSN provided
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV || 'development',
+    tracesSampleRate: parseFloat(process.env.SENTRY_TRACES_SAMPLE_RATE || '0.1'),
+  });
+
+  // Request handler must be first middleware
+  app.use(Sentry.Handlers.requestHandler());
+  app.use(Sentry.Handlers.tracingHandler());
+}
 
 // Create logger
 const logger = pino({
@@ -116,6 +131,11 @@ app.get('/healthz', (req, res) => {
 
 // Mount API routes
 app.use('/api', routes);
+
+// Sentry error handler (after routes, before general error handler)
+if (process.env.SENTRY_DSN) {
+  app.use(Sentry.Handlers.errorHandler());
+}
 
 // 404 handler for unmatched routes
 app.use('*', (req, res) => {

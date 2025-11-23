@@ -252,14 +252,16 @@ export const apiService = {
 
   // AI methods
   ai: {
+    // Use submitForFeedback endpoint which persists AI response on server
     generateFeedback: (submissionText, challengeContext) => 
-      api.post('/ai/feedback', { submissionText, challengeContext }),
+      api.post('/ai/submitForFeedback', { submissionText, challengeContext }),
     getHints: (challengeId, challenge, userProgress) => 
       api.post(`/ai/hints/${challengeId}`, { challenge }, { params: userProgress }),
     getSuggestions: (userProfile) => 
       api.post('/ai/suggestions', { userProfile }),
     analyzeProgress: (userId, learningData) => 
       api.post('/ai/analysis', { userId, learningData }),
+    generateChallenge: (opts) => api.post('/ai/generateChallenge', opts || {}),
   },
 };
 

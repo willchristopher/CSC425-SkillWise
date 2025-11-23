@@ -1,6 +1,13 @@
+import './index.css';
+// Initialize Sentry (if configured)
+try {
+  require('./services/sentry');
+} catch (e) {
+  // ignore if Sentry not available in environment
+}
+
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import './index.css';
 import App from './App.jsx';
 
 const container = document.getElementById('root');

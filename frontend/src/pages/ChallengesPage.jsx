@@ -4,6 +4,7 @@ import { apiService } from '../services/api';
 import ChallengeCard from '../components/challenges/ChallengeCard';
 import ChallengeModal from '../components/challenges/ChallengeModal';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import AIChallengeModal from '../components/challenges/AIChallengeModal';
 import '../styles/challenges.css';
 
 const ChallengesPage = () => {
@@ -15,6 +16,8 @@ const ChallengesPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingChallenge, setEditingChallenge] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAIChallengeOpen, setIsAIChallengeOpen] = useState(false);
+  const [generatedChallenge, setGeneratedChallenge] = useState(null);
 
   // Filter states
   const [filters, setFilters] = useState({
@@ -105,6 +108,20 @@ const ChallengesPage = () => {
   const handleCreateChallenge = () => {
     setEditingChallenge(null);
     setIsModalOpen(true);
+  };
+
+  const handleGenerateChallenge = async () => {
+    setGeneratedChallenge(null);
+    setIsAIChallengeOpen(true);
+
+    try {
+      const response = await apiService.ai.generateChallenge({ topic: 'algorithms', difficulty: 'medium' });
+      const challenge = response.data?.data?.challenge || response.data?.challenge || response.data;
+      setGeneratedChallenge(challenge);
+    } catch (err) {
+      console.error('Failed to generate AI challenge:', err);
+      setGeneratedChallenge({ title: 'Error', description: 'Failed to generate challenge. See console for details.' });
+    }
   };
 
   const handleEditChallenge = (challenge) => {
@@ -215,10 +232,15 @@ const ChallengesPage = () => {
           <h1>Learning Challenges</h1>
           <p>Discover challenges to enhance your skills and knowledge.</p>
         </div>
-        <button className="btn btn-primary" onClick={handleCreateChallenge}>
+        <div style={{display: 'flex', gap: '8px'}}>
+          <button className="btn btn-secondary" onClick={handleGenerateChallenge}>
+            🤖 Generate Challenge
+          </button>
+          <button className="btn btn-primary" onClick={handleCreateChallenge}>
           <span className="btn-icon">+</span>
           Create Challenge
-        </button>
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -360,6 +382,12 @@ const ChallengesPage = () => {
         onSubmit={handleSubmitChallenge}
         challenge={editingChallenge}
         isLoading={isSubmitting}
+      />
+
+      <AIChallengeModal
+        isOpen={isAIChallengeOpen}
+        onClose={() => { setIsAIChallengeOpen(false); setGeneratedChallenge(null); }}
+        challenge={generatedChallenge}
       />
     </div>
   );

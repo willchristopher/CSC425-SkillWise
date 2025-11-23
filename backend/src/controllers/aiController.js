@@ -1,5 +1,6 @@
 // AI integration controller for feedback and hints
 const aiService = require('../services/aiService');
+const db = require('../database/connection');
 
 const aiController = {
   /**
@@ -140,6 +141,89 @@ const aiController = {
       });
     } catch (error) {
       console.error('Error analyzing progress:', error);
+      next(error);
+    }
+  },
+
+  /**
+   * Submit work for AI feedback and persist the result
+   * POST /api/ai/submitForFeedback
+   * Body: { submissionId (optional), submissionText, challengeContext }
+   */
+  submitForFeedback: async (req, res, next) => {
+    try {
+      const { submissionId = null, submissionText, challengeContext } = req.body;
+
+      if (!submissionText || !challengeContext) {
+        return res.status(400).json({ success: false, message: 'submissionText and challengeContext required' });
+      }
+
+      // Generate feedback
+      const feedbackText = await aiService.generateFeedback(submissionText, challengeContext);
+
+      // Log prompt/response to console for auditing
+      console.log('AI Feedback generated for submissionId=', submissionId);
+      console.log('Feedback:', feedbackText?.slice(0, 200));
+
+      // Persist into ai_feedback table if database available
+      try {
+        await db.query(
+          `INSERT INTO ai_feedback (submission_id, feedback_text, feedback_type, ai_model, created_at)
+           VALUES ($1, $2, $3, $4, NOW())`,
+          [submissionId, feedbackText, 'submission_feedback', process.env.OPENAI_MODEL || process.env.GEMINI_MODEL || null]
+        );
+      } catch (dbErr) {
+        console.warn('Warning: failed to persist AI feedback to database', dbErr.message || dbErr);
+      }
+
+      res.json({ success: true, data: { feedback: feedbackText, saved: true } });
+    } catch (error) {
+      console.error('Error in submitForFeedback:', error);
+      next(error);
+    }
+  },
+
+  /**
+   * Generate a challenge from AI and log prompt/response
+   * POST /api/ai/generateChallenge
+   * Body: { topic (optional), difficulty (optional) }
+   */
+  generateChallenge: async (req, res, next) => {
+    try {
+      const { topic = 'general algorithms', difficulty = 'medium' } = req.body || {};
+
+      // Call AI service to generate a challenge
+      const challengeText = await aiService.generateChallenge({ topic, difficulty });
+
+      // Attempt to parse returned text into JSON-like structure (best-effort)
+      let challenge = { title: '', description: '', difficulty };
+      if (typeof challengeText === 'string') {
+        // Keep full text as description and try to extract a first-line title
+        const lines = challengeText.split('\n').filter(Boolean);
+        challenge.title = lines[0] ? lines[0].replace(/^#|\-\s*/g, '').trim() : `AI Challenge: ${topic}`;
+        challenge.description = challengeText;
+      } else if (typeof challengeText === 'object') {
+        challenge = { ...challenge, ...challengeText };
+      }
+
+      // Log prompt/response
+      console.log('AI generated challenge for topic=', topic, 'difficulty=', difficulty);
+      console.log('Challenge title:', challenge.title);
+
+      // Persist a record to ai_feedback table for audit (feedback_type used for generative logs)
+      try {
+        await db.query(
+          `INSERT INTO ai_feedback (submission_id, feedback_text, feedback_type, ai_model, created_at)
+           VALUES ($1, $2, $3, $4, NOW())`,
+          [null, JSON.stringify(challenge), 'challenge_generation', process.env.OPENAI_MODEL || process.env.GEMINI_MODEL || null]
+        );
+      } catch (dbErr) {
+        console.warn('Warning: failed to persist AI challenge log to database', dbErr.message || dbErr);
+      }
+
+      res.json({ success: true, data: { challenge } });
+    } catch (error) {
+      console.error('Error generating AI challenge:', error);
       next(error);
     }
   },
