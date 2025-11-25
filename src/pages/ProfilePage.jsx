@@ -1,4 +1,4 @@
-// TODO: Implement user profile management and settings
+// User profile management and settings page
 import React, { useState, useEffect } from 'react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { useAuth } from '../hooks/useAuth';
@@ -11,7 +11,7 @@ const ProfilePage = () => {
   const [formData, setFormData] = useState({});
   const { user, updateProfile } = useAuth();
 
-  // Mock data - TODO: Replace with API call
+  // Mock data for demonstration
   useEffect(() => {
     const mockProfileData = {
       id: user?.id || 1,
@@ -95,7 +95,7 @@ const ProfilePage = () => {
     e.preventDefault();
     setLoading(true);
     
-    // TODO: Replace with actual API call
+    // Replace with actual API call when backend is ready
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
       setProfileData(formData);

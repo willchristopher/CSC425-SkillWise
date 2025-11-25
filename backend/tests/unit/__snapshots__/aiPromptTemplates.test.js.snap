@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AI Prompt Templates buildChallengePrompts generates challenge prompt with defaults and custom values 1`] = `
+{
+  "systemPrompt": "You are an educational content writer creating concise programming challenges. Output a short title and a clear description with requirements and example input/output when appropriate. Keep the difficulty level consistent with the requested difficulty.",
+  "userPrompt": "Please create one programming challenge about: algorithms
+Difficulty: medium
+
+Provide a short title on the first line, then a clear description, requirements, and one example (input -> output) if applicable. Do not include extraneous commentary.",
+}
+`;
+
+exports[`AI Prompt Templates buildChallengePrompts generates challenge prompt with defaults and custom values 2`] = `
+{
+  "systemPrompt": "You are an educational content writer creating concise programming challenges. Output a short title and a clear description with requirements and example input/output when appropriate. Keep the difficulty level consistent with the requested difficulty.",
+  "userPrompt": "Please create one programming challenge about: arrays
+Difficulty: easy
+
+Provide a short title on the first line, then a clear description, requirements, and one example (input -> output) if applicable. Do not include extraneous commentary.",
+}
+`;
+
+exports[`AI Prompt Templates buildFeedbackPrompts generates expected prompt structure 1`] = `
+{
+  "systemPrompt": "You are an expert programming tutor providing constructive feedback on student code submissions.
+Be encouraging, specific, and educational. Point out both strengths and areas for improvement. Focus on code quality, best practices, and learning opportunities.",
+  "userPrompt": "Challenge: Sum Two Numbers
+
+Description: Write a function that returns sum of two numbers
+
+Student's Submission:
+function sum(a, b) { return a + b }
+
+Please provide detailed, constructive feedback on this submission. Include:
+1. What was done well
+2. Areas for improvement
+3. Specific suggestions for better implementation
+4. Any best practices or concepts the student should learn",
+}
+`;

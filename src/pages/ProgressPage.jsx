@@ -1,4 +1,3 @@
-// TODO: Implement progress tracking and analytics page
 import React, { useState, useEffect } from 'react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
@@ -68,78 +67,98 @@ const ProgressPage = () => {
   }, [timeframe]);
 
   if (loading) {
-    return <LoadingSpinner message="Loading your progress..." />;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
+        <LoadingSpinner message="Loading your progress..." />
+      </div>
+    );
   }
 
   return (
-    <div className="progress-page">
-      <div className="page-header">
-        <h1>Your Learning Progress</h1>
-        <p>Track your journey and celebrate your achievements</p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-8 px-4">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Your Learning Progress</h1>
+          <p className="text-lg text-gray-600">Track your journey and celebrate your achievements</p>
+        </div>
 
-      <div className="progress-overview">
-        <div className="stats-grid">
-          <div className="stat-card">
-            <div className="stat-icon">🎯</div>
-            <div className="stat-content">
-              <h3>{progressData.overall.totalPoints}</h3>
-              <p>Total Points</p>
-            </div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-icon">⭐</div>
-            <div className="stat-content">
-              <h3>Level {progressData.overall.level}</h3>
-              <p>Current Level</p>
-              <div className="progress-bar">
-                <div 
-                  className="progress-fill"
-                  style={{ 
-                    width: `${(progressData.overall.experiencePoints / progressData.overall.nextLevelXP) * 100}%` 
-                  }}
-                ></div>
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+          <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg">
+            <div className="flex items-center">
+              <div className="text-3xl mr-4">🎯</div>
+              <div>
+                <div className="text-2xl font-bold">{progressData.overall.totalPoints}</div>
+                <div className="text-sm opacity-90">Total Points</div>
               </div>
-              <small>{progressData.overall.experiencePoints}/{progressData.overall.nextLevelXP} XP</small>
             </div>
           </div>
 
-          <div className="stat-card">
-            <div className="stat-icon">✅</div>
-            <div className="stat-content">
-              <h3>{progressData.overall.completedGoals}</h3>
-              <p>Goals Completed</p>
+          <div className="bg-gradient-to-r from-yellow-500 to-orange-500 rounded-2xl p-6 text-white shadow-lg">
+            <div className="flex items-center">
+              <div className="text-3xl mr-4">⭐</div>
+              <div>
+                <div className="text-2xl font-bold">Level {progressData.overall.level}</div>
+                <div className="text-sm opacity-90">Current Level</div>
+                <div className="w-full bg-white/30 rounded-full h-2 mt-2">
+                  <div 
+                    className="bg-white rounded-full h-2 transition-all duration-300"
+                    style={{ 
+                      width: `${(progressData.overall.experiencePoints / progressData.overall.nextLevelXP) * 100}%` 
+                    }}
+                  ></div>
+                </div>
+                <div className="text-xs opacity-90 mt-1">
+                  {progressData.overall.experiencePoints}/{progressData.overall.nextLevelXP} XP
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="stat-card">
-            <div className="stat-icon">🚀</div>
-            <div className="stat-content">
-              <h3>{progressData.overall.completedChallenges}</h3>
-              <p>Challenges Done</p>
+          <div className="bg-gradient-to-r from-green-500 to-blue-500 rounded-2xl p-6 text-white shadow-lg">
+            <div className="flex items-center">
+              <div className="text-3xl mr-4">✅</div>
+              <div>
+                <div className="text-2xl font-bold">{progressData.overall.completedGoals}</div>
+                <div className="text-sm opacity-90">Goals Completed</div>
+              </div>
             </div>
           </div>
 
-          <div className="stat-card">
-            <div className="stat-icon">🔥</div>
-            <div className="stat-content">
-              <h3>{progressData.overall.currentStreak}</h3>
-              <p>Day Streak</p>
-              <small>Longest: {progressData.overall.longestStreak} days</small>
+          <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-6 text-white shadow-lg">
+            <div className="flex items-center">
+              <div className="text-3xl mr-4">🚀</div>
+              <div>
+                <div className="text-2xl font-bold">{progressData.overall.completedChallenges}</div>
+                <div className="text-sm opacity-90">Challenges Done</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-r from-red-500 to-orange-500 rounded-2xl p-6 text-white shadow-lg">
+            <div className="flex items-center">
+              <div className="text-3xl mr-4">🔥</div>
+              <div>
+                <div className="text-2xl font-bold">{progressData.overall.currentStreak}</div>
+                <div className="text-sm opacity-90">Day Streak</div>
+                <div className="text-xs opacity-75 mt-1">
+                  Longest: {progressData.overall.longestStreak} days
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="progress-sections">
-        <div className="section-row">
-          <div className="progress-chart-section">
-            <div className="section-header">
-              <h2>Weekly Activity</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Weekly Activity Chart */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Weekly Activity</h2>
               <select 
                 value={timeframe}
                 onChange={(e) => setTimeframe(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               >
                 <option value="week">This Week</option>
                 <option value="month">This Month</option>
@@ -147,38 +166,41 @@ const ProgressPage = () => {
               </select>
             </div>
 
-            <div className="weekly-chart">
+            <div className="flex items-end justify-between h-48 bg-gradient-to-t from-gray-50 to-transparent rounded-lg p-4">
               {progressData.weeklyProgress.map((day, index) => (
-                <div key={index} className="day-column">
-                  <div className="day-label">{day.day}</div>
+                <div key={index} className="flex flex-col items-center">
                   <div 
-                    className="day-bar"
-                    style={{ height: `${Math.max(day.points / 2, 5)}px` }}
+                    className="bg-gradient-to-t from-indigo-500 to-purple-500 rounded-t w-8 transition-all duration-300 hover:from-indigo-600 hover:to-purple-600"
+                    style={{ height: `${Math.max((day.points / 75) * 120, 8)}px` }}
                     title={`${day.points} points, ${day.timeSpent} minutes`}
                   ></div>
-                  <div className="day-points">{day.points}</div>
+                  <div className="text-xs text-gray-600 mt-2">{day.day}</div>
+                  <div className="text-sm font-semibold text-gray-900">{day.points}</div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="recent-activity-section">
-            <h2>Recent Activity</h2>
-            <div className="activity-list">
+          {/* Recent Activity */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Activity</h2>
+            <div className="space-y-4">
               {progressData.recentActivity.map((activity) => (
-                <div key={activity.id} className="activity-item">
-                  <div className="activity-icon">
+                <div key={activity.id} className="flex items-center p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200">
+                  <div className="text-2xl mr-4">
                     {activity.type === 'challenge_completed' && '🚀'}
                     {activity.type === 'goal_progress' && '🎯'}
                     {activity.type === 'achievement_earned' && '🏆'}
                   </div>
-                  <div className="activity-content">
-                    <h4>{activity.title}</h4>
-                    <p>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900">{activity.title}</h4>
+                    <p className="text-sm text-gray-600">
                       {activity.points && `+${activity.points} points`}
                       {activity.progress && `${activity.progress}% complete`}
                     </p>
-                    <small>{new Date(activity.timestamp).toLocaleDateString()}</small>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {new Date(activity.timestamp).toLocaleDateString()}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -186,23 +208,26 @@ const ProgressPage = () => {
           </div>
         </div>
 
-        <div className="skills-section">
-          <h2>Skill Breakdown</h2>
-          <div className="skills-grid">
+        {/* Skills Breakdown */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">Skill Breakdown</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {progressData.skillBreakdown.map((skill, index) => (
-              <div key={index} className="skill-item">
-                <div className="skill-header">
-                  <h4>{skill.skill}</h4>
-                  <span className="skill-level">Level {skill.level}</span>
+              <div key={index} className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-6 border border-gray-200">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold text-gray-900">{skill.skill}</h4>
+                  <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2 py-1 rounded-full">
+                    Level {skill.level}
+                  </span>
                 </div>
-                <div className="skill-progress">
-                  <div className="progress-bar">
+                <div className="relative">
+                  <div className="w-full bg-gray-200 rounded-full h-3">
                     <div 
-                      className="progress-fill"
+                      className="bg-gradient-to-r from-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-500"
                       style={{ width: `${skill.progress}%` }}
                     ></div>
                   </div>
-                  <span className="progress-text">{skill.progress}%</span>
+                  <div className="text-sm font-medium text-gray-700 mt-2">{skill.progress}%</div>
                 </div>
               </div>
             ))}

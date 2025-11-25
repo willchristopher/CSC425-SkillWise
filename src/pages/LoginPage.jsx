@@ -47,49 +47,148 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <Link to="/" className="flex justify-center">
-          <h1 className="text-3xl font-bold text-blue-600">SkillWise</h1>
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #dbeafe 0%, #e0e7ff 50%, #f3e8ff 100%)',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      padding: '3rem 1.5rem'
+    }}>
+      <div style={{
+        margin: '0 auto',
+        width: '100%',
+        maxWidth: '28rem'
+      }}>
+        <Link to="/" style={{
+          display: 'flex',
+          justifyContent: 'center',
+          textDecoration: 'none'
+        }}>
+          <h1 style={{
+            fontSize: '2.25rem',
+            fontWeight: 'bold',
+            background: 'linear-gradient(135deg, #2563eb 0%, #9333ea 50%, #4f46e5 100%)',
+            backgroundClip: 'text',
+            color: 'transparent',
+            transition: 'transform 0.3s ease'
+          }}
+          onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
+          onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
+          >
+            SkillWise
+          </h1>
         </Link>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        <h2 style={{
+          marginTop: '1.5rem',
+          textAlign: 'center',
+          fontSize: '1.875rem',
+          fontWeight: '800',
+          color: '#111827'
+        }}>
           Welcome Back
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p style={{
+          marginTop: '0.5rem',
+          textAlign: 'center',
+          fontSize: '0.875rem',
+          color: '#4b5563'
+        }}>
           Sign in to continue your learning journey
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+      <div style={{
+        marginTop: '2rem',
+        margin: '2rem auto 0',
+        width: '100%',
+        maxWidth: '28rem'
+      }}>
+        <div style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          backdropFilter: 'blur(10px)',
+          padding: '2rem 1rem',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          borderRadius: '1rem'
+        }}>
           <LoginForm 
             onSubmit={handleLogin}
             error={error}
             isLoading={isLoading}
           />
 
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+          <div style={{ marginTop: '1.5rem' }}>
+            <div style={{ position: 'relative' }}>
+              <div style={{
+                position: 'absolute',
+                inset: 0,
+                display: 'flex',
+                alignItems: 'center'
+              }}>
+                <div style={{
+                  width: '100%',
+                  borderTop: '1px solid #d1d5db'
+                }} />
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">New to SkillWise?</span>
+              <div style={{
+                position: 'relative',
+                display: 'flex',
+                justifyContent: 'center',
+                fontSize: '0.875rem'
+              }}>
+                <span style={{
+                  padding: '0 0.5rem',
+                  backgroundColor: 'white',
+                  color: '#6b7280'
+                }}>New to SkillWise?</span>
               </div>
             </div>
 
-            <div className="mt-6">
+            <div style={{ marginTop: '1.5rem' }}>
               <Link
                 to="/signup"
-                className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  padding: '0.75rem 1rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '0.5rem',
+                  boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                  background: 'linear-gradient(135deg, #f9fafb 0%, white 100%)',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: '#374151',
+                  textDecoration: 'none',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.background = 'linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%)';
+                  e.target.style.borderColor = '#3b82f6';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.background = 'linear-gradient(135deg, #f9fafb 0%, white 100%)';
+                  e.target.style.borderColor = '#d1d5db';
+                }}
               >
                 Create an account
               </Link>
             </div>
           </div>
 
-          <div className="mt-6 text-center">
-            <Link to="/" className="text-sm text-blue-600 hover:text-blue-500">
+          <div style={{
+            marginTop: '1.5rem',
+            textAlign: 'center'
+          }}>
+            <Link to="/" style={{
+              fontSize: '0.875rem',
+              color: '#2563eb',
+              textDecoration: 'none'
+            }}
+            onMouseOver={(e) => e.target.style.color = '#1d4ed8'}
+            onMouseOut={(e) => e.target.style.color = '#2563eb'}
+            >
               ← Back to home
             </Link>
           </div>

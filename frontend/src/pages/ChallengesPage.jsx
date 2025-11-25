@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { apiService } from '../services/api';
 import ChallengeCard from '../components/challenges/ChallengeCard';
@@ -9,6 +10,7 @@ import '../styles/challenges.css';
 
 const ChallengesPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [challenges, setChallenges] = useState([]);
   const [filteredChallenges, setFilteredChallenges] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -160,20 +162,19 @@ const ChallengesPage = () => {
   };
 
   const handleStartChallenge = (challenge) => {
-    // TODO: Navigate to challenge participation page
-    console.log('Starting challenge:', challenge.title);
-    // This would typically navigate to /challenges/:id/participate
+    // Navigate to challenge participation page
+    navigate(`/challenges/${challenge.id}/participate`);
   };
 
   const handleViewDetails = (challenge) => {
-    // TODO: Navigate to challenge details page
-    console.log('Viewing challenge:', challenge.title);
-    // This would typically navigate to /challenges/:id
+    // Navigate to challenge details page
+    navigate(`/challenges/${challenge.id}`);
   };
 
   const handleLinkToGoal = async (challenge) => {
-    // TODO: Show goal selection modal and link challenge to goal
-    console.log('Linking challenge to goal:', challenge.title);
+    // Show goal selection modal and link challenge to goal
+    setShowGoalLinkModal(true);
+    setSelectedChallenge(challenge);
   };
 
   const handleDeleteChallenge = async (challenge) => {

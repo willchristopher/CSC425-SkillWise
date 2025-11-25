@@ -1,0 +1,15 @@
+{
+  "extends": [
+    "react-app",
+    "react-app/jest"
+  ],
+  "rules": {
+    "indent": "off",
+    "no-trailing-spaces": "off",
+    "comma-dangle": "off",
+    "eol-last": "off",
+    "react/jsx-indent": "off",
+    "react/jsx-indent-props": "off",
+    "quotes": "off"
+  }
+}

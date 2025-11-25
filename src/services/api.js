@@ -254,6 +254,8 @@ export const apiService = {
   ai: {
     // Submit for feedback and persist AI response on backend
     generateFeedback: (submissionText, challengeContext) => 
+      api.post('/ai/feedback', { submissionText, challengeContext }),
+    submitForFeedback: (submissionText, challengeContext) => 
       api.post('/ai/submitForFeedback', { submissionText, challengeContext }),
     getHints: (challengeId, challenge, userProgress) => 
       api.post(`/ai/hints/${challengeId}`, { challenge }, { params: userProgress }),

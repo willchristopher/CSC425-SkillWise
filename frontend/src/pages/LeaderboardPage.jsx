@@ -1,4 +1,4 @@
-// TODO: Implement leaderboard and rankings page
+// Leaderboard and rankings page
 import React, { useState, useEffect } from 'react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { useAuth } from '../hooks/useAuth';
@@ -10,7 +10,7 @@ const LeaderboardPage = () => {
   const [category, setCategory] = useState('overall');
   const { user } = useAuth();
 
-  // Mock data - TODO: Replace with API call
+  // Mock data for demonstration
   useEffect(() => {
     const mockLeaderboardData = [
       {

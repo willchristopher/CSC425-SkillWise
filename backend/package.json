@@ -16,7 +16,9 @@
     "build": "echo 'No build step required for Node.js'"
   },
   "dependencies": {
+    "@google/genai": "^1.30.0",
     "@sentry/node": "^7.81.1",
+    "@sentry/tracing": "^7.120.4",
     "axios": "^1.6.2",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",

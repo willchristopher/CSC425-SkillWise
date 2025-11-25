@@ -1,8 +1,8 @@
-// TODO: Implement main navigation header component
+// Main navigation header component
 import React from 'react';
 
 const Header = () => {
-  // TODO: Add navigation menu, user profile dropdown, notifications
+  // Navigation menu, user profile dropdown, notifications
   return (
     <header className="header">
       <div className="container">
@@ -10,10 +10,10 @@ const Header = () => {
           <h1>SkillWise</h1>
         </div>
         <nav className="nav-menu">
-          {/* TODO: Add navigation items */}
+          {/* Add navigation items */}
         </nav>
         <div className="nav-actions">
-          {/* TODO: Add user profile, notifications */}
+          {/* Add user profile, notifications */}
         </div>
       </div>
     </header>

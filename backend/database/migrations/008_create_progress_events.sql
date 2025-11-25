@@ -1,4 +1,4 @@
--- TODO: Create progress events table for tracking learning activities
+-- Migration 008: Create progress events table for tracking learning activities
 -- Migration 008: Create progress events table
 
 CREATE TABLE IF NOT EXISTS progress_events (

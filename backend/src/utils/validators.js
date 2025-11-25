@@ -1,13 +1,13 @@
-// TODO: Data validation utility functions
+// Data validation utility functions
 const { z } = require('zod');
 
-// TODO: Email validation
+// Email validation
 const validateEmail = (email) => {
   const emailSchema = z.string().email();
   return emailSchema.safeParse(email).success;
 };
 
-// TODO: Password validation
+// Password validation
 const validatePassword = (password) => {
   const passwordSchema = z.string()
     .min(8, 'Password must be at least 8 characters')
@@ -24,7 +24,7 @@ const validatePassword = (password) => {
   };
 };
 
-// TODO: Username validation
+// Username validation
 const validateUsername = (username) => {
   const usernameSchema = z.string()
     .min(3, 'Username must be at least 3 characters')
@@ -34,7 +34,7 @@ const validateUsername = (username) => {
   return usernameSchema.safeParse(username).success;
 };
 
-// TODO: Phone number validation
+// Phone number validation
 const validatePhoneNumber = (phone) => {
   const phoneSchema = z.string()
     .regex(/^\+?[\d\s\-\(\)]+$/, 'Invalid phone number format');
@@ -42,25 +42,25 @@ const validatePhoneNumber = (phone) => {
   return phoneSchema.safeParse(phone).success;
 };
 
-// TODO: URL validation
+// URL validation
 const validateUrl = (url) => {
   const urlSchema = z.string().url();
   return urlSchema.safeParse(url).success;
 };
 
-// TODO: Date validation
+// Date validation
 const validateDate = (date) => {
   const dateSchema = z.string().datetime();
   return dateSchema.safeParse(date).success;
 };
 
-// TODO: MongoDB ObjectId validation
+// MongoDB ObjectId validation
 const validateObjectId = (id) => {
   const objectIdSchema = z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid ObjectId format');
   return objectIdSchema.safeParse(id).success;
 };
 
-// TODO: Sanitize input to prevent XSS
+// Sanitize input to prevent XSS
 const sanitizeString = (str) => {
   if (typeof str !== 'string') return str;
 
@@ -71,7 +71,7 @@ const sanitizeString = (str) => {
     .trim();
 };
 
-// TODO: Validate file upload
+// Validate file upload
 const validateFileUpload = (file, options = {}) => {
   const {
     maxSize = 5 * 1024 * 1024, // 5MB default

@@ -1,5 +1,10 @@
-// AI integration with Google Gemini API using axios
-const axios = require('axios');
+// AI integration with Google Gemini API using the official SDK
+const { GoogleGenAI } = require('@google/genai');
+
+// Initialize the Google GenAI client
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY
+});
 
 /**
  * Call Google Gemini API with a prompt
@@ -9,10 +14,10 @@ const axios = require('axios');
  * @returns {Promise<string>} AI response content
  */
 const callGemini = async (systemPrompt, userPrompt, options = {}) => {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
 
   if (!apiKey) {
-    throw new Error('GEMINI_API_KEY is not configured in environment variables');
+    throw new Error('GEMINI_API_KEY or GOOGLE_API_KEY is not configured in environment variables');
   }
 
   // Gemini model options: gemini-2.5-flash, gemini-2.5-pro, gemini-flash-latest
@@ -21,47 +26,33 @@ const callGemini = async (systemPrompt, userPrompt, options = {}) => {
   // Combine system and user prompts for Gemini
   const combinedPrompt = `${systemPrompt}\n\n${userPrompt}`;
 
-  const body = {
-    contents: [
-      {
-        parts: [
-          {
-            text: combinedPrompt,
-          },
-        ],
-      },
-    ],
-    generationConfig: {
-      temperature: options.temperature || 0.7,
-      maxOutputTokens: options.maxOutputTokens || 1000,
-      topP: options.topP || 0.95,
-      topK: options.topK || 40,
-    },
-  };
-
   try {
-    const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-      body,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        timeout: 30000, // 30 second timeout
-      },
-    );
+    const response = await ai.models.generateContent({
+      model: model,
+      contents: combinedPrompt,
+      generationConfig: {
+        temperature: options.temperature || 0.7,
+        maxOutputTokens: options.maxOutputTokens || 1000,
+        topP: options.topP || 0.95,
+        topK: options.topK || 40,
+      }
+    });
 
-    // Extract text from Gemini response
-    if (response.data?.candidates?.[0]?.content?.parts?.[0]?.text) {
-      return response.data.candidates[0].content.parts[0].text;
+    if (response && response.text) {
+      return response.text();
     }
 
     throw new Error('Invalid response format from Gemini API');
   } catch (error) {
-    console.error('Error calling Gemini API:', error.response?.data || error.message);
+    console.error('Error calling Gemini API:', error.message);
+    
+    // Handle specific error cases
+    if (error.message.includes('API key')) {
+      throw new Error('Invalid or missing API key for Gemini AI service');
+    }
+    
     throw new Error(
-      error.response?.data?.error?.message ||
-      'Failed to get response from AI service',
+      error.message || 'Failed to get response from AI service'
     );
   }
 };
@@ -69,27 +60,43 @@ const callGemini = async (systemPrompt, userPrompt, options = {}) => {
 const aiService = {
   /**
    * Generate AI feedback for a code submission
-   * @param {string} submissionText - The code or text submitted by the user
-   * @param {object} challengeContext - Context about the challenge (title, description, requirements)
-   * @returns {Promise<string>} AI-generated feedback
    */
   generateFeedback: async (submissionText, challengeContext) => {
-    const systemPrompt = `You are an expert programming tutor providing constructive feedback on student code submissions. 
-    Be encouraging, specific, and educational. Point out both strengths and areas for improvement.
-    Focus on code quality, best practices, and learning opportunities.`;
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    
+    if (!apiKey) {
+      return `**Demo Mode - AI Feedback**
+
+✅ **What was done well:**
+- Your code structure is clean and readable
+- Good use of meaningful variable/function names
+- Follows basic JavaScript syntax correctly
+
+🔧 **Areas for improvement:**
+- Consider adding error handling for edge cases
+- Add comments to explain complex logic
+- Think about input validation
+
+💡 **Suggestions:**
+- Try breaking down complex functions into smaller, reusable parts
+- Consider using modern ES6+ features like arrow functions
+- Look into testing your code with different inputs
+
+📚 **Learning opportunities:**
+- Research best practices for ${challengeContext.title || 'this type of problem'}
+- Practice writing unit tests
+- Learn about code optimization techniques
+
+*Note: This is a demo response. Configure GEMINI_API_KEY environment variable to get real AI feedback.*`;
+    }
+
+    const systemPrompt = `You are an expert programming tutor providing constructive feedback on student code submissions. Be encouraging, specific, and educational.`;
 
     const userPrompt = `Challenge: ${challengeContext.title}
-    
 Description: ${challengeContext.description}
+Student's Submission: ${submissionText}
 
-Student's Submission:
-${submissionText}
-
-Please provide detailed, constructive feedback on this submission. Include:
-1. What was done well
-2. Areas for improvement
-3. Specific suggestions for better implementation
-4. Any best practices or concepts the student should learn`;
+Please provide detailed, constructive feedback.`;
 
     return await callGemini(systemPrompt, userPrompt, {
       maxOutputTokens: 1500,
@@ -98,24 +105,27 @@ Please provide detailed, constructive feedback on this submission. Include:
   },
 
   /**
-   * Generate hints for a challenge without giving away the solution
-   * @param {object} challenge - Challenge details (title, description, difficulty)
-   * @param {object} userProgress - User's current progress and attempts
-   * @returns {Promise<string>} AI-generated hints
+   * Generate hints for a challenge
    */
   generateHints: async (challenge, userProgress) => {
-    const systemPrompt = `You are a helpful programming tutor. Provide hints that guide the student toward the solution 
-    without giving away the answer directly. Ask thought-provoking questions and suggest approaches to consider.`;
-
-    const userPrompt = `Challenge: ${challenge.title}
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
     
-Description: ${challenge.description}
-Difficulty: ${challenge.difficulty}
+    if (!apiKey) {
+      return `**Demo Mode - Hints**
 
-Student's attempts: ${userProgress.attempts || 0}
-${userProgress.lastAttempt ? `Last attempt summary: ${userProgress.lastAttempt}` : ''}
+🤔 **Think about this:**
+- What are the key steps needed to solve this problem?
+- Have you broken down the problem into smaller parts?
 
-Please provide 2-3 helpful hints that will guide the student without revealing the complete solution.`;
+💭 **Consider:**
+- What data structures would be most helpful here?
+- Are there any built-in functions that could simplify your solution?
+
+*Note: Configure GEMINI_API_KEY for personalized AI hints.*`;
+    }
+
+    const systemPrompt = `You are a helpful programming tutor. Provide hints without giving away the answer directly.`;
+    const userPrompt = `Challenge: ${challenge.title}\nDescription: ${challenge.description}\nPlease provide helpful hints.`;
 
     return await callGemini(systemPrompt, userPrompt, {
       maxOutputTokens: 800,
@@ -124,104 +134,45 @@ Please provide 2-3 helpful hints that will guide the student without revealing t
   },
 
   /**
-   * Generate a new programming challenge using AI
-   * @param {object} opts - { topic, difficulty }
-   * @returns {Promise<string|object>} AI-generated challenge text or object
+   * Generate a new coding challenge
    */
-  generateChallenge: async (opts = {}) => {
-    const { topic = 'algorithms', difficulty = 'medium' } = opts;
-
-    const systemPrompt = `You are an educational content writer creating concise programming challenges. Output a short title and a clear description with requirements and example input/output when appropriate. Keep the difficulty level consistent with the requested difficulty.`;
-
-    const userPrompt = `Please create one programming challenge about: ${topic}
-Difficulty: ${difficulty}
-
-Provide a short title on the first line, then a clear description, requirements, and one example (input -> output) if applicable. Do not include extraneous commentary.`;
-
-    const response = await callGemini(systemPrompt, userPrompt, {
-      maxOutputTokens: 800,
-      temperature: 0.7,
-    });
-
-    // Try to return structured object if possible (best-effort)
-    if (typeof response === 'string') {
-      return response;
+  generateChallenge: async (options = {}) => {
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    
+    if (!apiKey) {
+      return {
+        title: "Array Sum Calculator",
+        description: "Write a function that calculates the sum of all numbers in an array.",
+        difficulty: "Easy",
+        requirements: ["Function should accept an array of numbers", "Return the sum of all elements"],
+        examples: [{ input: "[1, 2, 3, 4, 5]", output: "15" }],
+        tags: ["arrays", "loops", "basic"],
+        estimatedTime: "15 minutes"
+      };
     }
 
-    return response;
-  },
-
-  /**
-   * Analyze user's learning patterns and provide insights
-   * @param {string} userId - User ID
-   * @param {object} learningData - User's learning history and statistics
-   * @returns {Promise<object>} Analysis with insights and recommendations
-   */
-  analyzePattern: async (userId, learningData) => {
-    const systemPrompt = `You are an educational data analyst. Analyze student learning patterns and provide 
-    actionable insights to help them improve their learning journey. Be specific and encouraging.`;
-
-    const userPrompt = `Student Learning Data:
-    - Total challenges completed: ${learningData.completedChallenges}
-    - Success rate: ${learningData.successRate}%
-    - Strong areas: ${learningData.strongAreas?.join(', ') || 'None yet'}
-    - Areas needing work: ${learningData.weakAreas?.join(', ') || 'None yet'}
-    - Average time per challenge: ${learningData.avgTimePerChallenge} minutes
-    - Learning streak: ${learningData.streak} days
-    - Recent activity: ${learningData.recentActivity}
-
-Please analyze this learning pattern and provide:
-1. Key strengths observed
-2. Areas that need attention
-3. Specific recommendations for improvement
-4. Suggested learning strategies`;
+    const systemPrompt = `You are an expert coding challenge creator. Generate engaging programming challenges.`;
+    const userPrompt = `Create a coding challenge. Topic: ${options.topic || 'Any'}, Difficulty: ${options.difficulty || 'Medium'}`;
 
     const response = await callGemini(systemPrompt, userPrompt, {
       maxOutputTokens: 1200,
-      temperature: 0.7,
+      temperature: 0.9,
     });
 
-    return {
-      analysis: response,
-      generatedAt: new Date().toISOString(),
-      userId,
-    };
-  },
-
-  /**
-   * Suggest next challenges based on user's skill level and progress
-   * @param {object} userProfile - User's skill profile and preferences
-   * @returns {Promise<object>} Challenge suggestions with reasoning
-   */
-  suggestNextChallenges: async (userProfile) => {
-    const systemPrompt = `You are a personalized learning advisor. Recommend programming challenges 
-    that match the student's current skill level and help them progress. Consider their interests and goals.`;
-
-    const userPrompt = `Student Profile:
-    - Current skill level: ${userProfile.skillLevel}
-    - Completed challenges: ${userProfile.completedCount}
-    - Interests: ${userProfile.interests?.join(', ') || 'General programming'}
-    - Goals: ${userProfile.goals || 'Improve programming skills'}
-    - Recent topics: ${userProfile.recentTopics?.join(', ') || 'Various'}
-    - Preferred difficulty: ${userProfile.preferredDifficulty || 'Medium'}
-
-Based on this profile, suggest 3-5 specific types of challenges they should tackle next. 
-For each suggestion, briefly explain why it would be beneficial for their learning journey.`;
-
-    const response = await callGemini(systemPrompt, userPrompt, {
-      maxOutputTokens: 1000,
-      temperature: 0.8,
-    });
-
-    return {
-      suggestions: response,
-      generatedAt: new Date().toISOString(),
-      basedOnProfile: {
-        skillLevel: userProfile.skillLevel,
-        completedCount: userProfile.completedCount,
-      },
-    };
-  },
+    try {
+      return JSON.parse(response);
+    } catch (error) {
+      return {
+        title: "Generated Challenge",
+        description: response,
+        difficulty: options.difficulty || 'Medium',
+        requirements: ["Implement the solution as described"],
+        examples: [],
+        tags: ["coding", "practice"],
+        estimatedTime: "30 minutes"
+      };
+    }
+  }
 };
 
 module.exports = aiService;

@@ -1,4 +1,4 @@
--- TODO: Create leaderboard table for ranking system
+-- Migration 010: Create leaderboard table for ranking system
 -- Migration 010: Create leaderboard table
 
 CREATE TABLE IF NOT EXISTS leaderboard (

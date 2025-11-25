@@ -1,4 +1,4 @@
--- TODO: Create achievements table for user accomplishments
+-- Migration 011: Create achievements table for user accomplishments
 -- Migration 011: Create achievements table
 
 CREATE TABLE IF NOT EXISTS achievements (

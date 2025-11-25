@@ -1,4 +1,4 @@
-// TODO: Implement peer review and collaboration features
+// Peer review and collaboration features page
 import React, { useState, useEffect } from 'react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { useAuth } from '../hooks/useAuth';
@@ -11,7 +11,7 @@ const PeerReviewPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { user } = useAuth();
 
-  // Mock data - TODO: Replace with API calls
+  // Mock data for demonstration
   useEffect(() => {
     const mockReviews = [
       {

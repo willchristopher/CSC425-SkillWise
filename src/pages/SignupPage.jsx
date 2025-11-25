@@ -46,10 +46,19 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #f3e8ff 0%, #dbeafe 50%, #e0e7ff 100%)',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      padding: '3rem 1.5rem'
+    }}>
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <Link to="/" className="flex justify-center">
-          <h1 className="text-3xl font-bold text-blue-600">SkillWise</h1>
+        <Link to="/" className="flex justify-center group">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent transform group-hover:scale-105 transition-transform duration-300">
+            SkillWise
+          </h1>
         </Link>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Create Your Account
@@ -60,7 +69,7 @@ const SignupPage = () => {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-white/80 backdrop-blur-sm py-8 px-4 shadow-xl border border-white/20 sm:rounded-2xl sm:px-10">
           <SignupForm 
             onSubmit={handleSignup}
             error={error}
@@ -80,7 +89,7 @@ const SignupPage = () => {
             <div className="mt-6">
               <Link
                 to="/login"
-                className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-gradient-to-r from-gray-50 to-white text-sm font-medium text-gray-700 hover:from-purple-50 hover:to-blue-50 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-300"
               >
                 Sign in instead
               </Link>

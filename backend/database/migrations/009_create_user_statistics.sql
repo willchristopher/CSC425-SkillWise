@@ -1,4 +1,4 @@
--- TODO: Create user statistics table for performance metrics
+-- Migration 009: Create user statistics table for performance metrics
 -- Migration 009: Create user statistics table
 
 CREATE TABLE IF NOT EXISTS user_statistics (

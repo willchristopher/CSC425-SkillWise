@@ -2,23 +2,24 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import DemoNavigation from './components/DemoNavigation';
 
 // Import all pages
-import HomePage from './pages/HomePage';
+import HomePage from './pages/HomePageSimple';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
-import DashboardPage from './pages/DashboardPage';
-import GoalsPage from './pages/GoalsPage';
-import ChallengesPage from './pages/ChallengesPage';
-import ProgressPage from './pages/ProgressPage';
-import LeaderboardPage from './pages/LeaderboardPage';
-import PeerReviewPage from './pages/PeerReviewPage';
-import ProfilePage from './pages/ProfilePage';
-import AITutorPage from './pages/AITutorPage';
+import DashboardPage from './pages/DashboardPageNew';
+import GoalsPage from './pages/GoalsPageNew';
+import ChallengesPage from './pages/ChallengesPageNew';
+import ProgressPage from './pages/ProgressPageNew';
+import LeaderboardPage from './pages/LeaderboardPageNew';
+import PeerReviewPage from './pages/PeerReviewPageNew';
+import ProfilePage from './pages/ProfilePageNew';
+import AITutorPage from './pages/AITutorPageNew';
 import NotFoundPage from './pages/NotFoundPage';
 import ErrorPage from './pages/ErrorPage';
 
-// Import layout components (TODO: Create these)
+// Import layout components
 // import Navbar from './components/layout/Navbar';
 // import Footer from './components/layout/Footer';
 
@@ -26,11 +27,10 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="App">
-          {/* TODO: Add Navbar component */}
-          {/* <Navbar /> */}
+        <div style={{ fontFamily: 'system-ui, sans-serif' }}>
+          <DemoNavigation />
           
-          <main className="main-content">
+          <main style={{ minHeight: '100vh' }}>
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<HomePage />} />
@@ -38,83 +38,28 @@ function App() {
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/error" element={<ErrorPage />} />
               
-              {/* Protected routes */}
-              <Route 
-                path="/dashboard" 
-                element={
-                  <ProtectedRoute>
-                    <DashboardPage />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/goals" 
-                element={
-                  <ProtectedRoute>
-                    <GoalsPage />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/challenges" 
-                element={
-                  <ProtectedRoute>
-                    <ChallengesPage />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/progress" 
-                element={
-                  <ProtectedRoute>
-                    <ProgressPage />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/leaderboard" 
-                element={
-                  <ProtectedRoute>
-                    <LeaderboardPage />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/peer-review" 
-                element={
-                  <ProtectedRoute>
-                    <PeerReviewPage />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/profile" 
-                element={
-                  <ProtectedRoute>
-                    <ProfilePage />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/ai-tutor" 
-                element={
-                  <ProtectedRoute>
-                    <AITutorPage />
-                  </ProtectedRoute>
-                } 
-              />
+              {/* Demo routes (no authentication required) */}
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/goals" element={<GoalsPage />} />
+              <Route path="/challenges" element={<ChallengesPage />} />
+              <Route path="/progress" element={<ProgressPage />} />
+              <Route path="/leaderboard" element={<LeaderboardPage />} />
+              <Route path="/peer-review" element={<PeerReviewPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/ai-tutor" element={<AITutorPage />} />
               
               {/* Catch-all route for 404 */}
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </main>
           
-          {/* TODO: Add Footer component */}
+          {/* Add Footer component when ready */}
           {/* <Footer /> */}
         </div>
       </Router>
     </AuthProvider>
   );
 }
+
 
 export default App;

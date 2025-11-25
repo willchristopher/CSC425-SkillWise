@@ -1,4 +1,3 @@
--- TODO: Create goals table for user learning objectives
 -- Migration 003: Create goals table
 
 CREATE TABLE IF NOT EXISTS goals (

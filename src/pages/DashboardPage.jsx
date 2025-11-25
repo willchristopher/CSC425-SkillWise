@@ -1,276 +1,444 @@
-// Dashboard shell page with navigation, goals and challenges sections
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useAuth } from '../hooks/useAuth';
 
 const DashboardPage = () => {
-  const [user, setUser] = useState(null);
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get user from localStorage
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    } else {
-      // Redirect to login if no user found
-      navigate('/login');
-    }
-  }, [navigate]);
+    const timer = setTimeout(() => setLoading(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleLogout = async () => {
     try {
-      await axios.post('http://localhost:3001/api/auth/logout', {}, {
-        withCredentials: true
-      });
+      await logout();
+      navigate('/login');
     } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      // Clear local storage and redirect
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('user');
       navigate('/login');
     }
   };
 
-  const navigationItems = [
-    { path: '/dashboard', label: 'Overview', icon: '📊' },
-    { path: '/goals', label: 'Goals', icon: '🎯' },
-    { path: '/challenges', label: 'Challenges', icon: '🚀' },
-    { path: '/progress', label: 'Progress', icon: '📈' },
-    { path: '/peer-review', label: 'Peer Review', icon: '👥' },
-    { path: '/leaderboard', label: 'Leaderboard', icon: '🏆' },
-    { path: '/profile', label: 'Profile', icon: '👤' },
-  ];
-
-  if (!user) {
+  if (!user || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #f0f4ff 0%, #e8f2ff 50%, #e0edff 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '64px',
+            height: '64px',
+            border: '4px solid #6366f1',
+            borderTop: '4px solid transparent',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 1rem auto'
+          }}></div>
+          <p style={{
+            fontSize: '1.125rem',
+            fontWeight: '500',
+            color: '#374151'
+          }}>Loading your dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation Bar */}
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link to="/dashboard" className="text-2xl font-bold text-blue-600">
-                SkillWise
-              </Link>
-            </div>
-            
-            {/* Navigation Items */}
-            <div className="hidden md:flex items-center space-x-8">
-              {navigationItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1"
-                >
-                  <span>{item.icon}</span>
-                  <span>{item.label}</span>
-                </Link>
-              ))}
-            </div>
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #f0f4ff 0%, #e8f2ff 50%, #e0edff 100%)'
+    }}>
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </style>
 
-            {/* User Menu */}
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700 text-sm">
-                Welcome, {user.first_name}!
-              </span>
-              <button
-                onClick={handleLogout}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Logout
-              </button>
-            </div>
+      {/* Header */}
+      <header style={{
+        background: '#ffffff',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+        padding: '1rem 0'
+      }}>
+        <div style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '0 2rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <div>
+            <h1 style={{
+              fontSize: '2rem',
+              fontWeight: 'bold',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              backgroundClip: 'text',
+              color: 'transparent',
+              margin: 0
+            }}>SkillWise</h1>
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <span style={{ fontSize: '1rem', color: '#64748b' }}>
+              Welcome, {user.username || user.name || user.email}
+            </span>
+            <button
+              onClick={handleLogout}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: '#ef4444',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.5rem',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontWeight: '500'
+              }}
+            >
+              Logout
+            </button>
           </div>
         </div>
-      </nav>
+      </header>
 
-      {/* Main Dashboard Content */}
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      {/* Main Content */}
+      <main style={{
+        maxWidth: '1200px',
+        margin: '0 auto',
+        padding: '2rem'
+      }}>
         {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, {user.first_name}!
-          </h1>
-          <p className="mt-2 text-gray-600">
-            Continue your learning journey and track your progress.
-          </p>
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '1rem',
+          padding: '2rem',
+          marginBottom: '2rem',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+          textAlign: 'center'
+        }}>
+          <h2 style={{
+            fontSize: '2rem',
+            fontWeight: 'bold',
+            color: '#1f2937',
+            marginBottom: '1rem'
+          }}>Welcome to Your Learning Dashboard</h2>
+          <p style={{
+            fontSize: '1.125rem',
+            color: '#6b7280',
+            marginBottom: '2rem'
+          }}>Track your progress, tackle new challenges, and achieve your learning goals</p>
         </div>
 
-        {/* Dashboard Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* AI Tutor Section - NEW */}
-          <div className="bg-gradient-to-br from-purple-50 to-blue-50 overflow-hidden shadow-lg rounded-lg border-2 border-purple-200">
-            <div className="p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <span className="text-3xl">🤖</span>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">AI Tutor</h3>
-                  <p className="text-sm text-gray-500">Get instant AI feedback</p>
-                </div>
+        {/* Navigation Cards Grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '2rem'
+        }}>
+          {/* Goals Card */}
+          <Link to="/goals" style={{ textDecoration: 'none' }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '1rem',
+              padding: '2rem',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              cursor: 'pointer',
+              border: 'none'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 8px 25px -8px rgba(0, 0, 0, 0.25)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+            }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                backgroundColor: '#dbeafe',
+                borderRadius: '0.75rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '1rem'
+              }}>
+                <span style={{ fontSize: '1.5rem' }}>🎯</span>
               </div>
-              <div className="mt-4">
-                <div className="bg-white rounded-md p-4 border border-purple-200">
-                  <p className="text-purple-700 text-sm font-medium">✨ Powered by Gemini AI</p>
-                  <Link 
-                    to="/ai-tutor" 
-                    className="mt-2 inline-flex text-purple-600 hover:text-purple-500 text-sm font-bold"
-                  >
-                    Try AI Tutor →
-                  </Link>
-                </div>
-              </div>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                color: '#1f2937',
+                marginBottom: '0.5rem'
+              }}>Goals</h3>
+              <p style={{
+                color: '#6b7280',
+                marginBottom: '1rem'
+              }}>Set and track your learning objectives</p>
+              <span style={{
+                color: '#3b82f6',
+                fontSize: '0.875rem',
+                fontWeight: '500'
+              }}>Manage Goals →</span>
             </div>
-          </div>
+          </Link>
 
-          {/* Goals Section Placeholder */}
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <span className="text-3xl">🎯</span>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">Your Goals</h3>
-                  <p className="text-sm text-gray-500">Track your learning objectives</p>
-                </div>
+          {/* Challenges Card */}
+          <Link to="/challenges" style={{ textDecoration: 'none' }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '1rem',
+              padding: '2rem',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              cursor: 'pointer',
+              border: 'none'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 8px 25px -8px rgba(0, 0, 0, 0.25)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+            }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                backgroundColor: '#dcfce7',
+                borderRadius: '0.75rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '1rem'
+              }}>
+                <span style={{ fontSize: '1.5rem' }}>⚡</span>
               </div>
-              <div className="mt-4">
-                <div className="bg-gray-50 rounded-md p-4">
-                  <p className="text-gray-600 text-sm">No goals set yet</p>
-                  <Link 
-                    to="/goals" 
-                    className="mt-2 inline-flex text-blue-600 hover:text-blue-500 text-sm font-medium"
-                  >
-                    Create your first goal →
-                  </Link>
-                </div>
-              </div>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                color: '#1f2937',
+                marginBottom: '0.5rem'
+              }}>Challenges</h3>
+              <p style={{
+                color: '#6b7280',
+                marginBottom: '1rem'
+              }}>Take on coding challenges to improve your skills</p>
+              <span style={{
+                color: '#10b981',
+                fontSize: '0.875rem',
+                fontWeight: '500'
+              }}>View Challenges →</span>
             </div>
-          </div>
+          </Link>
 
-          {/* Challenges Section Placeholder */}
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <span className="text-3xl">🚀</span>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">Challenges</h3>
-                  <p className="text-sm text-gray-500">Practice with coding challenges</p>
-                </div>
+          {/* AI Tutor Card */}
+          <Link to="/ai-tutor" style={{ textDecoration: 'none' }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '1rem',
+              padding: '2rem',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              cursor: 'pointer',
+              border: 'none'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 8px 25px -8px rgba(0, 0, 0, 0.25)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+            }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                backgroundColor: '#fef3c7',
+                borderRadius: '0.75rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '1rem'
+              }}>
+                <span style={{ fontSize: '1.5rem' }}>🤖</span>
               </div>
-              <div className="mt-4">
-                <div className="bg-gray-50 rounded-md p-4">
-                  <p className="text-gray-600 text-sm">No challenges completed</p>
-                  <Link 
-                    to="/challenges" 
-                    className="mt-2 inline-flex text-blue-600 hover:text-blue-500 text-sm font-medium"
-                  >
-                    Start a challenge →
-                  </Link>
-                </div>
-              </div>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                color: '#1f2937',
+                marginBottom: '0.5rem'
+              }}>AI Tutor</h3>
+              <p style={{
+                color: '#6b7280',
+                marginBottom: '1rem'
+              }}>Get personalized help and feedback</p>
+              <span style={{
+                color: '#f59e0b',
+                fontSize: '0.875rem',
+                fontWeight: '500'
+              }}>Chat with AI →</span>
             </div>
-          </div>
+          </Link>
 
-          {/* Progress Section Placeholder */}
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <span className="text-3xl">📈</span>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">Progress</h3>
-                  <p className="text-sm text-gray-500">View your learning analytics</p>
-                </div>
+          {/* Progress Card */}
+          <Link to="/progress" style={{ textDecoration: 'none' }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '1rem',
+              padding: '2rem',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              cursor: 'pointer',
+              border: 'none'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 8px 25px -8px rgba(0, 0, 0, 0.25)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+            }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                backgroundColor: '#f3e8ff',
+                borderRadius: '0.75rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '1rem'
+              }}>
+                <span style={{ fontSize: '1.5rem' }}>📊</span>
               </div>
-              <div className="mt-4">
-                <div className="bg-gray-50 rounded-md p-4">
-                  <p className="text-gray-600 text-sm">Start learning to see progress</p>
-                  <Link 
-                    to="/progress" 
-                    className="mt-2 inline-flex text-blue-600 hover:text-blue-500 text-sm font-medium"
-                  >
-                    View progress →
-                  </Link>
-                </div>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                color: '#1f2937',
+                marginBottom: '0.5rem'
+              }}>Progress</h3>
+              <p style={{
+                color: '#6b7280',
+                marginBottom: '1rem'
+              }}>Track your learning journey and achievements</p>
+              <span style={{
+                color: '#8b5cf6',
+                fontSize: '0.875rem',
+                fontWeight: '500'
+              }}>View Progress →</span>
+            </div>
+          </Link>
+
+          {/* Leaderboard Card */}
+          <Link to="/leaderboard" style={{ textDecoration: 'none' }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '1rem',
+              padding: '2rem',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              cursor: 'pointer',
+              border: 'none'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 8px 25px -8px rgba(0, 0, 0, 0.25)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+            }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                backgroundColor: '#fce7f3',
+                borderRadius: '0.75rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '1rem'
+              }}>
+                <span style={{ fontSize: '1.5rem' }}>🏆</span>
               </div>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                color: '#1f2937',
+                marginBottom: '0.5rem'
+              }}>Leaderboard</h3>
+              <p style={{
+                color: '#6b7280',
+                marginBottom: '1rem'
+              }}>See how you rank against other learners</p>
+              <span style={{
+                color: '#ec4899',
+                fontSize: '0.875rem',
+                fontWeight: '500'
+              }}>View Rankings →</span>
             </div>
-          </div>
-        </div>
+          </Link>
 
-        {/* Quick Actions */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-              <Link
-                to="/ai-tutor"
-                className="bg-purple-50 hover:bg-purple-100 p-4 rounded-lg text-center transition-colors border-2 border-purple-200"
-              >
-                <span className="text-2xl block mb-2">🤖</span>
-                <span className="text-sm font-medium text-purple-900">AI Tutor</span>
-              </Link>
-              <Link
-                to="/goals"
-                className="bg-blue-50 hover:bg-blue-100 p-4 rounded-lg text-center transition-colors"
-              >
-                <span className="text-2xl block mb-2">🎯</span>
-                <span className="text-sm font-medium text-blue-900">Create Goal</span>
-              </Link>
-              <Link
-                to="/challenges"
-                className="bg-green-50 hover:bg-green-100 p-4 rounded-lg text-center transition-colors"
-              >
-                <span className="text-2xl block mb-2">🚀</span>
-                <span className="text-sm font-medium text-green-900">Start Challenge</span>
-              </Link>
-              <Link
-                to="/peer-review"
-                className="bg-purple-50 hover:bg-purple-100 p-4 rounded-lg text-center transition-colors"
-              >
-                <span className="text-2xl block mb-2">👥</span>
-                <span className="text-sm font-medium text-purple-900">Peer Review</span>
-              </Link>
-              <Link
-                to="/leaderboard"
-                className="bg-yellow-50 hover:bg-yellow-100 p-4 rounded-lg text-center transition-colors"
-              >
-                <span className="text-2xl block mb-2">🏆</span>
-                <span className="text-sm font-medium text-yellow-900">Leaderboard</span>
-              </Link>
+          {/* Profile Card */}
+          <Link to="/profile" style={{ textDecoration: 'none' }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '1rem',
+              padding: '2rem',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              cursor: 'pointer',
+              border: 'none'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 8px 25px -8px rgba(0, 0, 0, 0.25)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+            }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                backgroundColor: '#e0f2fe',
+                borderRadius: '0.75rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '1rem'
+              }}>
+                <span style={{ fontSize: '1.5rem' }}>👤</span>
+              </div>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                color: '#1f2937',
+                marginBottom: '0.5rem'
+              }}>Profile</h3>
+              <p style={{
+                color: '#6b7280',
+                marginBottom: '1rem'
+              }}>Manage your account and preferences</p>
+              <span style={{
+                color: '#0284c7',
+                fontSize: '0.875rem',
+                fontWeight: '500'
+              }}>Edit Profile →</span>
             </div>
-          </div>
-        </div>
-
-        {/* Recent Activity Placeholder */}
-        <div className="mt-8 bg-white shadow rounded-lg">
-          <div className="p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h2>
-            <div className="text-center py-8">
-              <span className="text-4xl block mb-4">📝</span>
-              <p className="text-gray-500">No recent activity</p>
-              <p className="text-sm text-gray-400 mt-2">
-                Complete challenges and set goals to see your activity here
-              </p>
-            </div>
-          </div>
+          </Link>
         </div>
       </main>
     </div>

@@ -1,8 +1,7 @@
-// TODO: Implement authentication API service
 import api from './api';
 
 export const authService = {
-  // TODO: Login user
+  // Login user with email and password
   async login(email, password) {
     try {
       const response = await api.post('/auth/login', { email, password });
@@ -18,7 +17,7 @@ export const authService = {
     }
   },
 
-  // TODO: Register new user
+  // Register new user
   async register(userData) {
     try {
       const response = await api.post('/auth/register', userData);
@@ -28,7 +27,7 @@ export const authService = {
     }
   },
 
-  // TODO: Logout user
+  // Logout user and clear local storage
   async logout() {
     try {
       await api.post('/auth/logout');
@@ -42,7 +41,7 @@ export const authService = {
     }
   },
 
-  // TODO: Refresh token
+  // Refresh authentication token
   async refreshToken() {
     try {
       const refreshToken = localStorage.getItem('refreshToken');
@@ -56,13 +55,13 @@ export const authService = {
     }
   },
 
-  // TODO: Get current user
+  // Get current user from local storage
   getCurrentUser() {
     const userStr = localStorage.getItem('user');
     return userStr ? JSON.parse(userStr) : null;
   },
 
-  // TODO: Check if user is authenticated
+  // Check if user is authenticated
   isAuthenticated() {
     return !!localStorage.getItem('authToken');
   }

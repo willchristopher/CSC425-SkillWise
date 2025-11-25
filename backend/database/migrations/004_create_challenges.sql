@@ -1,4 +1,4 @@
--- TODO: Create challenges table for learning activities
+-- Migration 004: Create challenges table for learning activities
 -- Migration 004: Create challenges table
 
 CREATE TABLE IF NOT EXISTS challenges (

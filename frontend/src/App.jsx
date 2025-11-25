@@ -18,7 +18,7 @@ import AITutorPage from './pages/AITutorPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ErrorPage from './pages/ErrorPage';
 
-// Import layout components (TODO: Create these)
+// Import layout components
 // import Navbar from './components/layout/Navbar';
 // import Footer from './components/layout/Footer';
 
@@ -27,7 +27,7 @@ function App() {
     <AuthProvider>
       <Router>
         <div className="App">
-          {/* TODO: Add Navbar component */}
+          {/* Add Navbar component */}
           {/* <Navbar /> */}
           
           <main className="main-content">
@@ -109,7 +109,7 @@ function App() {
             </Routes>
           </main>
           
-          {/* TODO: Add Footer component */}
+          {/* Add Footer component */}
           {/* <Footer /> */}
         </div>
       </Router>

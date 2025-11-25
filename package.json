@@ -6,6 +6,7 @@
     "doc": "docs"
   },
   "scripts": {
+    "start": "react-scripts start",
     "dev:all": "docker-compose up -d && echo 'Dev environment is up! Frontend: http://localhost:3000 | Backend: http://localhost:3001/api'",
     "down": "docker-compose down -v",
     "logs": "docker-compose logs -f",
@@ -30,6 +31,7 @@
   "license": "ISC",
   "description": "SkillWise AI Tutor - An intelligent tutoring system",
   "devDependencies": {
+    "autoprefixer": "^10.4.22",
     "eslint": "^8.44.0",
     "husky": "^8.0.3",
     "lint-staged": "^13.2.3",
@@ -37,6 +39,8 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@sentry/react": "^10.27.0",
+    "@sentry/tracing": "^7.120.4",
     "axios": "^1.12.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

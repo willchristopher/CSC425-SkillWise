@@ -1,4 +1,4 @@
--- TODO: Create submissions table for challenge work submissions
+-- Migration 005: Create submissions table for challenge work submissions
 -- Migration 005: Create submissions table
 
 CREATE TABLE IF NOT EXISTS submissions (

@@ -1,4 +1,4 @@
--- TODO: Create AI feedback table for AI-generated responses
+-- Migration 006: Create AI feedback table for AI-generated responses
 -- Migration 006: Create AI feedback table
 
 CREATE TABLE IF NOT EXISTS ai_feedback (

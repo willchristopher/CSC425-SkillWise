@@ -1,4 +1,4 @@
--- TODO: Create peer reviews table for student peer evaluation
+-- Migration 007: Create peer reviews table for student peer evaluation
 -- Migration 007: Create peer reviews table
 
 CREATE TABLE IF NOT EXISTS peer_reviews (
