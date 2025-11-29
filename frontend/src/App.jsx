@@ -3,20 +3,21 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Import all pages
+// Import pages
 import HomePage from './pages/HomePage';
-import LoginPage from './pages/LoginPage';
+import LoginPageModern from './pages/LoginPageModern';
 import SignupPage from './pages/SignupPage';
-import DashboardPage from './pages/DashboardPage';
-import GoalsPage from './pages/GoalsPage';
-import ChallengesPage from './pages/ChallengesPage';
-import ProgressPage from './pages/ProgressPage';
+import DashboardPageModern from './pages/DashboardPageModern';
+import GoalsPageModern from './pages/GoalsPageModern';
+import ChallengesPageModern from './pages/ChallengesPageModern';
+import ProgressPageModern from './pages/ProgressPageModern';
 import LeaderboardPage from './pages/LeaderboardPage';
 import PeerReviewPage from './pages/PeerReviewPage';
 import ProfilePage from './pages/ProfilePage';
-import AITutorPage from './pages/AITutorPage';
+import AITutorPageModern from './pages/AITutorPageModern';
 import NotFoundPage from './pages/NotFoundPage';
 import ErrorPage from './pages/ErrorPage';
+import ErrorTestPage from './pages/ErrorTestPage';
 
 // Import layout components
 // import Navbar from './components/layout/Navbar';
@@ -34,16 +35,17 @@ function App() {
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<HomePage />} />
-              <Route path="/login" element={<LoginPage />} />
+              <Route path="/login" element={<LoginPageModern />} />
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/error" element={<ErrorPage />} />
+              <Route path="/error-test" element={<ErrorTestPage />} />
               
               {/* Protected routes */}
               <Route 
                 path="/dashboard" 
                 element={
                   <ProtectedRoute>
-                    <DashboardPage />
+                    <DashboardPageModern />
                   </ProtectedRoute>
                 } 
               />
@@ -51,7 +53,7 @@ function App() {
                 path="/goals" 
                 element={
                   <ProtectedRoute>
-                    <GoalsPage />
+                    <GoalsPageModern />
                   </ProtectedRoute>
                 } 
               />
@@ -59,7 +61,7 @@ function App() {
                 path="/challenges" 
                 element={
                   <ProtectedRoute>
-                    <ChallengesPage />
+                    <ChallengesPageModern />
                   </ProtectedRoute>
                 } 
               />
@@ -67,7 +69,7 @@ function App() {
                 path="/progress" 
                 element={
                   <ProtectedRoute>
-                    <ProgressPage />
+                    <ProgressPageModern />
                   </ProtectedRoute>
                 } 
               />
@@ -99,7 +101,7 @@ function App() {
                 path="/ai-tutor" 
                 element={
                   <ProtectedRoute>
-                    <AITutorPage />
+                    <AITutorPageModern />
                   </ProtectedRoute>
                 } 
               />

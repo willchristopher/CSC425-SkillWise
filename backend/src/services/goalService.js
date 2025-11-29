@@ -1,5 +1,5 @@
 // Goal business logic and database operations
-const db = require('../database/connection');
+const { query } = require('../database/connection');
 const { AppError } = require('../middleware/errorHandler');
 
 const goalService = {
@@ -49,7 +49,7 @@ const goalService = {
 
       query += ' ORDER BY created_at DESC';
 
-      const result = await db.query(query, params);
+      const result = await query(query, params);
       return result.rows;
     } catch (error) {
       throw new AppError('Failed to get user goals', 500, 'GET_GOALS_ERROR');
@@ -59,7 +59,7 @@ const goalService = {
   // Get single goal by ID
   getGoalById: async (goalId, userId) => {
     try {
-      const result = await db.query(
+      const result = await query(
         'SELECT * FROM goals WHERE id = $1 AND user_id = $2',
         [goalId, userId],
       );
@@ -124,7 +124,7 @@ const goalService = {
         RETURNING *
       `;
 
-      const result = await db.query(insertQuery, [
+      const result = await query(insertQuery, [
         userId,
         title.trim(),
         description?.trim() || null,
@@ -198,7 +198,7 @@ const goalService = {
         RETURNING *
       `;
 
-      const result = await db.query(updateQuery, values);
+      const result = await query(updateQuery, values);
       return result.rows[0];
     } catch (error) {
       if (error instanceof AppError) {
@@ -222,7 +222,7 @@ const goalService = {
       const is_completed = progress_percentage === 100;
       const completion_date = is_completed ? new Date() : null;
 
-      const result = await db.query(`
+      const result = await query(`
         UPDATE goals 
         SET 
           progress_percentage = $1,
@@ -254,7 +254,7 @@ const goalService = {
   // Delete goal
   deleteGoal: async (goalId, userId) => {
     try {
-      const result = await db.query(
+      const result = await query(
         'DELETE FROM goals WHERE id = $1 AND user_id = $2 RETURNING id',
         [goalId, userId],
       );
@@ -286,7 +286,7 @@ const goalService = {
         WHERE user_id = $1
       `;
 
-      const result = await db.query(statsQuery, [userId]);
+      const result = await query(statsQuery, [userId]);
       const stats = result.rows[0];
 
       // Convert string numbers to integers
@@ -318,7 +318,7 @@ const goalService = {
   // Get popular goal categories
   getPopularCategories: async () => {
     try {
-      const result = await db.query(`
+      const result = await query(`
         SELECT 
           category, 
           COUNT(*) as goal_count 

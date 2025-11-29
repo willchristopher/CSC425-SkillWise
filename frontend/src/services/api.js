@@ -194,10 +194,10 @@ export const apiService = {
 
   // User methods
   user: {
-    getProfile: () => api.get('/user/profile'),
-    updateProfile: (data) => api.put('/user/profile', data),
-    deleteAccount: () => api.delete('/user/profile'),
-    changePassword: (data) => api.put('/user/change-password', data),
+    getProfile: () => api.get('/users/profile'),
+    updateProfile: (data) => api.put('/users/profile', data),
+    deleteAccount: () => api.delete('/users/account'),
+    changePassword: (data) => api.put('/users/change-password', data),
   },
 
   // Goals methods
@@ -213,20 +213,24 @@ export const apiService = {
   // Challenges methods
   challenges: {
     getAll: (params) => api.get('/challenges', { params }),
+    getMy: () => api.get('/challenges/my'),
+    getRecommended: () => api.get('/challenges/recommended'),
     getById: (id) => api.get(`/challenges/${id}`),
     create: (challenge) => api.post('/challenges', challenge),
     update: (id, challenge) => api.put(`/challenges/${id}`, challenge),
     delete: (id) => api.delete(`/challenges/${id}`),
     submit: (id, submission) => api.post(`/challenges/${id}/submit`, submission),
     getSubmissions: (id) => api.get(`/challenges/${id}/submissions`),
+    linkToGoal: (id, goalId) => api.post(`/challenges/${id}/link-goal`, { goalId }),
+    unlinkFromGoal: (id) => api.delete(`/challenges/${id}/unlink-goal`),
   },
 
   // Progress methods
   progress: {
-    getOverview: () => api.get('/progress/overview'),
-    getSkills: () => api.get('/progress/skills'),
-    getActivity: (params) => api.get('/progress/activity', { params }),
-    getStats: () => api.get('/progress/stats'),
+    getOverview: () => api.get('/progress'),
+    getAnalytics: () => api.get('/progress/analytics'),
+    getMilestones: () => api.get('/progress/milestones'),
+    updateProgress: (data) => api.post('/progress/event', data),
   },
 
   // Leaderboard methods
@@ -254,7 +258,9 @@ export const apiService = {
   ai: {
     // Use submitForFeedback endpoint which persists AI response on server
     generateFeedback: (submissionText, challengeContext) => 
-      api.post('/ai/submitForFeedback', { submissionText, challengeContext }),
+      api.post('/ai/feedback', { submissionText, challengeContext }),
+    submitForFeedback: (submissionData) =>
+      api.post('/ai/submitForFeedback', submissionData),
     getHints: (challengeId, challenge, userProgress) => 
       api.post(`/ai/hints/${challengeId}`, { challenge }, { params: userProgress }),
     getSuggestions: (userProfile) => 

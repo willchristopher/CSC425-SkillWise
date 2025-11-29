@@ -1,4 +1,4 @@
-const db = require('../database/db');
+const { query } = require('../database/connection');
 
 const leaderboardService = {
   // Calculate user rankings based on points and achievements
@@ -31,7 +31,7 @@ const leaderboardService = {
       `;
 
       params.push(100); // Limit to top 100
-      const result = await db.query(query, params);
+      const result = await query(query, params);
       return result.rows;
     } catch (error) {
       console.error('Error calculating rankings:', error);
@@ -52,7 +52,7 @@ const leaderboardService = {
           last_activity_date = CURRENT_TIMESTAMP
       `;
 
-      await db.query(updateQuery, [userId, points]);
+      await query(updateQuery, [userId, points]);
 
       // Log the point change as a progress event
       const logQuery = `
@@ -60,7 +60,7 @@ const leaderboardService = {
         VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
       `;
 
-      await db.query(logQuery, [userId, 'points_earned', reason, points]);
+      await query(logQuery, [userId, 'points_earned', reason, points]);
 
       return { success: true, pointsAdded: points };
     } catch (error) {
@@ -90,7 +90,7 @@ const leaderboardService = {
         LIMIT $1
       `;
 
-      const result = await db.query(query, [limit]);
+      const result = await query(query, [limit]);
       return result.rows;
     } catch (error) {
       console.error('Error getting top performers:', error);
@@ -129,7 +129,7 @@ const leaderboardService = {
         SELECT rank FROM ranked_users WHERE id = $1
       `;
 
-      const result = await db.query(query, [userId]);
+      const result = await query(query, [userId]);
       return result.rows[0]?.rank || null;
     } catch (error) {
       console.error('Error getting user rank:', error);

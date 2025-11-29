@@ -1,10 +1,10 @@
-const db = require('../database/connection');
+const { query } = require('../database/connection');
 
 class Progress {
   static async findByUserId (userId) {
     try {
       const query = 'SELECT * FROM progress WHERE user_id = $1 ORDER BY created_at DESC';
-      const result = await db.query(query, [userId]);
+      const result = await query(query, [userId]);
       return result.rows;
     } catch (error) {
       throw new Error(`Error finding progress for user: ${error.message}`);
@@ -14,7 +14,7 @@ class Progress {
   static async findByUserAndChallenge (userId, challengeId) {
     try {
       const query = 'SELECT * FROM progress WHERE user_id = $1 AND challenge_id = $2';
-      const result = await db.query(query, [userId, challengeId]);
+      const result = await query(query, [userId, challengeId]);
       return result.rows[0];
     } catch (error) {
       throw new Error(`Error finding progress: ${error.message}`);
@@ -32,7 +32,7 @@ class Progress {
         FROM progress 
         WHERE user_id = $1
       `;
-      const result = await db.query(query, [userId]);
+      const result = await query(query, [userId]);
       return result.rows[0];
     } catch (error) {
       throw new Error(`Error getting user stats: ${error.message}`);
@@ -47,7 +47,7 @@ class Progress {
         VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
         RETURNING *
       `;
-      const result = await db.query(query, [user_id, challenge_id, score, completed, points_earned, time_spent]);
+      const result = await query(query, [user_id, challenge_id, score, completed, points_earned, time_spent]);
       return result.rows[0];
     } catch (error) {
       throw new Error(`Error creating progress: ${error.message}`);
@@ -67,7 +67,7 @@ class Progress {
         WHERE id = $1
         RETURNING *
       `;
-      const result = await db.query(query, [progressId, score, completed, points_earned, time_spent]);
+      const result = await query(query, [progressId, score, completed, points_earned, time_spent]);
       return result.rows[0];
     } catch (error) {
       throw new Error(`Error updating progress: ${error.message}`);
@@ -90,7 +90,7 @@ class Progress {
         ORDER BY total_points DESC, challenges_completed DESC
         LIMIT $1
       `;
-      const result = await db.query(query, [limit]);
+      const result = await query(query, [limit]);
       return result.rows;
     } catch (error) {
       throw new Error(`Error getting leaderboard data: ${error.message}`);

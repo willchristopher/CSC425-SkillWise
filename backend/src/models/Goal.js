@@ -1,10 +1,10 @@
-const db = require('../database/connection');
+const { query } = require('../database/connection');
 
 class Goal {
   static async findByUserId (userId) {
     try {
       const query = 'SELECT * FROM goals WHERE user_id = $1 ORDER BY created_at DESC';
-      const result = await db.query(query, [userId]);
+      const result = await query(query, [userId]);
       return result.rows;
     } catch (error) {
       throw new Error(`Error finding goals for user: ${error.message}`);
@@ -14,7 +14,7 @@ class Goal {
   static async findById (goalId) {
     try {
       const query = 'SELECT * FROM goals WHERE id = $1';
-      const result = await db.query(query, [goalId]);
+      const result = await query(query, [goalId]);
       return result.rows[0];
     } catch (error) {
       throw new Error(`Error finding goal: ${error.message}`);
@@ -29,7 +29,7 @@ class Goal {
         VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
         RETURNING *
       `;
-      const result = await db.query(query, [title, description, user_id, target_date, type]);
+      const result = await query(query, [title, description, user_id, target_date, type]);
       return result.rows[0];
     } catch (error) {
       throw new Error(`Error creating goal: ${error.message}`);
@@ -50,7 +50,7 @@ class Goal {
         WHERE id = $1
         RETURNING *
       `;
-      const result = await db.query(query, [goalId, title, description, target_date, progress, status]);
+      const result = await query(query, [goalId, title, description, target_date, progress, status]);
       return result.rows[0];
     } catch (error) {
       throw new Error(`Error updating goal: ${error.message}`);
@@ -60,7 +60,7 @@ class Goal {
   static async delete (goalId) {
     try {
       const query = 'DELETE FROM goals WHERE id = $1 RETURNING *';
-      const result = await db.query(query, [goalId]);
+      const result = await query(query, [goalId]);
       return result.rows[0];
     } catch (error) {
       throw new Error(`Error deleting goal: ${error.message}`);

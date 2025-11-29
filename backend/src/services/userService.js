@@ -1,10 +1,10 @@
 // TODO: User service for database operations and business logic
-const db = require('../database/connection');
+const { query } = require('../database/connection');
 
 const userService = {
   // TODO: Get user by ID
   getUserById: async (userId) => {
-    const { rows } = await db.query(
+    const { rows } = await query(
       'SELECT id, first_name, last_name, email, created_at, updated_at FROM users WHERE id = $1',
       [userId],
     );
@@ -34,7 +34,7 @@ const userService = {
     }
 
     values.push(userId);
-    const { rows } = await db.query(
+    const { rows } = await query(
       `UPDATE users SET ${fields.join(', ')}, updated_at = CURRENT_TIMESTAMP 
        WHERE id = $${paramCount} 
        RETURNING id, first_name, last_name, email, created_at, updated_at`,
@@ -46,13 +46,13 @@ const userService = {
 
   // TODO: Delete user account
   deleteUser: async (userId) => {
-    await db.query('DELETE FROM users WHERE id = $1', [userId]);
+    await query('DELETE FROM users WHERE id = $1', [userId]);
   },
 
   // TODO: Get user statistics
   getUserStats: async (userId) => {
     // This would integrate with user_statistics table
-    const { rows } = await db.query(
+    const { rows } = await query(
       'SELECT * FROM user_statistics WHERE user_id = $1',
       [userId],
     );

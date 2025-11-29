@@ -1,10 +1,10 @@
-const db = require('../database/connection');
+const { query } = require('../database/connection');
 
 class Challenge {
   static async findAll () {
     try {
       const query = 'SELECT * FROM challenges ORDER BY difficulty, created_at DESC';
-      const result = await db.query(query);
+      const result = await query(query);
       return result.rows;
     } catch (error) {
       throw new Error(`Error finding challenges: ${error.message}`);
@@ -14,7 +14,7 @@ class Challenge {
   static async findById (challengeId) {
     try {
       const query = 'SELECT * FROM challenges WHERE id = $1';
-      const result = await db.query(query, [challengeId]);
+      const result = await query(query, [challengeId]);
       return result.rows[0];
     } catch (error) {
       throw new Error(`Error finding challenge: ${error.message}`);
@@ -24,7 +24,7 @@ class Challenge {
   static async findByDifficulty (difficulty) {
     try {
       const query = 'SELECT * FROM challenges WHERE difficulty = $1 ORDER BY created_at DESC';
-      const result = await db.query(query, [difficulty]);
+      const result = await query(query, [difficulty]);
       return result.rows;
     } catch (error) {
       throw new Error(`Error finding challenges by difficulty: ${error.message}`);
@@ -34,7 +34,7 @@ class Challenge {
   static async findBySubject (subject) {
     try {
       const query = 'SELECT * FROM challenges WHERE subject = $1 ORDER BY difficulty, created_at DESC';
-      const result = await db.query(query, [subject]);
+      const result = await query(query, [subject]);
       return result.rows;
     } catch (error) {
       throw new Error(`Error finding challenges by subject: ${error.message}`);
@@ -49,7 +49,7 @@ class Challenge {
         VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
         RETURNING *
       `;
-      const result = await db.query(query, [title, description, difficulty, subject, points, type, content]);
+      const result = await query(query, [title, description, difficulty, subject, points, type, content]);
       return result.rows[0];
     } catch (error) {
       throw new Error(`Error creating challenge: ${error.message}`);
@@ -72,7 +72,7 @@ class Challenge {
         WHERE id = $1
         RETURNING *
       `;
-      const result = await db.query(query, [challengeId, title, description, difficulty, subject, points, type, content]);
+      const result = await query(query, [challengeId, title, description, difficulty, subject, points, type, content]);
       return result.rows[0];
     } catch (error) {
       throw new Error(`Error updating challenge: ${error.message}`);
@@ -82,7 +82,7 @@ class Challenge {
   static async delete (challengeId) {
     try {
       const query = 'DELETE FROM challenges WHERE id = $1 RETURNING *';
-      const result = await db.query(query, [challengeId]);
+      const result = await query(query, [challengeId]);
       return result.rows[0];
     } catch (error) {
       throw new Error(`Error deleting challenge: ${error.message}`);

@@ -57,6 +57,14 @@ const callGemini = async (systemPrompt, userPrompt, options = {}) => {
   }
 };
 
+const { 
+  buildFeedbackPrompts, 
+  buildChallengePrompts, 
+  buildHintsPrompts,
+  buildSuggestionsPrompts,
+  buildProgressPrompts 
+} = require('./aiPromptTemplates');
+
 const aiService = {
   /**
    * Generate AI feedback for a code submission
@@ -90,13 +98,12 @@ const aiService = {
 *Note: This is a demo response. Configure GEMINI_API_KEY environment variable to get real AI feedback.*`;
     }
 
-    const systemPrompt = `You are an expert programming tutor providing constructive feedback on student code submissions. Be encouraging, specific, and educational.`;
-
-    const userPrompt = `Challenge: ${challengeContext.title}
-Description: ${challengeContext.description}
-Student's Submission: ${submissionText}
-
-Please provide detailed, constructive feedback.`;
+    const { systemPrompt, userPrompt } = buildFeedbackPrompts({
+      title: challengeContext.title,
+      description: challengeContext.description,
+      submissionText,
+      requirements: challengeContext.requirements || []
+    });
 
     return await callGemini(systemPrompt, userPrompt, {
       maxOutputTokens: 1500,
@@ -124,8 +131,13 @@ Please provide detailed, constructive feedback.`;
 *Note: Configure GEMINI_API_KEY for personalized AI hints.*`;
     }
 
-    const systemPrompt = `You are a helpful programming tutor. Provide hints without giving away the answer directly.`;
-    const userPrompt = `Challenge: ${challenge.title}\nDescription: ${challenge.description}\nPlease provide helpful hints.`;
+    const { systemPrompt, userPrompt } = buildHintsPrompts({
+      title: challenge.title,
+      description: challenge.description,
+      difficulty: challenge.difficulty,
+      attemptCount: userProgress.attempts || 0,
+      lastAttempt: userProgress.lastAttempt || ''
+    });
 
     return await callGemini(systemPrompt, userPrompt, {
       maxOutputTokens: 800,
@@ -151,8 +163,11 @@ Please provide detailed, constructive feedback.`;
       };
     }
 
-    const systemPrompt = `You are an expert coding challenge creator. Generate engaging programming challenges.`;
-    const userPrompt = `Create a coding challenge. Topic: ${options.topic || 'Any'}, Difficulty: ${options.difficulty || 'Medium'}`;
+    const { systemPrompt, userPrompt } = buildChallengePrompts({
+      topic: options.topic || 'algorithms',
+      difficulty: options.difficulty || 'medium',
+      category: options.category || 'programming'
+    });
 
     const response = await callGemini(systemPrompt, userPrompt, {
       maxOutputTokens: 1200,
@@ -165,7 +180,7 @@ Please provide detailed, constructive feedback.`;
       return {
         title: "Generated Challenge",
         description: response,
-        difficulty: options.difficulty || 'Medium',
+        difficulty: options.difficulty || 'medium',
         requirements: ["Implement the solution as described"],
         examples: [],
         tags: ["coding", "practice"],

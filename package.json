@@ -1,12 +1,12 @@
 {
-  "name": "skillwise_aitutor",
+  "name": "skillwise-workspace",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "SkillWise AI Tutoring Platform - Workspace Management",
+  "private": true,
   "directories": {
     "doc": "docs"
   },
   "scripts": {
-    "start": "react-scripts start",
     "dev:all": "docker-compose up -d && echo 'Dev environment is up! Frontend: http://localhost:3000 | Backend: http://localhost:3001/api'",
     "down": "docker-compose down -v",
     "logs": "docker-compose logs -f",
@@ -16,49 +16,23 @@
     "build": "docker-compose build",
     "rebuild": "docker-compose build --no-cache",
     "reset": "docker-compose down -v && docker-compose up -d",
-    "test": "echo \"Run tests in individual services\" && exit 0",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test -- --watchAll=false",
+    "test:all": "npm run test:backend && npm run test:frontend",
     "prepare": "husky install"
   },
   "keywords": [
     "ai",
     "tutor",
     "education",
-    "react",
-    "node",
-    "postgresql"
+    "docker",
+    "workspace"
   ],
-  "author": "",
-  "license": "ISC",
-  "description": "SkillWise AI Tutor - An intelligent tutoring system",
+  "author": "SkillWise Team",
+  "license": "MIT",
   "devDependencies": {
-    "autoprefixer": "^10.4.22",
-    "eslint": "^8.44.0",
     "husky": "^8.0.3",
     "lint-staged": "^13.2.3",
     "prettier": "^2.8.8"
-  },
-  "dependencies": {
-    "@hookform/resolvers": "^5.2.2",
-    "@sentry/react": "^10.27.0",
-    "@sentry/tracing": "^7.120.4",
-    "axios": "^1.12.2",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "react-hook-form": "^7.65.0",
-    "react-router-dom": "^7.9.4",
-    "react-scripts": "^5.0.1",
-    "zod": "^4.1.12"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
   }
 }

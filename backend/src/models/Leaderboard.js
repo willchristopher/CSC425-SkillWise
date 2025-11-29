@@ -1,4 +1,4 @@
-const db = require('../database/connection');
+const { query } = require('../database/connection');
 
 class Leaderboard {
   static async getGlobalLeaderboard (limit = 10) {
@@ -20,7 +20,7 @@ class Leaderboard {
         ORDER BY total_points DESC, challenges_completed DESC, average_score DESC
         LIMIT $1
       `;
-      const result = await db.query(query, [limit]);
+      const result = await query(query, [limit]);
       return result.rows;
     } catch (error) {
       throw new Error(`Error getting global leaderboard: ${error.message}`);
@@ -45,7 +45,7 @@ class Leaderboard {
         ORDER BY weekly_points DESC, weekly_completions DESC
         LIMIT $1
       `;
-      const result = await db.query(query, [limit]);
+      const result = await query(query, [limit]);
       return result.rows;
     } catch (error) {
       throw new Error(`Error getting weekly leaderboard: ${error.message}`);
@@ -70,7 +70,7 @@ class Leaderboard {
         ORDER BY monthly_points DESC, monthly_completions DESC
         LIMIT $1
       `;
-      const result = await db.query(query, [limit]);
+      const result = await query(query, [limit]);
       return result.rows;
     } catch (error) {
       throw new Error(`Error getting monthly leaderboard: ${error.message}`);
@@ -94,7 +94,7 @@ class Leaderboard {
         FROM user_rankings
         WHERE id = $1
       `;
-      const result = await db.query(query, [userId]);
+      const result = await query(query, [userId]);
       return result.rows[0];
     } catch (error) {
       throw new Error(`Error getting user rank: ${error.message}`);
@@ -120,7 +120,7 @@ class Leaderboard {
         ORDER BY subject_points DESC, subject_completions DESC
         LIMIT $2
       `;
-      const result = await db.query(query, [subject, limit]);
+      const result = await query(query, [subject, limit]);
       return result.rows;
     } catch (error) {
       throw new Error(`Error getting subject leaderboard: ${error.message}`);

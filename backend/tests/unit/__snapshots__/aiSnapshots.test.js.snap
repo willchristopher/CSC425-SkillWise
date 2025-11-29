@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AI service snapshots generateChallenge produces stable output (snapshot) 1`] = `
+{
+  "description": "Write a function that calculates the sum of all numbers in an array.",
+  "difficulty": "Easy",
+  "estimatedTime": "15 minutes",
+  "examples": [
+    {
+      "input": "[1, 2, 3, 4, 5]",
+      "output": "15",
+    },
+  ],
+  "requirements": [
+    "Function should accept an array of numbers",
+    "Return the sum of all elements",
+  ],
+  "tags": [
+    "arrays",
+    "loops",
+    "basic",
+  ],
+  "title": "Array Sum Calculator",
+}
+`;
+
+exports[`AI service snapshots generateFeedback produces stable feedback (snapshot) 1`] = `
+"**Demo Mode - AI Feedback**
+
+✅ **What was done well:**
+- Your code structure is clean and readable
+- Good use of meaningful variable/function names
+- Follows basic JavaScript syntax correctly
+
+🔧 **Areas for improvement:**
+- Consider adding error handling for edge cases
+- Add comments to explain complex logic
+- Think about input validation
+
+💡 **Suggestions:**
+- Try breaking down complex functions into smaller, reusable parts
+- Consider using modern ES6+ features like arrow functions
+- Look into testing your code with different inputs
+
+📚 **Learning opportunities:**
+- Research best practices for Add
+- Practice writing unit tests
+- Learn about code optimization techniques
+
+*Note: This is a demo response. Configure GEMINI_API_KEY environment variable to get real AI feedback.*"
+`;

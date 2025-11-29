@@ -1,6 +1,6 @@
 // AI integration controller for feedback and hints
 const aiService = require('../services/aiService');
-const db = require('../database/connection');
+const { query } = require('../database/connection');
 
 const aiController = {
   /**
@@ -167,7 +167,7 @@ const aiController = {
 
       // Persist into ai_feedback table if database available
       try {
-        await db.query(
+        await query(
           `INSERT INTO ai_feedback (submission_id, feedback_text, feedback_type, ai_model, created_at)
            VALUES ($1, $2, $3, $4, NOW())`,
           [submissionId, feedbackText, 'submission_feedback', process.env.OPENAI_MODEL || process.env.GEMINI_MODEL || null]
@@ -212,7 +212,7 @@ const aiController = {
 
       // Persist a record to ai_feedback table for audit (feedback_type used for generative logs)
       try {
-        await db.query(
+        await query(
           `INSERT INTO ai_feedback (submission_id, feedback_text, feedback_type, ai_model, created_at)
            VALUES ($1, $2, $3, $4, NOW())`,
           [null, JSON.stringify(challenge), 'challenge_generation', process.env.OPENAI_MODEL || process.env.GEMINI_MODEL || null]

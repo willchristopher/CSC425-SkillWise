@@ -10,8 +10,7 @@ const logger = pino({
 if (!process.env.DATABASE_URL) {
   console.log('No DATABASE_URL found, using mock database for testing...');
   module.exports = require('./mockConnection');
-  return;
-}
+} else {
 
 // Database configuration
 const dbConfig = {
@@ -199,3 +198,5 @@ module.exports = {
   testConnection,
   closePool
 };
+
+}

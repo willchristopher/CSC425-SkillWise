@@ -1,0 +1,178 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AI Prompt Integration Tests should generate valid prompts for all template types: challenge-prompts-arrays-medium 1`] = `
+{
+  "systemPrompt": "You are an expert programming instructor creating educational coding challenges. Create engaging, educational challenges that help students learn effectively. Always respond with valid JSON format.",
+  "userPrompt": "Create a medium-level programming challenge about arrays in the programming category.
+
+Requirements:
+- Provide a clear, engaging title
+- Write a detailed description explaining what to implement
+- Include specific requirements/constraints
+- Add example inputs/outputs if applicable
+- Ensure the challenge is appropriate for medium skill level
+- Make it educational and practical
+
+Format your response as a JSON object with this structure:
+{
+  "title": "Challenge Title",
+  "description": "Detailed description of what to build/solve",
+  "difficulty": "medium",
+  "requirements": ["List of specific requirements"],
+  "examples": [{"input": "example input", "output": "expected output"}],
+  "hints": ["Helpful hints without giving away the solution"],
+  "tags": ["relevant", "tags"],
+  "estimatedTime": "estimated completion time"
+}",
+}
+`;
+
+exports[`AI Prompt Integration Tests should generate valid prompts for all template types: feedback-prompts-basic 1`] = `
+{
+  "systemPrompt": "You are an expert programming mentor providing constructive, encouraging feedback on student code submissions. Focus on being educational, specific, and positive while identifying areas for improvement.",
+  "userPrompt": "Challenge: Test Challenge
+Description: Test description
+Requirements: 
+
+Student's Code Submission:
+\`\`\`
+console.log("hello");
+\`\`\`
+
+Please provide comprehensive feedback including:
+
+✅ **Strengths:**
+- What the student did well
+- Correct implementations
+- Good programming practices demonstrated
+
+🔧 **Areas for Improvement:**
+- Code quality issues
+- Logic problems
+- Missing requirements
+
+💡 **Suggestions:**
+- Specific recommendations for improvement
+- Alternative approaches to consider
+- Best practices to adopt
+
+📚 **Learning Opportunities:**
+- Concepts to study further
+- Resources or topics to explore
+- Advanced techniques to consider
+
+Keep feedback encouraging and educational. Focus on helping the student learn and grow.",
+}
+`;
+
+exports[`AI Prompt Integration Tests should generate valid prompts for all template types: hints-prompts-binary-search 1`] = `
+{
+  "systemPrompt": "You are a helpful programming tutor providing hints without giving away solutions directly. Gradually increase hint specificity based on student progress.",
+  "userPrompt": "Challenge: Binary Search
+Description: Implement binary search algorithm
+Difficulty: medium
+Student Attempts: 2
+
+
+Provide helpful hints that:
+- Don't reveal the complete solution
+- Guide thinking in the right direction
+- Are appropriate for attempt number 2
+- Help break down the problem into smaller parts
+- Suggest relevant concepts or approaches
+
+Format as a friendly, encouraging response with numbered hints.",
+}
+`;
+
+exports[`AI Prompt Integration Tests should validate prompt template test harness: prompt-template-test-results 1`] = `
+[
+  {
+    "hasExpectedContent": true,
+    "name": "Challenge Generation",
+    "response": "Response for: Create a easy-level programmin......",
+    "success": true,
+  },
+  {
+    "hasExpectedContent": false,
+    "name": "Feedback Generation",
+    "response": "Response for: Challenge: Array Sum
+Descripti......",
+    "success": true,
+  },
+  {
+    "hasExpectedContent": false,
+    "name": "Hints Generation",
+    "response": "Response for: Challenge: Binary Search
+Descr......",
+    "success": true,
+  },
+]
+`;
+
+exports[`AI Service Snapshot Tests AI Challenge Generation should generate consistent challenge structures: challenge-data-structures-medium 1`] = `
+{
+  "description": "Implement in-order, pre-order, and post-order traversal for a binary tree",
+  "difficulty": "medium",
+  "estimatedTime": "45-60 minutes",
+  "examples": [
+    {
+      "input": "tree with nodes [1,2,3,4,5]",
+      "output": "inOrder: [4,2,5,1,3], preOrder: [1,2,4,5,3], postOrder: [4,5,2,3,1]",
+    },
+  ],
+  "hints": [
+    "Recursion is key for tree traversal",
+    "Think about when to process the current node vs. children",
+  ],
+  "requirements": [
+    "Implement TreeNode class with left and right properties",
+    "Create three traversal methods: inOrder, preOrder, postOrder",
+    "Return arrays of node values in correct order",
+  ],
+  "tags": [
+    "trees",
+    "recursion",
+    "data-structures",
+  ],
+  "title": "Binary Tree Traversal",
+}
+`;
+
+exports[`AI Service Snapshot Tests AI Challenge Generation should handle invalid JSON responses gracefully: challenge-fallback-format 1`] = `"This is not valid JSON but still a useful challenge description..."`;
+
+exports[`AI Service Snapshot Tests AI Feedback Generation should generate consistent feedback for code submissions 1`] = `
+"✅ **Strengths:**
+- Clean and readable code structure
+- Proper use of array reduce method
+- Good variable naming
+
+🔧 **Areas for Improvement:**
+- Consider adding input validation
+- Could benefit from error handling
+- Add comments for clarity
+
+💡 **Suggestions:**
+- Use TypeScript for better type safety
+- Consider edge cases like empty arrays
+- Add unit tests for the function
+
+📚 **Learning Opportunities:**
+- Study functional programming concepts
+- Learn about error handling patterns
+- Explore advanced array methods"
+`;
+
+exports[`AI Service Snapshot Tests AI Feedback Generation should generate consistent feedback for different difficulty levels: feedback-advanced_code 1`] = `"Feedback for advanced_code: Good implementation with appropriate complexity."`;
+
+exports[`AI Service Snapshot Tests AI Feedback Generation should generate consistent feedback for different difficulty levels: feedback-beginner_code 1`] = `"Feedback for beginner_code: Good implementation with appropriate complexity."`;
+
+exports[`AI Service Snapshot Tests AI Feedback Generation should generate consistent feedback for different difficulty levels: feedback-intermediate_code 1`] = `"Feedback for intermediate_code: Good implementation with appropriate complexity."`;
+
+exports[`AI Service Snapshot Tests AI Hints Generation should generate progressive hints based on attempt count: hints-attempt-0 1`] = `"Start by understanding what the problem is asking..."`;
+
+exports[`AI Service Snapshot Tests AI Hints Generation should generate progressive hints based on attempt count: hints-attempt-1 1`] = `"Consider using a hash map to store values you've seen..."`;
+
+exports[`AI Service Snapshot Tests AI Hints Generation should generate progressive hints based on attempt count: hints-attempt-2 1`] = `"Think about the complement of each number relative to the target..."`;
+
+exports[`AI Service Snapshot Tests AI Hints Generation should generate progressive hints based on attempt count: hints-attempt-3 1`] = `"The key insight is that for each number x, you need to find (target - x)..."`;

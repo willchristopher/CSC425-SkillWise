@@ -16,4 +16,7 @@ router.get('/statistics', auth, userController.getStatistics);
 // TODO: Add DELETE /account route
 router.delete('/account', auth, userController.deleteAccount);
 
+// Add change password route
+router.put('/change-password', auth, userController.changePassword);
+
 module.exports = router;

@@ -1,4 +1,4 @@
-const db = require('../database/db');
+const { query } = require('../database/connection');
 
 const progressController = {
   // Get user progress overview with statistics
