@@ -572,7 +572,7 @@
 }
 
 .form-label.required::after {
-  content: " *";
+  content: ' *';
   color: #e53e3e;
 }
 
@@ -644,8 +644,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-message {
@@ -720,8 +724,14 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Focus management */
@@ -742,11 +752,11 @@
   .goal-card {
     border: 2px solid #000;
   }
-  
+
   .btn {
     border: 2px solid transparent;
   }
-  
+
   .btn-primary {
     border-color: #000;
   }
@@ -760,7 +770,7 @@
   .progress-fill {
     transition: none;
   }
-  
+
   .spinner {
     animation: none;
   }

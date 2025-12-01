@@ -1,0 +1,287 @@
+.generate-challenge-modal {
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.generate-challenge-modal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.generate-challenge-modal .modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #1f2937;
+}
+
+.generate-challenge-modal .close-btn {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.generate-challenge-modal .close-btn:hover {
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+
+.generate-challenge-modal .modal-body {
+  padding: 1.5rem;
+}
+
+.generate-challenge-modal .form-group {
+  margin-bottom: 1.25rem;
+}
+
+.generate-challenge-modal .form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.generate-challenge-modal .form-group .required {
+  color: #ef4444;
+}
+
+.generate-challenge-modal .form-group input,
+.generate-challenge-modal .form-group select,
+.generate-challenge-modal .form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+}
+
+.generate-challenge-modal .form-group input:focus,
+.generate-challenge-modal .form-group select:focus,
+.generate-challenge-modal .form-group textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.generate-challenge-modal .form-group input:disabled,
+.generate-challenge-modal .form-group select:disabled,
+.generate-challenge-modal .form-group textarea:disabled {
+  background-color: #f9fafb;
+  cursor: not-allowed;
+}
+
+.generate-challenge-modal .form-group textarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.generate-challenge-modal .help-text {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.generate-challenge-modal .error-message {
+  padding: 0.75rem 1rem;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.generate-challenge-modal .error-icon {
+  font-size: 1.25rem;
+}
+
+.generate-challenge-modal .generated-challenge {
+  padding: 1rem 0;
+}
+
+.generate-challenge-modal .challenge-badge {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.generate-challenge-modal .difficulty-badge,
+.generate-challenge-modal .category-badge,
+.generate-challenge-modal .ai-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.generate-challenge-modal .difficulty-badge.easy {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.generate-challenge-modal .difficulty-badge.medium {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.generate-challenge-modal .difficulty-badge.hard {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.generate-challenge-modal .category-badge {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.generate-challenge-modal .ai-badge {
+  background-color: #e0e7ff;
+  color: #4338ca;
+}
+
+.generate-challenge-modal .generated-challenge h3 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.5rem;
+  color: #1f2937;
+}
+
+.generate-challenge-modal .challenge-section {
+  margin-bottom: 1.5rem;
+}
+
+.generate-challenge-modal .challenge-section h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  color: #374151;
+  font-weight: 600;
+}
+
+.generate-challenge-modal .challenge-section p {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.generate-challenge-modal .challenge-section .instructions {
+  color: #4b5563;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.generate-challenge-modal .challenge-section ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: #4b5563;
+}
+
+.generate-challenge-modal .challenge-section li {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+.generate-challenge-modal .challenge-section pre {
+  background-color: #1f2937;
+  color: #f9fafb;
+  padding: 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 0;
+}
+
+.generate-challenge-modal .challenge-section code {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9rem;
+}
+
+.generate-challenge-modal .challenge-meta {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-radius: 6px;
+  margin-top: 1rem;
+}
+
+.generate-challenge-modal .challenge-meta span {
+  color: #6b7280;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.generate-challenge-modal .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.generate-challenge-modal .btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.generate-challenge-modal .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.generate-challenge-modal .btn-primary {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.generate-challenge-modal .btn-primary:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.generate-challenge-modal .btn-secondary {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.generate-challenge-modal .btn-secondary:hover:not(:disabled) {
+  background-color: #e5e7eb;
+}
+
+.generate-challenge-modal .spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

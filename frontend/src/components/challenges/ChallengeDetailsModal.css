@@ -1,0 +1,280 @@
+.challenge-details-modal {
+  max-width: 900px;
+  width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.challenge-details-modal .modal-body {
+  padding: 1.5rem;
+}
+
+/* Challenge Info */
+.challenge-info {
+  margin-bottom: 1.5rem;
+}
+
+.info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.difficulty-badge,
+.category-badge,
+.time-badge,
+.points-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.difficulty-badge.difficulty-easy {
+  background-color: #c6f6d5;
+  color: #22543d;
+}
+
+.difficulty-badge.difficulty-medium {
+  background-color: #fef5cd;
+  color: #744210;
+}
+
+.difficulty-badge.difficulty-hard {
+  background-color: #fed7d7;
+  color: #742a2a;
+}
+
+.category-badge {
+  background-color: #e6fffa;
+  color: #234e52;
+}
+
+.time-badge {
+  background-color: #e0e7ff;
+  color: #3730a3;
+}
+
+.points-badge {
+  background-color: #fef5cd;
+  color: #744210;
+  font-weight: 600;
+}
+
+.submission-status {
+  display: flex;
+  gap: 2rem;
+  padding: 1rem;
+  background-color: #f7fafc;
+  border-radius: 8px;
+}
+
+.status-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.status-item .label {
+  font-size: 0.75rem;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-item .value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+/* Challenge Sections */
+.challenge-section {
+  margin-bottom: 2rem;
+}
+
+.challenge-section h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.description-text {
+  color: #4a5568;
+  line-height: 1.6;
+}
+
+.instructions-text p {
+  color: #4a5568;
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+}
+
+/* Lists */
+.objectives-list,
+.hints-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.objectives-list li,
+.hints-list li {
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background-color: #f7fafc;
+  border-left: 3px solid #4299e1;
+  border-radius: 4px;
+  color: #4a5568;
+  line-height: 1.5;
+}
+
+.hints-list li {
+  border-left-color: #ed8936;
+  background-color: #fffaf0;
+}
+
+/* Code Blocks */
+.code-block {
+  background-color: #2d3748;
+  color: #e2e8f0;
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.code-block code {
+  color: #e2e8f0;
+}
+
+/* Test Cases */
+.test-cases {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.test-case {
+  background-color: #f7fafc;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.test-case pre {
+  margin: 0;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 0.875rem;
+  color: #2d3748;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Code Editor */
+.code-editor {
+  width: 100%;
+  min-height: 300px;
+  padding: 1rem;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  background-color: #2d3748;
+  color: #e2e8f0;
+  border: 2px solid #4a5568;
+  border-radius: 8px;
+  resize: vertical;
+}
+
+.code-editor:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.code-editor:disabled {
+  background-color: #e2e8f0;
+  color: #a0aec0;
+  cursor: not-allowed;
+}
+
+/* Peer Review Notice */
+.peer-review-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  color: #1e40af;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.notice-icon {
+  font-size: 1.25rem;
+}
+
+/* Feedback Section */
+.feedback-section {
+  background-color: #f0fff4;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #9ae6b4;
+}
+
+.feedback-section h3 {
+  border-bottom-color: #9ae6b4;
+}
+
+.feedback-content {
+  color: #276749;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+/* Error Text */
+.error-text {
+  color: #e53e3e;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .challenge-details-modal {
+    width: 95vw;
+    max-height: 95vh;
+  }
+
+  .info-row {
+    flex-direction: column;
+  }
+
+  .submission-status {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+}

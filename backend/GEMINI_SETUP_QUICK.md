@@ -5,6 +5,7 @@
 Your SkillWise backend now uses **Google Gemini** instead of OpenAI!
 
 ### Why Gemini?
+
 - ✨ **FREE** for most use cases (15 requests/minute)
 - 🚀 Fast responses with Gemini 1.5 Flash
 - 💪 Powerful AI capabilities
@@ -28,12 +29,14 @@ GEMINI_API_KEY=AIzaSyC_your_actual_key_here
 ## 🔄 Restart Your Server
 
 ### If using Docker:
+
 ```bash
 cd /Users/zachwalters/CSC425-SkillWise
 docker-compose restart backend
 ```
 
 ### If running directly:
+
 ```bash
 cd /Users/zachwalters/CSC425-SkillWise/backend
 npm run dev
@@ -42,6 +45,7 @@ npm run dev
 ## 🧪 Test It Works
 
 ### Quick Test with curl:
+
 ```bash
 curl -X POST http://localhost:3001/api/ai/feedback \
   -H "Content-Type: application/json" \

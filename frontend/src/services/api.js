@@ -42,7 +42,7 @@ const processQueue = (error, token = null) => {
       resolve(token);
     }
   });
-  
+
   failedQueue = [];
 };
 
@@ -50,16 +50,18 @@ const processQueue = (error, token = null) => {
 api.interceptors.request.use(
   (config) => {
     const token = getAccessToken();
-    
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     // Log request in development
     if (process.env.NODE_ENV === 'development') {
-      console.log(`🔄 API Request: ${config.method?.toUpperCase()} ${config.url}`);
+      console.log(
+        `🔄 API Request: ${config.method?.toUpperCase()} ${config.url}`
+      );
     }
-    
+
     return config;
   },
   (error) => {
@@ -73,31 +75,41 @@ api.interceptors.response.use(
   (response) => {
     // Log successful response in development
     if (process.env.NODE_ENV === 'development') {
-      console.log(`✅ API Response: ${response.config.method?.toUpperCase()} ${response.config.url} - ${response.status}`);
+      console.log(
+        `✅ API Response: ${response.config.method?.toUpperCase()} ${
+          response.config.url
+        } - ${response.status}`
+      );
     }
-    
+
     return response;
   },
   async (error) => {
     const originalRequest = error.config;
-    
+
     // Log error in development
     if (process.env.NODE_ENV === 'development') {
-      console.log(`❌ API Error: ${originalRequest?.method?.toUpperCase()} ${originalRequest?.url} - ${error.response?.status}`);
+      console.log(
+        `❌ API Error: ${originalRequest?.method?.toUpperCase()} ${
+          originalRequest?.url
+        } - ${error.response?.status}`
+      );
     }
-    
+
     // Handle 401 Unauthorized errors
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         // If already refreshing, queue this request
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
-        }).then(token => {
-          originalRequest.headers.Authorization = `Bearer ${token}`;
-          return api(originalRequest);
-        }).catch(err => {
-          return Promise.reject(err);
-        });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return api(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
       }
 
       originalRequest._retry = true;
@@ -106,7 +118,9 @@ api.interceptors.response.use(
       try {
         // Attempt to refresh the token using httpOnly refresh cookie
         const refreshResponse = await axios.post(
-          `${process.env.REACT_APP_API_URL || 'http://localhost:3001/api'}/auth/refresh`,
+          `${
+            process.env.REACT_APP_API_URL || 'http://localhost:3001/api'
+          }/auth/refresh`,
           {},
           {
             withCredentials: true, // Send httpOnly refresh cookie
@@ -115,67 +129,72 @@ api.interceptors.response.use(
         );
 
         const { accessToken } = refreshResponse.data;
-        
+
         if (accessToken) {
           // Update stored access token
           setAccessToken(accessToken);
-          
+
           // Update default authorization header
           api.defaults.headers.Authorization = `Bearer ${accessToken}`;
-          
+
           // Process queued requests with new token
           processQueue(null, accessToken);
-          
+
           // Retry original request with new token
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          
+
           console.log('✅ Token refreshed successfully');
           return api(originalRequest);
         } else {
           throw new Error('No access token received from refresh');
         }
-        
       } catch (refreshError) {
         console.error('❌ Token refresh failed:', refreshError);
-        
+
         // Clear tokens and redirect to login
         clearTokens();
         processQueue(refreshError, null);
-        
+
         // Dispatch logout event for AuthContext to handle
-        window.dispatchEvent(new CustomEvent('auth:logout', { 
-          detail: { reason: 'token_refresh_failed' } 
-        }));
-        
+        window.dispatchEvent(
+          new CustomEvent('auth:logout', {
+            detail: { reason: 'token_refresh_failed' },
+          })
+        );
+
         // Redirect to login page
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
         }
-        
+
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
       }
     }
-    
+
     // Handle other error cases
     if (error.response?.status >= 500) {
       console.error('🚨 Server Error:', error.response.data);
       // Could dispatch global error event here
-      window.dispatchEvent(new CustomEvent('api:server-error', { 
-        detail: { error: error.response.data } 
-      }));
+      window.dispatchEvent(
+        new CustomEvent('api:server-error', {
+          detail: { error: error.response.data },
+        })
+      );
     }
-    
+
     // Network errors
     if (error.code === 'ECONNABORTED') {
       console.error('⏰ Request timeout');
-      error.message = 'Request timeout. Please check your connection and try again.';
+      error.message =
+        'Request timeout. Please check your connection and try again.';
     } else if (!error.response) {
       console.error('🔌 Network Error:', error.message);
-      error.message = 'Network error. Please check your connection and try again.';
+      error.message =
+        'Network error. Please check your connection and try again.';
     }
-    
+
     return Promise.reject(error);
   }
 );
@@ -189,7 +208,8 @@ export const apiService = {
     logout: () => api.post('/auth/logout'),
     refresh: () => api.post('/auth/refresh'),
     forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
-    resetPassword: (token, password) => api.post('/auth/reset-password', { token, password }),
+    resetPassword: (token, password) =>
+      api.post('/auth/reset-password', { token, password }),
   },
 
   // User methods
@@ -205,7 +225,8 @@ export const apiService = {
     getAll: () => api.get('/goals'),
     create: (goal) => api.post('/goals', goal),
     update: (id, goal) => api.put(`/goals/${id}`, goal),
-    updateProgress: (id, progressData) => api.put(`/goals/${id}/progress`, progressData),
+    updateProgress: (id, progressData) =>
+      api.put(`/goals/${id}/progress`, progressData),
     delete: (id) => api.delete(`/goals/${id}`),
     getById: (id) => api.get(`/goals/${id}`),
   },
@@ -217,7 +238,8 @@ export const apiService = {
     create: (challenge) => api.post('/challenges', challenge),
     update: (id, challenge) => api.put(`/challenges/${id}`, challenge),
     delete: (id) => api.delete(`/challenges/${id}`),
-    submit: (id, submission) => api.post(`/challenges/${id}/submit`, submission),
+    submit: (id, submission) =>
+      api.post(`/challenges/${id}/submit`, submission),
     getSubmissions: (id) => api.get(`/challenges/${id}/submissions`),
   },
 
@@ -239,8 +261,10 @@ export const apiService = {
   peerReview: {
     getReviewQueue: (params) => api.get('/peer-review/queue', { params }),
     getMySubmissions: () => api.get('/peer-review/my-submissions'),
-    submitReview: (submissionId, review) => api.post(`/peer-review/submissions/${submissionId}/review`, review),
-    getReviewDetails: (submissionId) => api.get(`/peer-review/submissions/${submissionId}`),
+    submitReview: (submissionId, review) =>
+      api.post(`/peer-review/submissions/${submissionId}/review`, review),
+    getReviewDetails: (submissionId) =>
+      api.get(`/peer-review/submissions/${submissionId}`),
   },
 
   // Notifications methods
@@ -252,14 +276,36 @@ export const apiService = {
 
   // AI methods
   ai: {
-    generateFeedback: (submissionText, challengeContext) => 
-      api.post('/ai/feedback', { submissionText, challengeContext }),
-    getHints: (challengeId, challenge, userProgress) => 
-      api.post(`/ai/hints/${challengeId}`, { challenge }, { params: userProgress }),
-    getSuggestions: (userProfile) => 
+    generateFeedback: (submissionText, challengeContext) =>
+      api.post(
+        '/ai/feedback/direct',
+        { submissionText, challengeContext },
+        { timeout: 30000 }
+      ), // Direct code feedback
+    generateSubmissionFeedback: (submissionId) =>
+      api.post('/ai/feedback', { submissionId }, { timeout: 30000 }), // Feedback for existing submission
+    getHints: (challengeId, challenge, userProgress) =>
+      api.post(
+        `/ai/hints/${challengeId}`,
+        { challenge },
+        { params: userProgress }
+      ),
+    getSuggestions: (userProfile) =>
       api.post('/ai/suggestions', { userProfile }),
-    analyzeProgress: (userId, learningData) => 
+    analyzeProgress: (userId, learningData) =>
       api.post('/ai/analysis', { userId, learningData }),
+    generateChallenge: (params) =>
+      api.post('/ai/generateChallenge', params, { timeout: 30000 }), // 30 second timeout for AI generation
+  },
+
+  // Feedback methods - for retrieving stored AI feedback
+  feedback: {
+    getBySubmission: (submissionId) =>
+      api.get(`/feedback/submission/${submissionId}`),
+    getLatest: (submissionId) =>
+      api.get(`/feedback/submission/${submissionId}/latest`),
+    getUserFeedback: () => api.get('/feedback/user'),
+    delete: (feedbackId) => api.delete(`/feedback/${feedbackId}`),
   },
 };
 

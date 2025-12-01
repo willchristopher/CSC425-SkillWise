@@ -27,6 +27,8 @@ const submissionRoutes = require('./submissions');
 const aiRoutes = require('./ai');
 const reviewRoutes = require('./reviews');
 const leaderboardRoutes = require('./leaderboard');
+const feedbackRoutes = require('./feedback');
+const sentryRoutes = require('./sentry');
 
 // API Documentation endpoint
 router.get('/', (req, res) => {
@@ -42,9 +44,11 @@ router.get('/', (req, res) => {
       progress: '/api/progress - Progress tracking',
       submissions: '/api/submissions - Work submissions',
       ai: '/api/ai - AI-powered features',
+      feedback: '/api/feedback - Stored AI feedback',
       reviews: '/api/reviews - Peer review system',
       leaderboard: '/api/leaderboard - Rankings and achievements',
       health: '/api/health - Health check',
+      sentry: '/api/sentry - Sentry error tracking (testing)',
     },
     documentation: '/api/docs',
     timestamp: new Date().toISOString(),
@@ -59,8 +63,10 @@ router.use('/challenges', challengeRoutes);
 router.use('/progress', progressRoutes);
 router.use('/submissions', submissionRoutes);
 router.use('/ai', aiRoutes);
+router.use('/feedback', feedbackRoutes);
 router.use('/reviews', reviewRoutes);
 router.use('/leaderboard', leaderboardRoutes);
+router.use('/sentry', sentryRoutes);
 
 // API Health check endpoint
 router.get('/health', (req, res) => {
@@ -74,8 +80,17 @@ router.get('/health', (req, res) => {
     routes: {
       total: router.stack.length,
       mounted: [
-        'auth', 'users', 'goals', 'challenges',
-        'progress', 'submissions', 'ai', 'reviews', 'leaderboard',
+        'auth',
+        'users',
+        'goals',
+        'challenges',
+        'progress',
+        'submissions',
+        'ai',
+        'feedback',
+        'reviews',
+        'leaderboard',
+        'sentry',
       ],
     },
   });

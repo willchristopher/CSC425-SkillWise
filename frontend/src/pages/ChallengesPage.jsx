@@ -3,6 +3,8 @@ import { useAuth } from '../hooks/useAuth';
 import { apiService } from '../services/api';
 import ChallengeCard from '../components/challenges/ChallengeCard';
 import ChallengeModal from '../components/challenges/ChallengeModal';
+import ChallengeDetailsModal from '../components/challenges/ChallengeDetailsModal';
+import GenerateChallengeModal from '../components/challenges/GenerateChallengeModal';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import '../styles/challenges.css';
 
@@ -13,7 +15,10 @@ const ChallengesPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [editingChallenge, setEditingChallenge] = useState(null);
+  const [selectedChallenge, setSelectedChallenge] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Filter states
@@ -52,7 +57,10 @@ const ChallengesPage = () => {
       const challengesData = response.data?.data || response.data || [];
       setChallenges(Array.isArray(challengesData) ? challengesData : []);
     } catch (err) {
-      const errorMessage = err.response?.data?.message || err.message || 'Failed to load challenges';
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        'Failed to load challenges';
       setError(errorMessage);
       console.error('Failed to fetch challenges:', err);
       // Set empty array on error so UI doesn't break
@@ -72,26 +80,30 @@ const ChallengesPage = () => {
 
     // Filter by category
     if (filters.category && filters.category !== '') {
-      filtered = filtered.filter(challenge =>
-        challenge.category?.toLowerCase() === filters.category.toLowerCase(),
+      filtered = filtered.filter(
+        (challenge) =>
+          challenge.category?.toLowerCase() === filters.category.toLowerCase()
       );
     }
 
     // Filter by difficulty
     if (filters.difficulty && filters.difficulty !== '') {
-      filtered = filtered.filter(challenge =>
-        challenge.difficulty_level?.toLowerCase() === filters.difficulty.toLowerCase(),
+      filtered = filtered.filter(
+        (challenge) =>
+          challenge.difficulty_level?.toLowerCase() ===
+          filters.difficulty.toLowerCase()
       );
     }
 
     // Filter by search term
     if (filters.search && filters.search.trim() !== '') {
       const searchTerm = filters.search.toLowerCase().trim();
-      filtered = filtered.filter(challenge =>
-        challenge.title?.toLowerCase().includes(searchTerm) ||
-        challenge.description?.toLowerCase().includes(searchTerm) ||
-        challenge.category?.toLowerCase().includes(searchTerm) ||
-        challenge.tags?.some(tag => tag.toLowerCase().includes(searchTerm)),
+      filtered = filtered.filter(
+        (challenge) =>
+          challenge.title?.toLowerCase().includes(searchTerm) ||
+          challenge.description?.toLowerCase().includes(searchTerm) ||
+          challenge.category?.toLowerCase().includes(searchTerm) ||
+          challenge.tags?.some((tag) => tag.toLowerCase().includes(searchTerm))
       );
     }
 
@@ -104,6 +116,47 @@ const ChallengesPage = () => {
 
   const handleCreateChallenge = () => {
     setEditingChallenge(null);
+    setIsModalOpen(true);
+  };
+
+  const handleGenerateChallenge = () => {
+    setIsGenerateModalOpen(true);
+  };
+
+  const handleChallengeGenerated = (generatedChallenge) => {
+    // Pre-fill the challenge modal with AI-generated data
+    // Ensure numeric fields are properly typed and remove any id/database fields
+    const sanitizedChallenge = {
+      title: generatedChallenge.title,
+      description: generatedChallenge.description,
+      instructions: generatedChallenge.instructions,
+      category: generatedChallenge.category,
+      difficulty_level: generatedChallenge.difficulty_level,
+      estimated_time_minutes:
+        parseInt(generatedChallenge.estimated_time_minutes, 10) || 30,
+      points_reward: parseInt(generatedChallenge.points_reward, 10) || 10,
+      max_attempts: parseInt(generatedChallenge.max_attempts, 10) || 3,
+      requires_peer_review: Boolean(generatedChallenge.requires_peer_review),
+      tags: Array.isArray(generatedChallenge.tags)
+        ? generatedChallenge.tags
+        : [],
+      learning_objectives: Array.isArray(generatedChallenge.learning_objectives)
+        ? generatedChallenge.learning_objectives
+        : [],
+      starter_code: generatedChallenge.starter_code || '',
+      test_cases: Array.isArray(generatedChallenge.test_cases)
+        ? generatedChallenge.test_cases
+        : [],
+      hints: Array.isArray(generatedChallenge.hints)
+        ? generatedChallenge.hints
+        : [],
+      prerequisites: Array.isArray(generatedChallenge.prerequisites)
+        ? generatedChallenge.prerequisites
+        : [],
+    };
+    // Set as editing challenge (without id, so it will be treated as new)
+    setEditingChallenge(sanitizedChallenge);
+    setIsGenerateModalOpen(false);
     setIsModalOpen(true);
   };
 
@@ -123,8 +176,8 @@ const ChallengesPage = () => {
       setIsSubmitting(true);
       setError('');
 
-      if (editingChallenge) {
-        // Update existing challenge
+      if (editingChallenge && editingChallenge.id) {
+        // Update existing challenge (only if it has an ID)
         await apiService.challenges.update(editingChallenge.id, challengeData);
       } else {
         // Create new challenge
@@ -143,15 +196,55 @@ const ChallengesPage = () => {
   };
 
   const handleStartChallenge = (challenge) => {
-    // TODO: Navigate to challenge participation page
-    console.log('Starting challenge:', challenge.title);
-    // This would typically navigate to /challenges/:id/participate
+    setSelectedChallenge(challenge);
+    setIsDetailsModalOpen(true);
   };
 
   const handleViewDetails = (challenge) => {
-    // TODO: Navigate to challenge details page
-    console.log('Viewing challenge:', challenge.title);
-    // This would typically navigate to /challenges/:id
+    setSelectedChallenge(challenge);
+    setIsDetailsModalOpen(true);
+  };
+
+  const handleSubmitSolution = async (submissionData) => {
+    try {
+      setError('');
+      const result = await apiService.challenges.submit(
+        submissionData.challenge_id,
+        {
+          code: submissionData.code,
+        }
+      );
+
+      // Refresh challenges to get updated submission status
+      await fetchChallenges();
+
+      // Update the selected challenge with the new submission data
+      if (selectedChallenge && result?.data) {
+        const updatedChallenge = {
+          ...selectedChallenge,
+          user_submission_id: result.data.id,
+          user_submission_status: result.data.status,
+          user_score: result.data.score,
+          user_submitted_at: result.data.submitted_at,
+          user_feedback: result.data.feedback,
+          user_submission_text: result.data.submission_text,
+          user_attempts: result.data.attempt_number,
+        };
+        setSelectedChallenge(updatedChallenge);
+      }
+
+      // Keep modal open to show feedback
+      // User can close it manually
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to submit solution');
+      console.error('Failed to submit solution:', err);
+      throw err; // Re-throw so the modal can handle it
+    }
+  };
+
+  const handleCloseDetailsModal = () => {
+    setIsDetailsModalOpen(false);
+    setSelectedChallenge(null);
   };
 
   const handleLinkToGoal = async (challenge) => {
@@ -175,14 +268,14 @@ const ChallengesPage = () => {
   };
 
   const handleFilterChange = (key, value) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       [key]: value,
     }));
   };
 
   const clearFilters = () => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       category: '',
       difficulty: '',
@@ -192,8 +285,8 @@ const ChallengesPage = () => {
 
   const getUniqueCategories = () => {
     const categories = challenges
-      .filter(challenge => challenge.category)
-      .map(challenge => challenge.category)
+      .filter((challenge) => challenge.category)
+      .map((challenge) => challenge.category)
       .filter((category, index, self) => self.indexOf(category) === index);
     return categories.sort();
   };
@@ -215,10 +308,19 @@ const ChallengesPage = () => {
           <h1>Learning Challenges</h1>
           <p>Discover challenges to enhance your skills and knowledge.</p>
         </div>
-        <button className="btn btn-primary" onClick={handleCreateChallenge}>
-          <span className="btn-icon">+</span>
-          Create Challenge
-        </button>
+        <div className="header-actions">
+          <button
+            className="btn btn-secondary"
+            onClick={handleGenerateChallenge}
+          >
+            <span className="btn-icon">🤖</span>
+            Generate with AI
+          </button>
+          <button className="btn btn-primary" onClick={handleCreateChallenge}>
+            <span className="btn-icon">+</span>
+            Create Challenge
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -316,13 +418,17 @@ const ChallengesPage = () => {
                 onLinkToGoal={handleLinkToGoal}
                 onEdit={handleEditChallenge}
                 onDelete={handleDeleteChallenge}
-                userSubmission={challenge.user_submission_id ? {
-                  id: challenge.user_submission_id,
-                  status: challenge.user_submission_status,
-                  score: challenge.user_score,
-                  submitted_at: challenge.user_submitted_at,
-                  attempts_count: challenge.user_attempts,
-                } : null}
+                userSubmission={
+                  challenge.user_submission_id
+                    ? {
+                        id: challenge.user_submission_id,
+                        status: challenge.user_submission_status,
+                        score: challenge.user_score,
+                        submitted_at: challenge.user_submitted_at,
+                        attempts_count: challenge.user_attempts,
+                      }
+                    : null
+                }
                 isOwner={challenge.created_by === user?.id}
               />
             ))}
@@ -332,10 +438,9 @@ const ChallengesPage = () => {
             <div className="empty-icon">🎯</div>
             <h3>No challenges available</h3>
             <p>
-              {filters.tab === 'my' 
+              {filters.tab === 'my'
                 ? "You haven't created any challenges yet!"
-                : "No challenges found. Be the first to create one!"
-              }
+                : 'No challenges found. Be the first to create one!'}
             </p>
             <button className="btn btn-primary" onClick={handleCreateChallenge}>
               Create Challenge
@@ -360,6 +465,36 @@ const ChallengesPage = () => {
         onSubmit={handleSubmitChallenge}
         challenge={editingChallenge}
         isLoading={isSubmitting}
+      />
+
+      {/* Generate Challenge Modal */}
+      <GenerateChallengeModal
+        isOpen={isGenerateModalOpen}
+        onClose={() => setIsGenerateModalOpen(false)}
+        onChallengeGenerated={handleChallengeGenerated}
+      />
+
+      {/* Challenge Details/Start Modal */}
+      <ChallengeDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={handleCloseDetailsModal}
+        challenge={selectedChallenge}
+        onSubmit={handleSubmitSolution}
+        userSubmission={
+          selectedChallenge?.user_submission_id
+            ? {
+                id: selectedChallenge.user_submission_id,
+                status: selectedChallenge.user_submission_status,
+                score: selectedChallenge.user_score,
+                submitted_at: selectedChallenge.user_submitted_at,
+                attempts_count: selectedChallenge.user_attempts,
+                submission_text:
+                  selectedChallenge.user_submission_text ||
+                  selectedChallenge.user_submission_code,
+                feedback: selectedChallenge.user_feedback,
+              }
+            : null
+        }
       />
     </div>
   );

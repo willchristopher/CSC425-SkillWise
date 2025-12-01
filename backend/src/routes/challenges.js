@@ -31,6 +31,16 @@ router.post('/', auth, challengeController.createChallenge);
 // POST /:id/link-goal route for linking challenge to goal
 router.post('/:id/link-goal', auth, challengeController.linkChallengeToGoal);
 
+// POST /:id/submit route for submitting a challenge solution
+router.post('/:id/submit', auth, challengeController.submitChallenge);
+
+// GET /:id/submissions route for getting challenge submissions
+router.get(
+  '/:id/submissions',
+  auth,
+  challengeController.getChallengeSubmissions
+);
+
 // PUT /:id route for updating challenge
 router.put('/:id', auth, challengeController.updateChallenge);
 
@@ -38,6 +48,10 @@ router.put('/:id', auth, challengeController.updateChallenge);
 router.delete('/:id', auth, challengeController.deleteChallenge);
 
 // DELETE /:id/unlink-goal route for unlinking challenge from goal
-router.delete('/:id/unlink-goal', auth, challengeController.unlinkChallengeFromGoal);
+router.delete(
+  '/:id/unlink-goal',
+  auth,
+  challengeController.unlinkChallengeFromGoal
+);
 
 module.exports = router;

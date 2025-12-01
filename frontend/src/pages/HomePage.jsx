@@ -1,7 +1,19 @@
 // TODO: Implement home/landing page
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const HomePage = () => {
+  const navigate = useNavigate();
+
+  const handleGetStarted = () => {
+    navigate('/signup');
+  };
+
+  const handleLearnMore = () => {
+    // Scroll to features section
+    document.querySelector('.features')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   // TODO: Add hero section, features, testimonials, call-to-action
   return (
     <div className="home-page">
@@ -10,8 +22,12 @@ const HomePage = () => {
           <h1>Welcome to SkillWise</h1>
           <p>Your AI-powered learning companion for skill development</p>
           <div className="hero-actions">
-            <button className="btn-primary">Get Started</button>
-            <button className="btn-secondary">Learn More</button>
+            <button className="btn-primary" onClick={handleGetStarted}>
+              Get Started
+            </button>
+            <button className="btn-secondary" onClick={handleLearnMore}>
+              Learn More
+            </button>
           </div>
         </div>
       </section>

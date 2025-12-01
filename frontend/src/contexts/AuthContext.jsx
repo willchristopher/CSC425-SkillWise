@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { apiService, getAccessToken, setAccessToken, clearTokens } from '../services/api';
+import {
+  apiService,
+  getAccessToken,
+  setAccessToken,
+  clearTokens,
+} from '../services/api';
+import { setUser, clearUser } from '../config/sentry';
 
 // Initial state
 const initialState = {
@@ -29,6 +35,9 @@ const authReducer = (state, action) => {
       };
 
     case AUTH_ACTIONS.LOGIN_SUCCESS:
+      // Set user in Sentry for error tracking
+      setUser(action.payload.user);
+
       return {
         ...state,
         user: action.payload.user,
@@ -38,6 +47,9 @@ const authReducer = (state, action) => {
       };
 
     case AUTH_ACTIONS.LOGOUT:
+      // Clear user from Sentry
+      clearUser();
+
       return {
         ...state,
         user: null,
@@ -81,7 +93,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       const token = getAccessToken();
-      
+
       if (token) {
         try {
           // Validate token by fetching user profile
@@ -112,7 +124,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     window.addEventListener('auth:logout', handleLogout);
-    
+
     return () => {
       window.removeEventListener('auth:logout', handleLogout);
     };
@@ -165,7 +177,8 @@ export const AuthProvider = ({ children }) => {
 
       return { success: true, user };
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Registration failed';
+      const errorMessage =
+        error.response?.data?.message || 'Registration failed';
       dispatch({
         type: AUTH_ACTIONS.SET_ERROR,
         payload: errorMessage,
@@ -208,7 +221,8 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
       return { success: true, user: updatedUser };
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Profile update failed';
+      const errorMessage =
+        error.response?.data?.message || 'Profile update failed';
       dispatch({
         type: AUTH_ACTIONS.SET_ERROR,
         payload: errorMessage,
@@ -227,7 +241,8 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
       return { success: true };
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Password change failed';
+      const errorMessage =
+        error.response?.data?.message || 'Password change failed';
       dispatch({
         type: AUTH_ACTIONS.SET_ERROR,
         payload: errorMessage,
@@ -246,7 +261,8 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
       return { success: true };
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Password reset request failed';
+      const errorMessage =
+        error.response?.data?.message || 'Password reset request failed';
       dispatch({
         type: AUTH_ACTIONS.SET_ERROR,
         payload: errorMessage,
@@ -265,7 +281,8 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
       return { success: true };
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Password reset failed';
+      const errorMessage =
+        error.response?.data?.message || 'Password reset failed';
       dispatch({
         type: AUTH_ACTIONS.SET_ERROR,
         payload: errorMessage,
@@ -298,21 +315,17 @@ export const AuthProvider = ({ children }) => {
     clearError,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 // Custom hook to use auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  
+
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
-  
+
   return context;
 };
 

@@ -242,7 +242,13 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(45deg, transparent 33%, rgba(255, 255, 255, 0.3) 33%, rgba(255, 255, 255, 0.3) 66%, transparent 66%);
+  background: linear-gradient(
+    45deg,
+    transparent 33%,
+    rgba(255, 255, 255, 0.3) 33%,
+    rgba(255, 255, 255, 0.3) 66%,
+    transparent 66%
+  );
   background-size: 20px 20px;
   animation: progress-stripes 1s linear infinite;
 }
@@ -437,22 +443,22 @@
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .circular-progress-container,
   .progress-ring-container {
     padding: 1rem;
   }
-  
+
   .multi-progress-container {
     padding: 1rem;
   }
-  
+
   .multi-progress-item-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.25rem;
   }
-  
+
   .linear-progress-details {
     flex-direction: column;
     align-items: flex-start;
@@ -465,15 +471,15 @@
     width: 100px;
     height: 100px;
   }
-  
+
   .progress-ring-percentage {
     font-size: 1.25rem;
   }
-  
+
   .circular-progress-percentage {
     font-size: 1.5rem;
   }
-  
+
   .tooltip-content {
     font-size: 0.7rem;
   }
@@ -489,24 +495,24 @@
     background-color: #2d3748;
     border-color: #4a5568;
   }
-  
+
   .progress-labels {
     background-color: #4a5568;
     border-color: #718096;
   }
-  
+
   .progress-percentage,
   .circular-progress-percentage,
   .progress-ring-percentage {
     color: #63b3ed;
   }
-  
+
   .multi-progress-title,
   .linear-progress-title,
   .progress-ring-title {
     color: #f7fafc;
   }
-  
+
   .progress-count,
   .linear-progress-details,
   .multi-progress-subtitle,
