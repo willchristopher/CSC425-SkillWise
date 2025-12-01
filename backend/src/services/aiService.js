@@ -196,4 +196,76 @@ For each suggestion, briefly explain why it would be beneficial for their learni
   },
 };
 
+
+// --- OpenAI integration for challenge generation ---
+const { Configuration, OpenAIApi } = (() => {
+  try {
+    return require('openai');
+  } catch {
+    return {};
+  }
+})();
+
+/**
+ * Generate a programming challenge using OpenAI (ChatGPT)
+ * @param {string} prompt - The prompt to send to OpenAI
+ * @returns {Promise<string>} Raw AI response (string)
+ */
+aiService.generateChallenge = async (prompt) => {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error('OPENAI_API_KEY is not set in environment');
+  if (!Configuration || !OpenAIApi) throw new Error('openai package not installed');
+
+  const configuration = new Configuration({ apiKey });
+  const openai = new OpenAIApi(configuration);
+  const model = process.env.OPENAI_MODEL || 'gpt-3.5-turbo';
+
+  const response = await openai.createChatCompletion({
+    model,
+    messages: [
+      { role: 'system', content: 'You are an expert programming instructor.' },
+      { role: 'user', content: prompt },
+    ],
+    temperature: 0.7,
+    max_tokens: 600,
+  });
+  // Return the raw text content
+  return response.data.choices[0].message.content;
+};
+
+/**
+ * Parse the AI response into { title, description, difficulty, hints }
+ * @param {string} aiRawResponse
+ * @returns {object|null}
+ */
+aiService.parseChallengeResponse = (aiRawResponse) => {
+  try {
+    // Try to parse as JSON
+    const obj = JSON.parse(aiRawResponse);
+    if (!obj.title || !obj.description || !obj.difficulty) return null;
+    return {
+      title: obj.title,
+      description: obj.description,
+      difficulty: obj.difficulty,
+      hints: Array.isArray(obj.hints) ? obj.hints : [],
+    };
+  } catch {
+    // Try to extract JSON from text
+    const match = aiRawResponse.match(/\{[\s\S]*\}/);
+    if (match) {
+      try {
+        const obj = JSON.parse(match[0]);
+        if (!obj.title || !obj.description || !obj.difficulty) return null;
+        return {
+          title: obj.title,
+          description: obj.description,
+          difficulty: obj.difficulty,
+          hints: Array.isArray(obj.hints) ? obj.hints : [],
+        };
+      } catch {}
+    }
+    return null;
+  }
+};
+
 module.exports = aiService;

@@ -1,0 +1,31 @@
+// Prisma schema for AI feedback and submissions
+// Run: npx prisma migrate dev --name add_ai_feedback
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Submission {
+  id          Int        @id @default(autoincrement())
+  userId      Int?
+  title       String
+  description String
+  filePath    String?
+  createdAt   DateTime   @default(now())
+  feedback    Feedback[]
+}
+
+model Feedback {
+  id           Int         @id @default(autoincrement())
+  submissionId Int
+  prompt       String      @db.Text
+  responseRaw  String      @db.Text
+  responseJson Json?
+  createdAt    DateTime    @default(now())
+  submission   Submission  @relation(fields: [submissionId], references: [id])
+}

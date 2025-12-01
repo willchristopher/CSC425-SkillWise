@@ -1,8 +1,13 @@
 #!/usr/bin/env node
 // Server entry point with graceful shutdown and error handling
 
+
 // Load environment variables
 require('dotenv').config();
+
+// Initialize Sentry
+const { initSentry } = require('./src/sentry');
+initSentry();
 
 const app = require('./src/app');
 const logger = app.get('logger');

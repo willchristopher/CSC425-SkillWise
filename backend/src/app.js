@@ -9,12 +9,18 @@ const pinoHttp = require('pino-http');
 
 // Import middleware
 const errorHandler = require('./middleware/errorHandler');
+const { Sentry } = require('./sentry');
 
 // Import routes
 const routes = require('./routes/index');
 
 // Create Express app
 const app = express();
+
+// Sentry request handler (must be before all other middleware/routes)
+if (Sentry && Sentry.Handlers) {
+  app.use(Sentry.Handlers.requestHandler());
+}
 
 // Create logger
 const logger = pino({
@@ -103,6 +109,7 @@ app.use(express.urlencoded({
 // Cookie parsing middleware (needed for refresh tokens)
 app.use(cookieParser());
 
+
 // Health check endpoint
 app.get('/healthz', (req, res) => {
   res.status(200).json({
@@ -112,6 +119,11 @@ app.get('/healthz', (req, res) => {
     environment: process.env.NODE_ENV || 'development',
     version: process.env.npm_package_version || '1.0.0',
   });
+});
+
+// Debug Sentry test route
+app.get('/debug/sentry', (req, res) => {
+  throw new Error('Sentry test error (backend)');
 });
 
 // Mount API routes
@@ -125,6 +137,11 @@ app.use('*', (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+// Sentry error handler (must be before any other error middleware)
+if (Sentry && Sentry.Handlers) {
+  app.use(Sentry.Handlers.errorHandler());
+}
 
 // Global error handler (must be last)
 app.use(errorHandler);

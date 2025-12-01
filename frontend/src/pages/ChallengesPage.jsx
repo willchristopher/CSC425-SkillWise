@@ -4,7 +4,9 @@ import { apiService } from '../services/api';
 import ChallengeCard from '../components/challenges/ChallengeCard';
 import ChallengeModal from '../components/challenges/ChallengeModal';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+
 import '../styles/challenges.css';
+import AiChallengeGenerator from '../components/AiChallengeGenerator';
 
 const ChallengesPage = () => {
   const { user } = useAuth();
@@ -209,16 +211,20 @@ const ChallengesPage = () => {
   const categories = getUniqueCategories();
 
   return (
+
     <div className="challenges-page">
-      <div className="page-header">
+      <div className="page-header flex flex-wrap items-center justify-between gap-4">
         <div className="header-content">
           <h1>Learning Challenges</h1>
           <p>Discover challenges to enhance your skills and knowledge.</p>
         </div>
-        <button className="btn btn-primary" onClick={handleCreateChallenge}>
-          <span className="btn-icon">+</span>
-          Create Challenge
-        </button>
+        <div className="flex gap-2">
+          <button className="btn btn-primary" onClick={handleCreateChallenge}>
+            <span className="btn-icon">+</span>
+            Create Challenge
+          </button>
+          <AiChallengeGenerator />
+        </div>
       </div>
 
       {error && (

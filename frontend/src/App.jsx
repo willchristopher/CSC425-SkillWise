@@ -19,8 +19,8 @@ import NotFoundPage from './pages/NotFoundPage';
 import ErrorPage from './pages/ErrorPage';
 
 // Import layout components (TODO: Create these)
-// import Navbar from './components/layout/Navbar';
-// import Footer from './components/layout/Footer';
+
+import SentryTestButton from './components/SentryTestButton';
 
 function App() {
   return (
@@ -31,6 +31,8 @@ function App() {
           {/* <Navbar /> */}
           
           <main className="main-content">
+            {/* Sentry test button (remove in production) */}
+            <SentryTestButton />
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<HomePage />} />

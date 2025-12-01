@@ -1,5 +1,7 @@
+
 import React from 'react';
 import AITutor from '../components/common/AITutor';
+import AiFeedbackForm from '../components/AiFeedbackForm';
 
 const AITutorPage = () => {
   return (
@@ -14,11 +16,16 @@ const AITutorPage = () => {
           </p>
         </div>
 
+
         <AITutor 
           challengeId="ai-tutor"
           challengeTitle="Code Review & Learning"
           challengeDescription="Submit your code to get personalized feedback and suggestions"
         />
+
+        <div className="mt-10">
+          <AiFeedbackForm />
+        </div>
 
         <div className="mt-8 bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">
