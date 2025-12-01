@@ -9,35 +9,50 @@ const validateEmail = (email) => {
 
 // TODO: Password validation
 const validatePassword = (password) => {
-  const passwordSchema = z.string()
+  const passwordSchema = z
+    .string()
     .min(8, 'Password must be at least 8 characters')
     .max(128, 'Password too long')
-    .regex(/^(?=.*[a-z])/, 'Password must contain at least one lowercase letter')
-    .regex(/^(?=.*[A-Z])/, 'Password must contain at least one uppercase letter')
+    .regex(
+      /^(?=.*[a-z])/,
+      'Password must contain at least one lowercase letter'
+    )
+    .regex(
+      /^(?=.*[A-Z])/,
+      'Password must contain at least one uppercase letter'
+    )
     .regex(/^(?=.*\d)/, 'Password must contain at least one number')
-    .regex(/^(?=.*[@$!%*?&])/, 'Password must contain at least one special character');
+    .regex(
+      /^(?=.*[@$!%*?&])/,
+      'Password must contain at least one special character'
+    );
 
   const result = passwordSchema.safeParse(password);
   return {
     isValid: result.success,
-    errors: result.success ? [] : result.error.errors.map(e => e.message),
+    errors: result.success ? [] : result.error.errors.map((e) => e.message),
   };
 };
 
 // TODO: Username validation
 const validateUsername = (username) => {
-  const usernameSchema = z.string()
+  const usernameSchema = z
+    .string()
     .min(3, 'Username must be at least 3 characters')
     .max(30, 'Username must be less than 30 characters')
-    .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores');
+    .regex(
+      /^[a-zA-Z0-9_]+$/,
+      'Username can only contain letters, numbers, and underscores'
+    );
 
   return usernameSchema.safeParse(username).success;
 };
 
 // TODO: Phone number validation
 const validatePhoneNumber = (phone) => {
-  const phoneSchema = z.string()
-    .regex(/^\+?[\d\s\-\(\)]+$/, 'Invalid phone number format');
+  const phoneSchema = z
+    .string()
+    .regex(/^\+?[\d\s\-()]+$/, 'Invalid phone number format');
 
   return phoneSchema.safeParse(phone).success;
 };
@@ -56,7 +71,9 @@ const validateDate = (date) => {
 
 // TODO: MongoDB ObjectId validation
 const validateObjectId = (id) => {
-  const objectIdSchema = z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid ObjectId format');
+  const objectIdSchema = z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, 'Invalid ObjectId format');
   return objectIdSchema.safeParse(id).success;
 };
 
@@ -89,7 +106,9 @@ const validateFileUpload = (file, options = {}) => {
     errors.push(`File type ${file.mimetype} not allowed`);
   }
 
-  const ext = file.originalname.toLowerCase().substring(file.originalname.lastIndexOf('.'));
+  const ext = file.originalname
+    .toLowerCase()
+    .substring(file.originalname.lastIndexOf('.'));
   if (!allowedExtensions.includes(ext)) {
     errors.push(`File extension ${ext} not allowed`);
   }

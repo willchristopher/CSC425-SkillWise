@@ -28,7 +28,7 @@ const aiController = {
       }
 
       // Generate feedback using AI service
-      const feedback = await aiService.generateFeedback(
+      const feedbackResult = await aiService.generateFeedback(
         submissionText,
         challengeContext
       );
@@ -36,7 +36,7 @@ const aiController = {
       res.json({
         success: true,
         data: {
-          feedback,
+          feedback: feedbackResult.feedback, // Extract just the feedback text
           submissionLength: submissionText.length,
           generatedAt: new Date().toISOString(),
         },

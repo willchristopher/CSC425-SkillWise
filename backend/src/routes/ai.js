@@ -8,6 +8,10 @@ const auth = require('../middleware/auth');
 // Body: { submissionId }
 router.post('/feedback', auth, aiController.generateSubmissionFeedback);
 
+// POST /api/ai/feedback/direct - Generate AI feedback for direct code input (tutor mode)
+// Body: { submissionText, challengeContext: { title, description, requirements } }
+router.post('/feedback/direct', auth, aiController.generateFeedback);
+
 // POST /api/ai/hints/:challengeId - Get hints for a challenge
 // Body: { challenge: { title, description, difficulty } }
 // Query: ?attempts=0&lastAttempt=...

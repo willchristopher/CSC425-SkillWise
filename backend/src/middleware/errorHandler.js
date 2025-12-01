@@ -2,9 +2,10 @@
 const logger = require('pino')({
   name: 'skillwise-error-handler',
 });
+const { captureException } = require('../config/sentry');
 
 class AppError extends Error {
-  constructor (message, statusCode, code = null) {
+  constructor(message, statusCode, code = null) {
     super(message);
     this.statusCode = statusCode;
     this.code = code;
@@ -28,17 +29,25 @@ const handleDuplicateFieldsDB = (err) => {
 };
 
 const handleValidationErrorDB = (err) => {
-  const errors = Object.values(err.errors).map(el => el.message);
+  const errors = Object.values(err.errors).map((el) => el.message);
   const message = `Invalid input data. ${errors.join('. ')}`;
   return new AppError(message, 400, 'VALIDATION_ERROR');
 };
 
 const handleJWTError = () => {
-  return new AppError('Invalid token. Please log in again.', 401, 'INVALID_TOKEN');
+  return new AppError(
+    'Invalid token. Please log in again.',
+    401,
+    'INVALID_TOKEN'
+  );
 };
 
 const handleJWTExpiredError = () => {
-  return new AppError('Your token has expired. Please log in again.', 401, 'TOKEN_EXPIRED');
+  return new AppError(
+    'Your token has expired. Please log in again.',
+    401,
+    'TOKEN_EXPIRED'
+  );
 };
 
 const sendErrorDev = (err, req, res) => {
@@ -80,6 +89,16 @@ const sendErrorProd = (err, req, res) => {
   }
 
   // Programming or other unknown error: don't leak error details
+  // Capture non-operational errors in Sentry
+  captureException(err, {
+    extra: {
+      url: req.originalUrl,
+      method: req.method,
+      ip: req.ip,
+      userId: req.user?.id,
+    },
+  });
+
   logger.error('Unknown Error:', {
     error: err.message,
     stack: err.stack,
@@ -95,7 +114,7 @@ const sendErrorProd = (err, req, res) => {
   });
 };
 
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 

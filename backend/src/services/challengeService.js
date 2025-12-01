@@ -617,77 +617,97 @@ const challengeService = {
       }
 
       // Create submission
-      return await withTransaction(async (transactionQuery) => {
-        const submissionResult = await transactionQuery(
-          `
+      const submissionResult = await withTransaction(
+        async (transactionQuery) => {
+          const submissionRes = await transactionQuery(
+            `
           INSERT INTO submissions (
             challenge_id, user_id, submission_text, status, submitted_at, attempt_number
           ) VALUES ($1, $2, $3, $4, NOW(), $5)
           RETURNING *
         `,
-          [challengeId, userId, code, 'submitted', attemptCount + 1]
-        );
-
-        const submission = submissionResult.rows[0];
-
-        // Generate AI feedback for the submission
-        try {
-          const startTime = Date.now();
-          const feedbackResult = await aiService.generateFeedback(
-            code,
-            {
-              title: challenge.title,
-              description: challenge.description,
-              requirements: challenge.instructions || '',
-              previousAttempts: attemptCount,
-            },
-            userId
+            [challengeId, userId, code, 'submitted', attemptCount + 1]
           );
-          const processingTime = Date.now() - startTime;
 
-          // Store feedback in ai_feedback table
-          await aiFeedbackService.createAIFeedback({
-            submissionId: submission.id,
-            prompt: feedbackResult.prompt.combined,
-            response: feedbackResult.feedback,
-            feedbackType: 'submission_review',
-            aiModel: 'gemini-2.5-flash',
-            processingTimeMs: processingTime,
-          });
+          const submission = submissionRes.rows[0];
 
-          // Also update submission with AI feedback for backwards compatibility
-          const updateResult = await transactionQuery(
-            `
+          // Generate AI feedback for the submission
+          try {
+            const startTime = Date.now();
+            const feedbackResult = await aiService.generateFeedback(
+              code,
+              {
+                title: challenge.title,
+                description: challenge.description,
+                requirements: challenge.instructions || '',
+                previousAttempts: attemptCount,
+              },
+              userId
+            );
+            const processingTime = Date.now() - startTime;
+
+            // Update submission with AI feedback for backwards compatibility
+            const updateResult = await transactionQuery(
+              `
             UPDATE submissions
             SET status = $1, feedback = $2, score = $3
             WHERE id = $4
             RETURNING *
           `,
-            ['completed', feedbackResult.feedback, 75, submission.id]
-          );
+              ['completed', feedbackResult.feedback, 75, submission.id]
+            );
 
-          return updateResult.rows[0];
-        } catch (feedbackError) {
-          console.error('Failed to generate AI feedback:', feedbackError);
+            // Return both the submission and feedback data for storage after transaction
+            return {
+              submission: updateResult.rows[0],
+              feedbackData: {
+                submissionId: submission.id,
+                prompt: feedbackResult.prompt.combined,
+                response: feedbackResult.feedback,
+                feedbackType: 'submission_review',
+                aiModel: 'gemini-2.5-flash',
+                processingTimeMs: processingTime,
+              },
+            };
+          } catch (feedbackError) {
+            console.error('Failed to generate AI feedback:', feedbackError);
 
-          // If feedback generation fails, still return the submission but without feedback
-          const updateResult = await transactionQuery(
-            `
+            // If feedback generation fails, still return the submission but without feedback
+            const updateResult = await transactionQuery(
+              `
             UPDATE submissions
             SET status = $1, feedback = $2
             WHERE id = $3
             RETURNING *
           `,
-            [
-              'completed',
-              'Feedback generation failed. Please try again later.',
-              submission.id,
-            ]
-          );
+              [
+                'completed',
+                'Feedback generation failed. Please try again later.',
+                submission.id,
+              ]
+            );
 
-          return updateResult.rows[0];
+            return { submission: updateResult.rows[0], feedbackData: null };
+          }
         }
-      });
+      );
+
+      // Store feedback in ai_feedback table AFTER transaction commits
+      if (submissionResult.feedbackData) {
+        try {
+          await aiFeedbackService.createAIFeedback(
+            submissionResult.feedbackData
+          );
+        } catch (feedbackStoreError) {
+          console.error(
+            'Failed to store feedback in ai_feedback table:',
+            feedbackStoreError
+          );
+          // Submission is already completed, just log the error
+        }
+      }
+
+      return submissionResult.submission;
     } catch (error) {
       throw new Error(`Failed to submit challenge: ${error.message}`);
     }

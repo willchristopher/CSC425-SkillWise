@@ -276,8 +276,14 @@ export const apiService = {
 
   // AI methods
   ai: {
-    generateFeedback: (submissionId) =>
-      api.post('/ai/feedback', { submissionId }, { timeout: 30000 }), // 30 second timeout for AI generation
+    generateFeedback: (submissionText, challengeContext) =>
+      api.post(
+        '/ai/feedback/direct',
+        { submissionText, challengeContext },
+        { timeout: 30000 }
+      ), // Direct code feedback
+    generateSubmissionFeedback: (submissionId) =>
+      api.post('/ai/feedback', { submissionId }, { timeout: 30000 }), // Feedback for existing submission
     getHints: (challengeId, challenge, userProgress) =>
       api.post(
         `/ai/hints/${challengeId}`,
