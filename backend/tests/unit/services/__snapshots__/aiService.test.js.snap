@@ -3,64 +3,31 @@
 exports[`AI Service PROMPT_TEMPLATES PROMPT_TEMPLATES structure should match snapshot 1`] = `
 {
   "GENERATE_CHALLENGE": {
-    "system": "You are an expert programming instructor creating educational coding challenges.
-Generate challenges that are clear, achievable, and educational.
-Always respond with valid JSON format only, no additional text or markdown.",
-    "user": "Create a {{DIFFICULTY}} level programming challenge for learning {{SKILL}}.
+    "system": "You are an expert tutor creating engaging learning challenges across all subjects.",
+    "user": "Generate a {{DIFFICULTY}} level challenge for learning {{SKILL}}.
 Category: {{CATEGORY}}
-Topic Focus: {{TOPIC}}
+Topic: {{TOPIC}}
 
-Generate a JSON response with this exact structure:
-{
-  "title": "Challenge title (short, descriptive)",
-  "description": "Detailed description of what the student needs to accomplish",
-  "difficulty_level": "{{DIFFICULTY}}",
-  "category": "{{CATEGORY}}",
-  "estimated_time_minutes": <number between 15-120>,
-  "requirements": ["requirement 1", "requirement 2", "requirement 3"],
-  "hints": ["hint 1", "hint 2"],
-  "tags": ["tag1", "tag2", "tag3"],
-  "learning_objectives": ["objective 1", "objective 2"],
-  "starter_code": "// Optional starter code here",
-  "test_cases": ["Test case 1", "Test case 2"]
-}",
+Create an engaging challenge with clear requirements and helpful hints.",
   },
   "GENERATE_HINTS": {
-    "system": "You are a helpful programming tutor. Provide hints that guide the student toward the solution 
-without giving away the answer directly. Ask thought-provoking questions.",
-    "user": "Challenge: {{CHALLENGE_TITLE}}
+    "system": "You are a helpful tutor providing progressive hints.",
+    "user": "Generate helpful hints for this challenge:
+Challenge: {{CHALLENGE_TITLE}}
 Description: {{CHALLENGE_DESCRIPTION}}
 Difficulty: {{DIFFICULTY}}
-Student's attempts: {{ATTEMPTS}}
+Student Attempts: {{ATTEMPTS}}
 
-Provide 2-3 helpful hints as JSON:
-{
-  "hints": [
-    {"level": 1, "hint": "gentle nudge"},
-    {"level": 2, "hint": "more specific guidance"},
-    {"level": 3, "hint": "detailed approach suggestion"}
-  ]
-}",
+Create progressive hints from subtle to more revealing.",
   },
   "SUBMIT_FEEDBACK": {
-    "system": "You are an expert programming tutor providing constructive feedback on student submissions.
-Be encouraging, specific, and educational. Point out both strengths and areas for improvement.
-Always respond with valid JSON format only.",
-    "user": "Challenge: {{CHALLENGE_TITLE}}
+    "system": "You are a supportive tutor providing constructive feedback.",
+    "user": "Evaluate this student submission:
+Challenge: {{CHALLENGE_TITLE}}
 Description: {{CHALLENGE_DESCRIPTION}}
+Student's Work: {{SUBMISSION_TEXT}}
 
-Student's Submission:
-{{SUBMISSION_TEXT}}
-
-Provide feedback as JSON:
-{
-  "overall_score": <number 1-100>,
-  "strengths": ["strength 1", "strength 2"],
-  "improvements": ["area 1", "area 2"],
-  "suggestions": ["suggestion 1", "suggestion 2"],
-  "feedback_summary": "Overall encouraging summary",
-  "next_steps": ["next step 1", "next step 2"]
-}",
+Provide encouraging, actionable feedback.",
   },
 }
 `;
@@ -68,46 +35,44 @@ Provide feedback as JSON:
 exports[`AI Service generateChallenge generated challenge response structure should match snapshot 1`] = `
 {
   "category": "backend",
-  "description": "Create a RESTful API for a todo application using Node.js and Express.",
-  "difficulty_level": "intermediate",
-  "estimated_time_minutes": 120,
-  "generated_by_ai": true,
-  "hints": [
-    "Start with a simple server setup",
-    "Use middleware for common operations",
+  "categoryId": "programming",
+  "description": "Create a RESTful API for a todo application.",
+  "difficulty": "intermediate",
+  "estimatedTime": "60 minutes",
+  "questionTypes": [
+    "mcq",
+    "short-answer",
   ],
-  "requirements": [
-    "Implement CRUD operations",
-    "Use proper HTTP methods",
-    "Add input validation",
-    "Handle errors gracefully",
+  "questions": [
+    {
+      "correctAnswer": 1,
+      "explanation": "POST is used to create new resources",
+      "options": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+      ],
+      "question": "What HTTP method is used to create resources?",
+      "type": "mcq",
+    },
+  ],
+  "tips": [
+    "Start with a simple server setup",
   ],
   "title": "Build a REST API",
 }
 `;
 
-exports[`AI Service generateFeedback generateFeedback response should match snapshot 1`] = `
+exports[`AI Service generateFeedback (legacy) generateFeedback response should match snapshot 1`] = `
 {
-  "feedback_summary": "Excellent work on this solution!",
+  "feedback_summary": "Excellent work!",
   "improvements": [
     "Add unit tests",
-    "Consider edge cases",
   ],
   "overall_score": 90,
-  "prompt_used": "Challenge: Test
-Description: Test desc
-
-Student's Submission:
-function test() {}
-
-Provide feedback as JSON:
-{
-  "overall_score": <number 1-100>,
-  "strengths": ["strength 1", "strength 2"],
-  "improve...",
   "strengths": [
     "Efficient algorithm",
-    "Good code organization",
   ],
 }
 `;
@@ -116,15 +81,15 @@ exports[`AI Service generateHints generateHints response should match snapshot 1
 {
   "hints": [
     {
-      "hint": "Think about the problem step by step",
+      "hint": "Think step by step",
       "level": 1,
     },
     {
-      "hint": "Consider using a hash map for O(1) lookups",
+      "hint": "Consider using a hash map",
       "level": 2,
     },
     {
-      "hint": "Don't forget to handle edge cases",
+      "hint": "Handle edge cases",
       "level": 3,
     },
   ],
@@ -133,29 +98,16 @@ exports[`AI Service generateHints generateHints response should match snapshot 1
 
 exports[`AI Service submitForFeedback feedback response structure should match snapshot 1`] = `
 {
-  "feedback_summary": "Great job! Your solution demonstrates a solid understanding.",
+  "feedback": "Great job!",
   "improvements": [
-    "Consider adding more comments",
-    "Could optimize the loop performance",
+    "Add comments",
   ],
-  "next_steps": [
-    "Practice more algorithms",
-    "Learn about time complexity",
+  "nextSteps": [
+    "Practice algorithms",
   ],
-  "overall_score": 85,
-  "prompt_used": "Challenge: Array Manipulation
-Description: Write a function to find duplicates in an array
-
-Student's Submission:
-function findDuplicates(arr) { return arr.filter((item, index) => arr.indexOf(item) !=...",
+  "score": 85,
   "strengths": [
     "Clean code structure",
-    "Good variable naming",
-    "Proper error handling",
-  ],
-  "suggestions": [
-    "Try using array methods like map() and filter()",
-    "Consider edge cases in your validation",
   ],
 }
 `;

@@ -80,10 +80,12 @@ describe('AI Controller', () => {
       await aiController.generateChallenge(mockReq, mockRes, mockNext);
 
       expect(aiService.generateChallenge).toHaveBeenCalledWith({
-        skill: 'JavaScript',
-        difficulty: 'medium',
-        category: 'Programming',
+        category: 'programming',
+        difficulty: 'intermediate',
         topic: 'General',
+        questionTypes: ['mcq', 'short-answer'],
+        numQuestions: 5,
+        customInstructions: '',
       });
     });
 

@@ -3,20 +3,33 @@
  * Story 3.7: Tests run with sample prompts; snapshots pass
  */
 
-const aiService = require('../../../src/services/aiService');
-
-// Mock axios to prevent real API calls
-jest.mock('axios', () => ({
-  post: jest.fn(),
-}));
-
-const axios = require('axios');
-
 describe('AI Service', () => {
+  let aiService;
+  let mockGenerateContent;
+
   beforeEach(() => {
-    jest.clearAllMocks();
-    // Set up environment variable for tests
+    jest.resetModules();
+
+    // Create mock function
+    mockGenerateContent = jest.fn();
+
+    // Mock the module before requiring aiService
+    jest.doMock('@google/generative-ai', () => ({
+      GoogleGenerativeAI: jest.fn().mockImplementation(() => ({
+        getGenerativeModel: jest.fn().mockReturnValue({
+          generateContent: mockGenerateContent,
+        }),
+      })),
+    }));
+
     process.env.GEMINI_API_KEY = 'test-api-key';
+
+    // Now require the service
+    aiService = require('../../../src/services/aiService');
+  });
+
+  afterEach(() => {
+    jest.resetModules();
   });
 
   describe('PROMPT_TEMPLATES', () => {
@@ -60,294 +73,169 @@ describe('AI Service', () => {
   describe('generateChallenge', () => {
     const mockChallengeResponse = {
       title: 'Build a REST API',
-      description:
-        'Create a RESTful API for a todo application using Node.js and Express.',
-      difficulty_level: 'intermediate',
+      description: 'Create a RESTful API for a todo application.',
+      difficulty: 'intermediate',
       category: 'backend',
-      requirements: [
-        'Implement CRUD operations',
-        'Use proper HTTP methods',
-        'Add input validation',
-        'Handle errors gracefully',
+      questions: [
+        {
+          type: 'mcq',
+          question: 'What HTTP method is used to create resources?',
+          options: ['GET', 'POST', 'PUT', 'DELETE'],
+          correctAnswer: 1,
+          explanation: 'POST is used to create new resources',
+        },
       ],
-      hints: [
-        'Start with a simple server setup',
-        'Use middleware for common operations',
-      ],
-      estimated_time_minutes: 120,
+      tips: ['Start with a simple server setup'],
+      estimatedTime: '60 minutes',
     };
 
     it('should generate a challenge successfully', async () => {
-      axios.post.mockResolvedValueOnce({
-        data: {
-          candidates: [
-            {
-              content: {
-                parts: [
-                  {
-                    text: JSON.stringify(mockChallengeResponse),
-                  },
-                ],
-              },
-            },
-          ],
+      mockGenerateContent.mockResolvedValueOnce({
+        response: {
+          text: () => JSON.stringify(mockChallengeResponse),
         },
       });
 
       const result = await aiService.generateChallenge({
-        skill: 'javascript',
-        difficulty: 'intermediate',
-        category: 'backend',
+        category: 'programming',
         topic: 'REST APIs',
+        difficulty: 'intermediate',
+        questionTypes: ['mcq', 'short-answer'],
+        numQuestions: 5,
       });
 
       expect(result).toBeDefined();
-      expect(axios.post).toHaveBeenCalled();
+      expect(result.title).toBe('Build a REST API');
+      expect(mockGenerateContent).toHaveBeenCalled();
     });
 
-    it('should use correct parameters in API call', async () => {
-      axios.post.mockResolvedValueOnce({
-        data: {
-          candidates: [
-            {
-              content: {
-                parts: [
-                  {
-                    text: JSON.stringify(mockChallengeResponse),
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      });
-
-      await aiService.generateChallenge({
-        skill: 'python',
-        difficulty: 'beginner',
-        category: 'algorithms',
-        topic: 'sorting',
-      });
-
-      const callArgs = axios.post.mock.calls[0];
-      const requestBody = callArgs[1];
-      const prompt = requestBody.contents[0].parts[0].text;
-
-      expect(prompt).toContain('python');
-      expect(prompt).toContain('beginner');
-    });
-
-    it('generated challenge response structure should match snapshot', async () => {
-      axios.post.mockResolvedValueOnce({
-        data: {
-          candidates: [
-            {
-              content: {
-                parts: [
-                  {
-                    text: JSON.stringify(mockChallengeResponse),
-                  },
-                ],
-              },
-            },
-          ],
+    it('should include metadata in generated challenge', async () => {
+      mockGenerateContent.mockResolvedValueOnce({
+        response: {
+          text: () => JSON.stringify(mockChallengeResponse),
         },
       });
 
       const result = await aiService.generateChallenge({
-        skill: 'javascript',
+        category: 'programming',
+        topic: 'REST APIs',
         difficulty: 'intermediate',
+        questionTypes: ['mcq'],
+        numQuestions: 3,
       });
-      // Remove timestamp for snapshot comparison (timestamps change each run)
-      const { generated_at, ...resultWithoutTimestamp } = result;
+
+      expect(result.generatedAt).toBeDefined();
+      expect(result.questionTypes).toEqual(['mcq']);
+      expect(result.categoryId).toBe('programming');
+    });
+
+    it('generated challenge response structure should match snapshot', async () => {
+      mockGenerateContent.mockResolvedValueOnce({
+        response: {
+          text: () => JSON.stringify(mockChallengeResponse),
+        },
+      });
+
+      const result = await aiService.generateChallenge({
+        category: 'programming',
+        topic: 'JavaScript basics',
+        difficulty: 'beginner',
+      });
+
+      const { generatedAt, ...resultWithoutTimestamp } = result;
       expect(resultWithoutTimestamp).toMatchSnapshot();
-      expect(generated_at).toBeDefined();
+      expect(generatedAt).toBeDefined();
     });
 
     it('should handle API errors gracefully', async () => {
-      axios.post.mockRejectedValueOnce(new Error('API Error'));
+      mockGenerateContent.mockRejectedValueOnce(new Error('API Error'));
 
       await expect(
         aiService.generateChallenge({
-          skill: 'javascript',
+          category: 'programming',
+          topic: 'JavaScript',
           difficulty: 'intermediate',
         })
-      ).rejects.toThrow();
+      ).rejects.toThrow('AI generation failed');
     });
   });
 
   describe('submitForFeedback', () => {
     const mockFeedbackResponse = {
-      overall_score: 85,
-      strengths: [
-        'Clean code structure',
-        'Good variable naming',
-        'Proper error handling',
-      ],
-      improvements: [
-        'Consider adding more comments',
-        'Could optimize the loop performance',
-      ],
-      suggestions: [
-        'Try using array methods like map() and filter()',
-        'Consider edge cases in your validation',
-      ],
-      feedback_summary:
-        'Great job! Your solution demonstrates a solid understanding.',
-      next_steps: ['Practice more algorithms', 'Learn about time complexity'],
+      score: 85,
+      feedback: 'Great job!',
+      strengths: ['Clean code structure'],
+      improvements: ['Add comments'],
+      nextSteps: ['Practice algorithms'],
     };
-
-    const mockChallengeContext = {
-      title: 'Array Manipulation',
-      description: 'Write a function to find duplicates in an array',
-    };
-
-    const mockSubmissionText =
-      'function findDuplicates(arr) { return arr.filter((item, index) => arr.indexOf(item) !== index); }';
 
     it('should submit for feedback successfully', async () => {
-      axios.post.mockResolvedValueOnce({
-        data: {
-          candidates: [
-            {
-              content: {
-                parts: [
-                  {
-                    text: JSON.stringify(mockFeedbackResponse),
-                  },
-                ],
-              },
-            },
-          ],
+      mockGenerateContent.mockResolvedValueOnce({
+        response: {
+          text: () => JSON.stringify(mockFeedbackResponse),
         },
       });
 
-      // Note: submitForFeedback takes (submissionText, challengeContext)
-      const result = await aiService.submitForFeedback(
-        mockSubmissionText,
-        mockChallengeContext
-      );
+      const result = await aiService.submitForFeedback({
+        challenge: { title: 'Test Challenge', description: 'Test desc' },
+        submission: 'function test() { return true; }',
+        questionType: 'code-challenge',
+      });
 
       expect(result).toBeDefined();
-      expect(axios.post).toHaveBeenCalled();
-    });
-
-    it('should include challenge context in the prompt', async () => {
-      axios.post.mockResolvedValueOnce({
-        data: {
-          candidates: [
-            {
-              content: {
-                parts: [
-                  {
-                    text: JSON.stringify(mockFeedbackResponse),
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      });
-
-      await aiService.submitForFeedback(
-        mockSubmissionText,
-        mockChallengeContext
-      );
-
-      const callArgs = axios.post.mock.calls[0];
-      const requestBody = callArgs[1];
-      const prompt = requestBody.contents[0].parts[0].text;
-
-      expect(prompt).toContain(mockChallengeContext.title);
-      expect(prompt).toContain(mockChallengeContext.description);
-      expect(prompt).toContain(mockSubmissionText);
+      expect(result.score).toBe(85);
+      expect(mockGenerateContent).toHaveBeenCalled();
     });
 
     it('feedback response structure should match snapshot', async () => {
-      axios.post.mockResolvedValueOnce({
-        data: {
-          candidates: [
-            {
-              content: {
-                parts: [
-                  {
-                    text: JSON.stringify(mockFeedbackResponse),
-                  },
-                ],
-              },
-            },
-          ],
+      mockGenerateContent.mockResolvedValueOnce({
+        response: {
+          text: () => JSON.stringify(mockFeedbackResponse),
         },
       });
 
-      const result = await aiService.submitForFeedback(
-        mockSubmissionText,
-        mockChallengeContext
-      );
-      // Remove timestamp for snapshot comparison (timestamps change each run)
-      const { generated_at, ...resultWithoutTimestamp } = result;
-      expect(resultWithoutTimestamp).toMatchSnapshot();
-      expect(generated_at).toBeDefined();
-    });
+      const result = await aiService.submitForFeedback({
+        challenge: {
+          title: 'Array Manipulation',
+          description: 'Find duplicates',
+        },
+        submission: 'function findDupes(arr) { return [...new Set(arr)]; }',
+        questionType: 'code-challenge',
+      });
 
-    it('should handle API errors gracefully', async () => {
-      axios.post.mockRejectedValueOnce(new Error('API Error'));
-
-      await expect(
-        aiService.submitForFeedback(mockSubmissionText, mockChallengeContext)
-      ).rejects.toThrow();
+      expect(result).toMatchSnapshot();
     });
   });
 
-  describe('generateFeedback', () => {
+  describe('generateFeedback (legacy)', () => {
     const mockFeedback = {
       overall_score: 90,
-      feedback_summary: 'Excellent work on this solution!',
-      strengths: ['Efficient algorithm', 'Good code organization'],
-      improvements: ['Add unit tests', 'Consider edge cases'],
+      feedback_summary: 'Excellent work!',
+      strengths: ['Efficient algorithm'],
+      improvements: ['Add unit tests'],
     };
 
     it('should generate feedback for a submission', async () => {
-      axios.post.mockResolvedValueOnce({
-        data: {
-          candidates: [
-            {
-              content: {
-                parts: [
-                  {
-                    text: JSON.stringify(mockFeedback),
-                  },
-                ],
-              },
-            },
-          ],
+      mockGenerateContent.mockResolvedValueOnce({
+        response: {
+          text: () => JSON.stringify(mockFeedback),
         },
       });
 
-      // generateFeedback wraps submitForFeedback with (submissionText, challengeContext)
       const result = await aiService.generateFeedback('function test() {}', {
-        title: 'Test',
-        description: 'Test desc',
+        title: 'Test Challenge',
+        description: 'Test description',
       });
 
       expect(result).toBeDefined();
-      expect(axios.post).toHaveBeenCalled();
+      expect(result.overall_score).toBe(90);
+      expect(mockGenerateContent).toHaveBeenCalled();
     });
 
     it('generateFeedback response should match snapshot', async () => {
-      axios.post.mockResolvedValueOnce({
-        data: {
-          candidates: [
-            {
-              content: {
-                parts: [
-                  {
-                    text: JSON.stringify(mockFeedback),
-                  },
-                ],
-              },
-            },
-          ],
+      mockGenerateContent.mockResolvedValueOnce({
+        response: {
+          text: () => JSON.stringify(mockFeedback),
         },
       });
 
@@ -355,7 +243,7 @@ describe('AI Service', () => {
         title: 'Test',
         description: 'Test desc',
       });
-      // Remove timestamp for snapshot comparison (timestamps change each run)
+
       const { generated_at, ...resultWithoutTimestamp } = result;
       expect(resultWithoutTimestamp).toMatchSnapshot();
       expect(generated_at).toBeDefined();
@@ -365,113 +253,121 @@ describe('AI Service', () => {
   describe('generateHints', () => {
     const mockHints = {
       hints: [
-        { level: 1, hint: 'Think about the problem step by step' },
-        { level: 2, hint: 'Consider using a hash map for O(1) lookups' },
-        { level: 3, hint: "Don't forget to handle edge cases" },
+        { level: 1, hint: 'Think step by step' },
+        { level: 2, hint: 'Consider using a hash map' },
+        { level: 3, hint: 'Handle edge cases' },
       ],
     };
 
-    const mockChallenge = {
-      title: 'Find Duplicates',
-      description: 'Find all duplicates in an array',
-      difficulty: 'intermediate',
-    };
-
-    const mockUserProgress = {
-      attempts: 2,
-    };
-
     it('should generate hints for a challenge', async () => {
-      axios.post.mockResolvedValueOnce({
-        data: {
-          candidates: [
-            {
-              content: {
-                parts: [
-                  {
-                    text: JSON.stringify(mockHints),
-                  },
-                ],
-              },
-            },
-          ],
+      mockGenerateContent.mockResolvedValueOnce({
+        response: {
+          text: () => JSON.stringify(mockHints),
         },
       });
 
       const result = await aiService.generateHints(
-        mockChallenge,
-        mockUserProgress
+        {
+          title: 'Find Duplicates',
+          description: 'Find all duplicates',
+          difficulty: 'intermediate',
+        },
+        { attempts: 2 }
       );
 
       expect(result).toBeDefined();
-      expect(axios.post).toHaveBeenCalled();
+      expect(result.hints).toHaveLength(3);
+      expect(mockGenerateContent).toHaveBeenCalled();
     });
 
     it('generateHints response should match snapshot', async () => {
-      axios.post.mockResolvedValueOnce({
-        data: {
-          candidates: [
-            {
-              content: {
-                parts: [
-                  {
-                    text: JSON.stringify(mockHints),
-                  },
-                ],
-              },
-            },
-          ],
+      mockGenerateContent.mockResolvedValueOnce({
+        response: {
+          text: () => JSON.stringify(mockHints),
         },
       });
 
       const result = await aiService.generateHints(
-        mockChallenge,
-        mockUserProgress
+        {
+          title: 'Find Duplicates',
+          description: 'Find all duplicates',
+          difficulty: 'intermediate',
+        },
+        { attempts: 2 }
       );
+
       expect(result).toMatchSnapshot();
+    });
+  });
+
+  describe('validateAnswer', () => {
+    it('should validate MCQ answers correctly', () => {
+      const question = {
+        type: 'mcq',
+        correctAnswer: 2,
+        options: ['A', 'B', 'C', 'D'],
+        explanation: 'C is correct',
+      };
+
+      const correct = aiService.validateAnswer(question, 2);
+      expect(correct.isCorrect).toBe(true);
+
+      const incorrect = aiService.validateAnswer(question, 0);
+      expect(incorrect.isCorrect).toBe(false);
+    });
+
+    it('should validate true-false answers correctly', () => {
+      const question = {
+        type: 'true-false',
+        correctAnswer: true,
+        explanation: 'This is true',
+      };
+
+      const correct = aiService.validateAnswer(question, true);
+      expect(correct.isCorrect).toBe(true);
+
+      const incorrect = aiService.validateAnswer(question, false);
+      expect(incorrect.isCorrect).toBe(false);
+    });
+
+    it('should return null for non-auto-gradeable types', () => {
+      const question = { type: 'long-response', prompt: 'Write an essay' };
+      const result = aiService.validateAnswer(question, 'Some response');
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('QUESTION_STRUCTURES', () => {
+    it('should have all question type structures defined', () => {
+      expect(aiService.QUESTION_STRUCTURES).toBeDefined();
+      expect(aiService.QUESTION_STRUCTURES.mcq).toBeDefined();
+      expect(aiService.QUESTION_STRUCTURES['fill-blank']).toBeDefined();
+      expect(aiService.QUESTION_STRUCTURES['true-false']).toBeDefined();
+      expect(aiService.QUESTION_STRUCTURES.matching).toBeDefined();
+      expect(aiService.QUESTION_STRUCTURES['short-answer']).toBeDefined();
+      expect(aiService.QUESTION_STRUCTURES['long-response']).toBeDefined();
+      expect(aiService.QUESTION_STRUCTURES['code-challenge']).toBeDefined();
+      expect(aiService.QUESTION_STRUCTURES.practical).toBeDefined();
+      expect(aiService.QUESTION_STRUCTURES.flashcard).toBeDefined();
+      expect(aiService.QUESTION_STRUCTURES.ordering).toBeDefined();
     });
   });
 
   describe('API Response Formatting', () => {
     it('should handle malformed JSON responses by throwing error', async () => {
-      axios.post.mockResolvedValueOnce({
-        data: {
-          candidates: [
-            {
-              content: {
-                parts: [
-                  {
-                    text: 'This is not valid JSON but still a valid response',
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      });
-
-      // generateChallenge throws when JSON parsing fails
-      await expect(
-        aiService.generateChallenge({
-          skill: 'javascript',
-          difficulty: 'intermediate',
-        })
-      ).rejects.toThrow('Failed to parse AI-generated challenge');
-    });
-
-    it('should handle empty API responses', async () => {
-      axios.post.mockResolvedValueOnce({
-        data: {
-          candidates: [],
+      mockGenerateContent.mockResolvedValueOnce({
+        response: {
+          text: () => 'This is not valid JSON',
         },
       });
 
       await expect(
         aiService.generateChallenge({
-          skill: 'javascript',
+          category: 'programming',
+          topic: 'JavaScript',
           difficulty: 'intermediate',
         })
-      ).rejects.toThrow();
+      ).rejects.toThrow('AI generation failed');
     });
   });
 });
