@@ -15,7 +15,7 @@ class ErrorBoundary extends React.Component {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
     this.setState({
       error,
-      errorInfo
+      errorInfo,
     });
   }
 
@@ -30,9 +30,10 @@ class ErrorBoundary extends React.Component {
                 Oops! Something went wrong
               </h1>
               <p className="text-gray-600 mb-6">
-                We encountered an unexpected error. Please try refreshing the page.
+                We encountered an unexpected error. Please try refreshing the
+                page.
               </p>
-              
+
               {process.env.NODE_ENV === 'development' && this.state.error && (
                 <div className="mb-6 text-left">
                   <details className="bg-gray-100 rounded p-4">
@@ -46,11 +47,11 @@ class ErrorBoundary extends React.Component {
                   </details>
                 </div>
               )}
-              
+
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <button
                   onClick={() => window.location.reload()}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md font-medium"
                 >
                   Refresh Page
                 </button>

@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Development Dockerfile for Frontend  
 FROM node:18-alpine
 
@@ -7,8 +8,9 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Install dependencies with cache mount for speed
+RUN --mount=type=cache,target=/root/.npm \
+    npm install
 
 # Copy source code
 COPY . .

@@ -20,8 +20,10 @@ const challengeController = {
       const filters = {};
       if (category) filters.category = category;
       if (difficulty) filters.difficulty = difficulty;
-      if (requiresPeerReview !== undefined) filters.requiresPeerReview = requiresPeerReview === 'true';
-      if (estimatedTimeMax) filters.estimatedTimeMax = parseInt(estimatedTimeMax, 10);
+      if (requiresPeerReview !== undefined)
+        filters.requiresPeerReview = requiresPeerReview === 'true';
+      if (estimatedTimeMax)
+        filters.estimatedTimeMax = parseInt(estimatedTimeMax, 10);
       if (search) filters.search = search;
       if (tags) filters.tags = Array.isArray(tags) ? tags : [tags];
       if (limit) filters.limit = parseInt(limit, 10);
@@ -64,7 +66,10 @@ const challengeController = {
       const { goalId } = req.params;
       const userId = req.user.id;
 
-      const challenges = await challengeService.getChallengesByGoal(parseInt(goalId, 10), userId);
+      const challenges = await challengeService.getChallengesByGoal(
+        parseInt(goalId, 10),
+        userId
+      );
 
       res.json({
         success: true,
@@ -84,7 +89,10 @@ const challengeController = {
       const { id } = req.params;
       const userId = req.user?.id; // Optional for public challenges
 
-      const challenge = await challengeService.getChallengeById(parseInt(id, 10), userId);
+      const challenge = await challengeService.getChallengeById(
+        parseInt(id, 10),
+        userId
+      );
 
       res.json({
         success: true,
@@ -110,7 +118,10 @@ const challengeController = {
       const challengeData = req.body;
       const creatorId = req.user.id;
 
-      const challenge = await challengeService.createChallenge(challengeData, creatorId);
+      const challenge = await challengeService.createChallenge(
+        challengeData,
+        creatorId
+      );
 
       res.status(201).json({
         success: true,
@@ -140,7 +151,7 @@ const challengeController = {
       const challenge = await challengeService.updateChallenge(
         parseInt(id, 10),
         challengeData,
-        userId,
+        userId
       );
 
       res.json({
@@ -214,7 +225,7 @@ const challengeController = {
       const link = await challengeService.linkChallengeToGoal(
         parseInt(challengeId, 10),
         parseInt(goalId, 10),
-        userId,
+        userId
       );
 
       res.status(201).json({
@@ -223,7 +234,10 @@ const challengeController = {
         message: 'Challenge linked to goal successfully',
       });
     } catch (error) {
-      if (error.message.includes('not found') || error.message.includes('not accessible')) {
+      if (
+        error.message.includes('not found') ||
+        error.message.includes('not accessible')
+      ) {
         return res.status(404).json({
           success: false,
           message: error.message,
@@ -251,7 +265,7 @@ const challengeController = {
       await challengeService.unlinkChallengeFromGoal(
         parseInt(challengeId, 10),
         parseInt(goalId, 10),
-        userId,
+        userId
       );
 
       res.json({
@@ -259,7 +273,10 @@ const challengeController = {
         message: 'Challenge unlinked from goal successfully',
       });
     } catch (error) {
-      if (error.message.includes('not found') || error.message.includes('not accessible')) {
+      if (
+        error.message.includes('not found') ||
+        error.message.includes('not accessible')
+      ) {
         return res.status(404).json({
           success: false,
           message: error.message,
@@ -276,7 +293,9 @@ const challengeController = {
     try {
       const { id } = req.params;
 
-      const statistics = await challengeService.getChallengeStatistics(parseInt(id, 10));
+      const statistics = await challengeService.getChallengeStatistics(
+        parseInt(id, 10)
+      );
 
       res.json({
         success: true,
@@ -298,7 +317,7 @@ const challengeController = {
 
       const recommendations = await challengeService.getRecommendedChallenges(
         userId,
-        limit ? parseInt(limit, 10) : 10,
+        limit ? parseInt(limit, 10) : 10
       );
 
       res.json({
@@ -327,8 +346,183 @@ const challengeController = {
       next(error);
     }
   },
-};
 
-module.exports = challengeController;
+  /**
+   * Submit work for a challenge
+   */
+  submitChallenge: async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      const { content, language } = req.body;
+
+      if (!content || !content.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Submission content is required',
+        });
+      }
+
+      const submission = await challengeService.submitChallenge(
+        parseInt(id, 10),
+        userId,
+        { content, language }
+      );
+
+      res.status(201).json({
+        success: true,
+        data: submission,
+        message: 'Challenge submission created successfully',
+      });
+    } catch (error) {
+      if (error.message === 'Challenge not found') {
+        return res.status(404).json({
+          success: false,
+          message: error.message,
+        });
+      }
+      if (error.message.includes('Maximum attempts reached')) {
+        return res.status(400).json({
+          success: false,
+          message: error.message,
+        });
+      }
+      next(error);
+    }
+  },
+
+  /**
+   * Create a challenge from AI-generated content
+   * POST /api/challenges/from-ai
+   */
+  createFromAI: async (req, res, next) => {
+    try {
+      const userId = req.user.id;
+      const { challenge, goalId } = req.body;
+
+      if (!challenge) {
+        return res.status(400).json({
+          success: false,
+          message: 'AI-generated challenge data is required',
+        });
+      }
+
+      const savedChallenge = await challengeService.createFromAI(
+        challenge,
+        userId,
+        goalId ? parseInt(goalId, 10) : null
+      );
+
+      res.status(201).json({
+        success: true,
+        data: savedChallenge,
+        message: 'Challenge created from AI content successfully',
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  /**
+   * Complete a challenge and update goal progress
+   * POST /api/challenges/:id/complete
+   */
+  completeChallenge: async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      const { score, answers } = req.body;
+
+      const result = await challengeService.completeChallenge(
+        parseInt(id, 10),
+        userId,
+        score || 0,
+        answers || {}
+      );
+
+      res.json({
+        success: true,
+        data: result,
+        message: 'Challenge completed successfully',
+      });
+    } catch (error) {
+      if (error.message === 'Challenge not found') {
+        return res.status(404).json({
+          success: false,
+          message: error.message,
+        });
+      }
+      next(error);
+    }
+  },
+
+  /**
+   * Link a challenge to a goal
+   * POST /api/challenges/:id/link-goal
+   */
+  linkToGoal: async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { goalId } = req.body;
+      const userId = req.user.id;
+
+      if (!goalId) {
+        return res.status(400).json({
+          success: false,
+          message: 'goalId is required',
+        });
+      }
+
+      await challengeService.linkToGoal(
+        parseInt(id, 10),
+        parseInt(goalId, 10),
+        userId
+      );
+
+      res.json({
+        success: true,
+        message: 'Challenge linked to goal successfully',
+      });
+    } catch (error) {
+      if (error.message.includes('not found')) {
+        return res.status(404).json({
+          success: false,
+          message: error.message,
+        });
+      }
+      if (error.message.includes('Not authorized')) {
+        return res.status(403).json({
+          success: false,
+          message: error.message,
+        });
+      }
+      next(error);
+    }
+  },
+
+  /**
+   * Get challenges for a goal with user progress
+   * GET /api/challenges/goal/:goalId
+   */
+  getGoalChallenges: async (req, res, next) => {
+    try {
+      const { goalId } = req.params;
+      const userId = req.user.id;
+
+      const challenges = await challengeService.getGoalChallenges(
+        parseInt(goalId, 10),
+        userId
+      );
+
+      res.json({
+        success: true,
+        data: challenges,
+        message: `Retrieved ${challenges.length} challenges for goal`,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+};
 
 module.exports = challengeController;

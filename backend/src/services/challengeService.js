@@ -217,44 +217,52 @@ const challengeService = {
 
       return await withTransaction(async (transactionQuery) => {
         // Create the challenge
-        const challengeResult = await transactionQuery(`
+        const challengeResult = await transactionQuery(
+          `
           INSERT INTO challenges (
             title, description, instructions, category, difficulty_level,
             estimated_time_minutes, points_reward, max_attempts, requires_peer_review,
             created_by, tags, prerequisites, learning_objectives
           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
           RETURNING *
-        `, [
-          validatedData.title,
-          validatedData.description,
-          validatedData.instructions,
-          validatedData.category,
-          validatedData.difficulty_level,
-          validatedData.estimated_time_minutes,
-          validatedData.points_reward,
-          validatedData.max_attempts,
-          validatedData.requires_peer_review,
-          creatorId,
-          validatedData.tags,
-          validatedData.prerequisites,
-          validatedData.learning_objectives,
-        ]);
+        `,
+          [
+            validatedData.title,
+            validatedData.description,
+            validatedData.instructions,
+            validatedData.category,
+            validatedData.difficulty_level,
+            validatedData.estimated_time_minutes,
+            validatedData.points_reward,
+            validatedData.max_attempts,
+            validatedData.requires_peer_review,
+            creatorId,
+            validatedData.tags,
+            validatedData.prerequisites,
+            validatedData.learning_objectives,
+          ]
+        );
 
         const challenge = challengeResult.rows[0];
 
         // Link to goal if specified
         if (validatedData.goal_id) {
-          await transactionQuery(`
+          await transactionQuery(
+            `
             INSERT INTO challenge_goals (challenge_id, goal_id, created_by)
             VALUES ($1, $2, $3)
-          `, [challenge.id, validatedData.goal_id, creatorId]);
+          `,
+            [challenge.id, validatedData.goal_id, creatorId]
+          );
         }
 
         return challenge;
       });
     } catch (error) {
       if (error.name === 'ZodError') {
-        throw new Error(`Validation error: ${error.errors.map(e => e.message).join(', ')}`);
+        throw new Error(
+          `Validation error: ${error.errors.map((e) => e.message).join(', ')}`
+        );
       }
       throw new Error(`Failed to create challenge: ${error.message}`);
     }
@@ -268,7 +276,7 @@ const challengeService = {
       // Check if user can update this challenge
       const existingChallenge = await query(
         'SELECT created_by FROM challenges WHERE id = $1',
-        [challengeId],
+        [challengeId]
       );
 
       if (existingChallenge.rows.length === 0) {
@@ -313,7 +321,9 @@ const challengeService = {
       return result.rows[0];
     } catch (error) {
       if (error.name === 'ZodError') {
-        throw new Error(`Validation error: ${error.errors.map(e => e.message).join(', ')}`);
+        throw new Error(
+          `Validation error: ${error.errors.map((e) => e.message).join(', ')}`
+        );
       }
       throw new Error(`Failed to update challenge: ${error.message}`);
     }
@@ -327,7 +337,7 @@ const challengeService = {
       // Check if user can delete this challenge
       const existingChallenge = await query(
         'SELECT created_by FROM challenges WHERE id = $1',
-        [challengeId],
+        [challengeId]
       );
 
       if (existingChallenge.rows.length === 0) {
@@ -341,7 +351,7 @@ const challengeService = {
       // Soft delete by setting is_active to false
       const result = await query(
         'UPDATE challenges SET is_active = false, updated_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *',
-        [challengeId],
+        [challengeId]
       );
 
       return result.rows[0];
@@ -359,7 +369,7 @@ const challengeService = {
         // Check if goal belongs to user
         const goalCheck = await transactionQuery(
           'SELECT id FROM goals WHERE id = $1 AND user_id = $2',
-          [goalId, userId],
+          [goalId, userId]
         );
 
         if (goalCheck.rows.length === 0) {
@@ -369,7 +379,7 @@ const challengeService = {
         // Check if challenge exists
         const challengeCheck = await transactionQuery(
           'SELECT id FROM challenges WHERE id = $1 AND is_active = true',
-          [challengeId],
+          [challengeId]
         );
 
         if (challengeCheck.rows.length === 0) {
@@ -379,7 +389,7 @@ const challengeService = {
         // Check if link already exists
         const existingLink = await transactionQuery(
           'SELECT id FROM challenge_goals WHERE challenge_id = $1 AND goal_id = $2',
-          [challengeId, goalId],
+          [challengeId, goalId]
         );
 
         if (existingLink.rows.length > 0) {
@@ -387,11 +397,14 @@ const challengeService = {
         }
 
         // Create the link
-        const result = await transactionQuery(`
+        const result = await transactionQuery(
+          `
           INSERT INTO challenge_goals (challenge_id, goal_id, created_by)
           VALUES ($1, $2, $3)
           RETURNING *
-        `, [challengeId, goalId, userId]);
+        `,
+          [challengeId, goalId, userId]
+        );
 
         return result.rows[0];
       });
@@ -408,7 +421,7 @@ const challengeService = {
       // Check if goal belongs to user
       const goalCheck = await query(
         'SELECT id FROM goals WHERE id = $1 AND user_id = $2',
-        [goalId, userId],
+        [goalId, userId]
       );
 
       if (goalCheck.rows.length === 0) {
@@ -417,7 +430,7 @@ const challengeService = {
 
       const result = await query(
         'DELETE FROM challenge_goals WHERE challenge_id = $1 AND goal_id = $2 RETURNING *',
-        [challengeId, goalId],
+        [challengeId, goalId]
       );
 
       if (result.rows.length === 0) {
@@ -435,7 +448,8 @@ const challengeService = {
    */
   getChallengeStatistics: async (challengeId) => {
     try {
-      const result = await query(`
+      const result = await query(
+        `
         SELECT 
           COUNT(s.id) as total_submissions,
           COUNT(CASE WHEN s.status = 'completed' THEN 1 END) as completed_submissions,
@@ -447,7 +461,9 @@ const challengeService = {
           COUNT(DISTINCT s.user_id) as unique_participants
         FROM submissions s
         WHERE s.challenge_id = $1
-      `, [challengeId]);
+      `,
+        [challengeId]
+      );
 
       const stats = result.rows[0];
 
@@ -456,10 +472,15 @@ const challengeService = {
         completed_submissions: parseInt(stats.completed_submissions) || 0,
         pending_submissions: parseInt(stats.pending_submissions) || 0,
         failed_submissions: parseInt(stats.failed_submissions) || 0,
-        completion_rate: stats.total_submissions > 0
-          ? Math.round((stats.completed_submissions / stats.total_submissions) * 100)
-          : 0,
-        average_score: stats.average_score ? parseFloat(stats.average_score).toFixed(1) : null,
+        completion_rate:
+          stats.total_submissions > 0
+            ? Math.round(
+                (stats.completed_submissions / stats.total_submissions) * 100
+              )
+            : 0,
+        average_score: stats.average_score
+          ? parseFloat(stats.average_score).toFixed(1)
+          : null,
         min_score: stats.min_score || null,
         max_score: stats.max_score || null,
         unique_participants: parseInt(stats.unique_participants) || 0,
@@ -541,6 +562,306 @@ const challengeService = {
       return result.rows;
     } catch (error) {
       throw new Error(`Failed to get popular categories: ${error.message}`);
+    }
+  },
+
+  /**
+   * Submit work for a challenge
+   */
+  submitChallenge: async (challengeId, userId, submissionData) => {
+    try {
+      // First, verify the challenge exists
+      const challengeResult = await query(
+        'SELECT * FROM challenges WHERE id = $1 AND is_active = true',
+        [challengeId]
+      );
+
+      if (challengeResult.rows.length === 0) {
+        throw new Error('Challenge not found');
+      }
+
+      const challenge = challengeResult.rows[0];
+
+      // Check user's previous attempts
+      const attemptsResult = await query(
+        'SELECT COUNT(*) as attempts FROM submissions WHERE challenge_id = $1 AND user_id = $2',
+        [challengeId, userId]
+      );
+
+      const currentAttempts = parseInt(attemptsResult.rows[0].attempts);
+      const maxAttempts = challenge.max_attempts || 3;
+
+      if (currentAttempts >= maxAttempts) {
+        throw new Error(`Maximum attempts reached (${maxAttempts})`);
+      }
+
+      // Create the submission
+      const result = await query(
+        `INSERT INTO submissions 
+         (challenge_id, user_id, content, language, status, attempt_number, submitted_at)
+         VALUES ($1, $2, $3, $4, 'submitted', $5, CURRENT_TIMESTAMP)
+         RETURNING *`,
+        [
+          challengeId,
+          userId,
+          submissionData.content,
+          submissionData.language || 'text',
+          currentAttempts + 1,
+        ]
+      );
+
+      return result.rows[0];
+    } catch (error) {
+      throw new Error(`Failed to submit challenge: ${error.message}`);
+    }
+  },
+
+  /**
+   * Create a challenge from AI-generated content
+   */
+  createFromAI: async (aiChallenge, userId, goalId = null) => {
+    try {
+      return await withTransaction(async (transactionQuery) => {
+        // Insert the challenge with AI-generated questions
+        const challengeResult = await transactionQuery(
+          `
+          INSERT INTO challenges (
+            title, description, instructions, category, difficulty_level,
+            estimated_time, points_reward, created_by, 
+            questions, question_types, goal_id, tags, learning_objectives
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+          RETURNING *
+        `,
+          [
+            aiChallenge.title,
+            aiChallenge.description,
+            aiChallenge.description, // Use description as instructions
+            aiChallenge.category || aiChallenge.categoryId,
+            aiChallenge.difficulty || 'intermediate',
+            aiChallenge.estimatedTime || '15 minutes',
+            aiChallenge.points_reward || 10,
+            userId,
+            JSON.stringify(aiChallenge.questions || []),
+            aiChallenge.questionTypes || [],
+            goalId,
+            aiChallenge.tags || [],
+            aiChallenge.learning_objectives || [],
+          ]
+        );
+
+        const challenge = challengeResult.rows[0];
+
+        // Link to goal if specified (also add to junction table for querying)
+        if (goalId) {
+          await transactionQuery(
+            `
+            INSERT INTO challenge_goals (challenge_id, goal_id, created_by)
+            VALUES ($1, $2, $3)
+            ON CONFLICT (challenge_id, goal_id) DO NOTHING
+          `,
+            [challenge.id, goalId, userId]
+          );
+        }
+
+        return challenge;
+      });
+    } catch (error) {
+      throw new Error(`Failed to create AI challenge: ${error.message}`);
+    }
+  },
+
+  /**
+   * Complete a challenge and update goal progress
+   */
+  completeChallenge: async (challengeId, userId, score, answers) => {
+    try {
+      return await withTransaction(async (transactionQuery) => {
+        // Get the challenge
+        const challengeResult = await transactionQuery(
+          'SELECT * FROM challenges WHERE id = $1',
+          [challengeId]
+        );
+
+        if (challengeResult.rows.length === 0) {
+          throw new Error('Challenge not found');
+        }
+
+        const challenge = challengeResult.rows[0];
+
+        // Create/update submission as completed
+        const submissionResult = await transactionQuery(
+          `
+          INSERT INTO submissions 
+            (challenge_id, user_id, submission_text, status, score, submitted_at)
+          VALUES ($1, $2, $3, 'completed', $4, CURRENT_TIMESTAMP)
+          ON CONFLICT (user_id, challenge_id, attempt_number) 
+          DO UPDATE SET status = 'completed', score = $4, graded_at = CURRENT_TIMESTAMP
+          RETURNING *
+        `,
+          [challengeId, userId, JSON.stringify(answers), score]
+        );
+
+        // If challenge is linked to a goal, update goal progress
+        if (challenge.goal_id) {
+          // Count completed challenges for this goal
+          const progressResult = await transactionQuery(
+            `
+            SELECT 
+              COUNT(DISTINCT c.id) as total_challenges,
+              COUNT(DISTINCT CASE WHEN s.status = 'completed' THEN c.id END) as completed_challenges
+            FROM challenges c
+            LEFT JOIN submissions s ON c.id = s.challenge_id AND s.user_id = $2
+            WHERE c.goal_id = $1 OR c.id IN (SELECT challenge_id FROM challenge_goals WHERE goal_id = $1)
+          `,
+            [challenge.goal_id, userId]
+          );
+
+          const { total_challenges, completed_challenges } =
+            progressResult.rows[0];
+          const progressPercentage =
+            total_challenges > 0
+              ? Math.round(
+                  (parseInt(completed_challenges) /
+                    parseInt(total_challenges)) *
+                    100
+                )
+              : 0;
+
+          // Update goal progress
+          await transactionQuery(
+            `
+            UPDATE goals 
+            SET progress_percentage = $1,
+                is_completed = CASE WHEN $1 >= 100 THEN true ELSE false END,
+                completion_date = CASE WHEN $1 >= 100 THEN CURRENT_TIMESTAMP ELSE NULL END,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = $2
+          `,
+            [progressPercentage, challenge.goal_id]
+          );
+        }
+
+        // Also check junction table for linked goals
+        const linkedGoalsResult = await transactionQuery(
+          'SELECT goal_id FROM challenge_goals WHERE challenge_id = $1',
+          [challengeId]
+        );
+
+        for (const row of linkedGoalsResult.rows) {
+          if (row.goal_id !== challenge.goal_id) {
+            // Update progress for each linked goal
+            const progressResult = await transactionQuery(
+              `
+              SELECT 
+                COUNT(DISTINCT c.id) as total_challenges,
+                COUNT(DISTINCT CASE WHEN s.status = 'completed' THEN c.id END) as completed_challenges
+              FROM challenges c
+              JOIN challenge_goals cg ON c.id = cg.challenge_id
+              LEFT JOIN submissions s ON c.id = s.challenge_id AND s.user_id = $2
+              WHERE cg.goal_id = $1
+            `,
+              [row.goal_id, userId]
+            );
+
+            const { total_challenges, completed_challenges } =
+              progressResult.rows[0];
+            const progressPercentage =
+              total_challenges > 0
+                ? Math.round(
+                    (parseInt(completed_challenges) /
+                      parseInt(total_challenges)) *
+                      100
+                  )
+                : 0;
+
+            await transactionQuery(
+              `
+              UPDATE goals 
+              SET progress_percentage = $1,
+                  is_completed = CASE WHEN $1 >= 100 THEN true ELSE false END,
+                  completion_date = CASE WHEN $1 >= 100 THEN CURRENT_TIMESTAMP ELSE NULL END,
+                  updated_at = CURRENT_TIMESTAMP
+              WHERE id = $2
+            `,
+              [progressPercentage, row.goal_id]
+            );
+          }
+        }
+
+        return submissionResult.rows[0];
+      });
+    } catch (error) {
+      throw new Error(`Failed to complete challenge: ${error.message}`);
+    }
+  },
+
+  /**
+   * Link a challenge to a goal
+   */
+  linkToGoal: async (challengeId, goalId, userId) => {
+    try {
+      // Verify ownership
+      const goalResult = await query(
+        'SELECT user_id FROM goals WHERE id = $1',
+        [goalId]
+      );
+
+      if (goalResult.rows.length === 0) {
+        throw new Error('Goal not found');
+      }
+
+      if (goalResult.rows[0].user_id !== userId) {
+        throw new Error('Not authorized to link to this goal');
+      }
+
+      // Create the link
+      await query(
+        `
+        INSERT INTO challenge_goals (challenge_id, goal_id, created_by)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (challenge_id, goal_id) DO NOTHING
+      `,
+        [challengeId, goalId, userId]
+      );
+
+      // Also update the challenge's goal_id if not set
+      await query(
+        `
+        UPDATE challenges SET goal_id = $1 WHERE id = $2 AND goal_id IS NULL
+      `,
+        [goalId, challengeId]
+      );
+
+      return { success: true };
+    } catch (error) {
+      throw new Error(`Failed to link challenge to goal: ${error.message}`);
+    }
+  },
+
+  /**
+   * Get challenges for a goal with user progress
+   */
+  getGoalChallenges: async (goalId, userId) => {
+    try {
+      const result = await query(
+        `
+        SELECT 
+          c.*,
+          s.status as user_status,
+          s.score as user_score,
+          s.submitted_at as last_attempt
+        FROM challenges c
+        LEFT JOIN submissions s ON c.id = s.challenge_id AND s.user_id = $2
+        WHERE (c.goal_id = $1 OR c.id IN (SELECT challenge_id FROM challenge_goals WHERE goal_id = $1))
+          AND c.is_active = true
+        ORDER BY c.created_at ASC
+      `,
+        [goalId, userId]
+      );
+
+      return result.rows;
+    } catch (error) {
+      throw new Error(`Failed to get goal challenges: ${error.message}`);
     }
   },
 };

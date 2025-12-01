@@ -3,15 +3,16 @@ const { Pool } = require('pg');
 
 // Test database configuration
 const testDbConfig = {
-  connectionString: process.env.TEST_DATABASE_URL ||
-    'postgresql://skillwise_user:skillwise_pass@localhost:5432/skillwise_test_db',
+  connectionString:
+    process.env.TEST_DATABASE_URL ||
+    'postgresql://skillwise_user:skillwise_pass@localhost:5433/skillwise_db',
   // Reduce connections for test environment
   max: 5,
   idleTimeoutMillis: 10000,
-  connectionTimeoutMillis: 1000,
+  connectionTimeoutMillis: 2000,
 };
 
-const testPool = new Pool(testDbConfig);
+let testPool = null;
 
 // Global test setup
 beforeAll(async () => {
@@ -19,14 +20,17 @@ beforeAll(async () => {
   process.env.NODE_ENV = 'test';
   process.env.JWT_SECRET = 'test-jwt-secret-key-for-testing-only';
   process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-for-testing-only';
+  process.env.GEMINI_API_KEY = 'test-gemini-api-key';
 
-  // Test database connection
+  // Try to connect to test database (optional for unit tests)
   try {
+    testPool = new Pool(testDbConfig);
     await testPool.query('SELECT 1');
     console.log('✅ Test database connected');
   } catch (err) {
-    console.error('❌ Test database connection failed:', err.message);
-    throw err;
+    console.warn('⚠️ Test database connection skipped:', err.message);
+    console.warn('   Unit tests will run without database.');
+    testPool = null;
   }
 });
 
@@ -36,9 +40,11 @@ afterAll(async () => {
     // Clean up test data if needed
     // await testPool.query('TRUNCATE TABLE users CASCADE');
 
-    // Close database connections
-    await testPool.end();
-    console.log('✅ Test database cleanup completed');
+    // Close database connections if connected
+    if (testPool) {
+      await testPool.end();
+      console.log('✅ Test database cleanup completed');
+    }
   } catch (err) {
     console.error('❌ Test cleanup failed:', err.message);
   }

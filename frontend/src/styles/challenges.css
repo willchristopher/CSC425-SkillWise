@@ -128,10 +128,13 @@
   border-radius: 12px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   border: 1px solid #e2e8f0;
-  overflow: hidden;
+  overflow: visible;
   transition: all 0.3s;
   position: relative;
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  min-height: 320px;
 }
 
 .challenge-card:hover {
@@ -272,6 +275,9 @@
 /* Challenge Content */
 .challenge-content {
   padding: 0 1.5rem 1.5rem 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .challenge-description {
@@ -415,6 +421,7 @@
   padding: 1.5rem;
   border-top: 1px solid #f7fafc;
   background-color: #fefefe;
+  margin-top: auto;
 }
 
 /* Challenge Progress Bar */
@@ -598,7 +605,7 @@
 }
 
 .form-label.required::after {
-  content: " *";
+  content: ' *';
   color: #e53e3e;
 }
 
@@ -862,8 +869,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-message {
@@ -876,11 +887,11 @@
   .challenge-card {
     border: 2px solid #000;
   }
-  
+
   .btn {
     border: 2px solid transparent;
   }
-  
+
   .btn-primary {
     border-color: #000;
   }
@@ -895,7 +906,7 @@
   .menu-button {
     transition: none;
   }
-  
+
   .spinner {
     animation: none;
   }

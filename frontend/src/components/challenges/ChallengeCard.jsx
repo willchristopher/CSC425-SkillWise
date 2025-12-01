@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import LinearProgress from '../progress/LinearProgress';
 
-const ChallengeCard = ({ 
-  challenge, 
-  onStart, 
-  onViewDetails, 
-  onLinkToGoal, 
-  onEdit, 
-  onDelete, 
+const ChallengeCard = ({
+  challenge,
+  onStart,
+  onViewDetails,
+  onLinkToGoal,
+  onEdit,
+  onDelete,
   userSubmission,
   showActions = true,
   isOwner = false,
@@ -53,12 +53,14 @@ const ChallengeCard = ({
     if (minutes < 60) return `${minutes} min`;
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
-    return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
+    return remainingMinutes > 0
+      ? `${hours}h ${remainingMinutes}m`
+      : `${hours}h`;
   };
 
   const handleAction = async (actionFn, ...args) => {
     if (!actionFn) return;
-    
+
     try {
       setIsLoading(true);
       await actionFn(...args);
@@ -80,7 +82,10 @@ const ChallengeCard = ({
   };
 
   const status = getStatus();
-  const canStart = status === 'not-started' || (status === 'failed' && (userSubmission?.attempts_count || 0) < (challenge?.max_attempts || 3));
+  const canStart =
+    status === 'not-started' ||
+    (status === 'failed' &&
+      (userSubmission?.attempts_count || 0) < (challenge?.max_attempts || 3));
 
   return (
     <div className={`challenge-card ${getStatusColor(status)}`}>
@@ -108,7 +113,7 @@ const ChallengeCard = ({
             >
               ⋯
             </button>
-            
+
             {isMenuOpen && (
               <div className="menu-dropdown">
                 <button
@@ -161,12 +166,18 @@ const ChallengeCard = ({
         <div className="challenge-meta">
           <div className="meta-item">
             <span className="meta-label">Category:</span>
-            <span className="meta-value">{challenge?.category || 'General'}</span>
+            <span className="meta-value">
+              {challenge?.category || 'General'}
+            </span>
           </div>
-          
+
           <div className="meta-item">
             <span className="meta-label">Difficulty:</span>
-            <span className={`difficulty-badge ${getDifficultyColor(challenge?.difficulty_level)}`}>
+            <span
+              className={`difficulty-badge ${getDifficultyColor(
+                challenge?.difficulty_level
+              )}`}
+            >
               {challenge?.difficulty_level || 'Medium'}
             </span>
           </div>
@@ -211,12 +222,13 @@ const ChallengeCard = ({
                 <span className="score-value">{userSubmission.score}%</span>
               </div>
             )}
-            
+
             {userSubmission.attempts_count > 0 && (
               <div className="attempts-info">
                 <span className="attempts-label">Attempts:</span>
                 <span className="attempts-value">
-                  {userSubmission.attempts_count} / {challenge?.max_attempts || 3}
+                  {userSubmission.attempts_count} /{' '}
+                  {challenge?.max_attempts || 3}
                 </span>
               </div>
             )}
@@ -249,9 +261,7 @@ const ChallengeCard = ({
         {/* Requirements */}
         {challenge?.requires_peer_review && (
           <div className="requirements">
-            <span className="requirement-badge">
-              👥 Peer Review Required
-            </span>
+            <span className="requirement-badge">Peer Review Required</span>
           </div>
         )}
       </div>
@@ -303,14 +313,16 @@ const ChallengeCard = ({
         )}
 
         {/* Statistics */}
-        {(challenge?.submission_count > 0 || challenge?.total_submissions > 0) && (
+        {(challenge?.submission_count > 0 ||
+          challenge?.total_submissions > 0) && (
           <div className="challenge-stats">
             <span className="stat">
-              👥 {challenge.total_submissions || challenge.submission_count || 0} attempts
+              {challenge.total_submissions || challenge.submission_count || 0}{' '}
+              attempts
             </span>
             {challenge.average_score && (
               <span className="stat">
-                📊 {parseFloat(challenge.average_score).toFixed(1)}% avg
+                {parseFloat(challenge.average_score).toFixed(1)}% avg
               </span>
             )}
           </div>
@@ -318,7 +330,7 @@ const ChallengeCard = ({
       </div>
 
       {/* Click overlay for card actions */}
-      <div 
+      <div
         className="card-overlay"
         onClick={() => onViewDetails && onViewDetails(challenge)}
         role="button"

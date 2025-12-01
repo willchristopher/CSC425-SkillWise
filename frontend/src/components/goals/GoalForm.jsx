@@ -2,44 +2,38 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { getCategoryList } from '../../constants/categories';
 
 // Validation schema
 const goalSchema = z.object({
-  title: z.string()
+  title: z
+    .string()
     .min(1, 'Goal title is required')
     .max(255, 'Title must be less than 255 characters'),
-  description: z.string()
+  description: z
+    .string()
     .max(1000, 'Description must be less than 1000 characters')
-    .optional(),
-  category: z.string()
-    .min(1, 'Please select a category'),
-  difficulty_level: z.enum(['easy', 'medium', 'hard']),
-  target_completion_date: z.string()
     .optional()
+    .or(z.literal('')),
+  category: z.string().min(1, 'Please select a category'),
+  difficulty_level: z.enum(['easy', 'medium', 'hard']),
+  target_completion_date: z
+    .string()
+    .optional()
+    .or(z.literal(''))
     .refine((date) => {
       if (!date) return true;
       return new Date(date) > new Date();
     }, 'Target date must be in the future'),
-  points_reward: z.number()
+  points_reward: z.coerce
+    .number()
     .min(1, 'Points must be at least 1')
     .max(1000, 'Points cannot exceed 1000'),
-  is_public: z.boolean(),
+  is_public: z.boolean().optional().default(false),
 });
 
-const CATEGORIES = [
-  'Programming',
-  'Web Development',
-  'Data Science',
-  'Design',
-  'Business',
-  'Marketing',
-  'Language Learning',
-  'Mathematics',
-  'Science',
-  'Personal Development',
-  'Fitness',
-  'Other',
-];
+// Get categories from shared constants
+const CATEGORIES = getCategoryList();
 
 const GoalForm = ({ onSubmit, initialData = null, isLoading = false }) => {
   const {
@@ -55,19 +49,40 @@ const GoalForm = ({ onSubmit, initialData = null, isLoading = false }) => {
       category: initialData?.category || '',
       difficulty_level: initialData?.difficulty_level || 'medium',
       target_completion_date: initialData?.target_completion_date
-        ? new Date(initialData.target_completion_date).toISOString().split('T')[0]
+        ? new Date(initialData.target_completion_date)
+            .toISOString()
+            .split('T')[0]
         : '',
       points_reward: initialData?.points_reward || 10,
       is_public: initialData?.is_public || false,
     },
   });
 
+  // Log validation errors for debugging
+  React.useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      console.log('GoalForm validation errors:', errors);
+      // Show alert for debugging - remove this later
+      const errorMessages = Object.entries(errors)
+        .map(([key, value]) => `${key}: ${value.message}`)
+        .join(', ');
+      console.error('Form validation failed:', errorMessages);
+    }
+  }, [errors]);
+
   const handleFormSubmit = (data) => {
-    onSubmit({
+    console.log('GoalForm handleFormSubmit called with data:', data);
+    const submitData = {
       ...data,
       points_reward: Number(data.points_reward),
       target_completion_date: data.target_completion_date || null,
-    });
+    };
+    console.log('Submitting goal data:', submitData);
+    try {
+      onSubmit(submitData);
+    } catch (error) {
+      console.error('Error calling onSubmit:', error);
+    }
   };
 
   const handleReset = () => {
@@ -75,7 +90,13 @@ const GoalForm = ({ onSubmit, initialData = null, isLoading = false }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="goal-form">
+    <form
+      onSubmit={(e) => {
+        console.log('Form submit event');
+        handleSubmit(handleFormSubmit)(e);
+      }}
+      className="goal-form"
+    >
       <div className="form-group">
         <label htmlFor="title" className="form-label">
           Goal Title *
@@ -101,7 +122,9 @@ const GoalForm = ({ onSubmit, initialData = null, isLoading = false }) => {
           {...register('description')}
           id="description"
           rows="4"
-          className={`form-textarea ${errors.description ? 'form-input-error' : ''}`}
+          className={`form-textarea ${
+            errors.description ? 'form-input-error' : ''
+          }`}
           placeholder="Describe your learning goal in detail..."
           disabled={isLoading}
         />
@@ -118,13 +141,15 @@ const GoalForm = ({ onSubmit, initialData = null, isLoading = false }) => {
           <select
             {...register('category')}
             id="category"
-            className={`form-select ${errors.category ? 'form-input-error' : ''}`}
+            className={`form-select ${
+              errors.category ? 'form-input-error' : ''
+            }`}
             disabled={isLoading}
           >
             <option value="">Select a category</option>
             {CATEGORIES.map((cat) => (
-              <option key={cat} value={cat.toLowerCase()}>
-                {cat}
+              <option key={cat.id} value={cat.id}>
+                {cat.icon} {cat.name}
               </option>
             ))}
           </select>
@@ -159,12 +184,16 @@ const GoalForm = ({ onSubmit, initialData = null, isLoading = false }) => {
             {...register('target_completion_date')}
             type="date"
             id="target_completion_date"
-            className={`form-input ${errors.target_completion_date ? 'form-input-error' : ''}`}
+            className={`form-input ${
+              errors.target_completion_date ? 'form-input-error' : ''
+            }`}
             min={new Date().toISOString().split('T')[0]}
             disabled={isLoading}
           />
           {errors.target_completion_date && (
-            <span className="form-error">{errors.target_completion_date.message}</span>
+            <span className="form-error">
+              {errors.target_completion_date.message}
+            </span>
           )}
         </div>
 
@@ -178,7 +207,9 @@ const GoalForm = ({ onSubmit, initialData = null, isLoading = false }) => {
             id="points_reward"
             min="1"
             max="1000"
-            className={`form-input ${errors.points_reward ? 'form-input-error' : ''}`}
+            className={`form-input ${
+              errors.points_reward ? 'form-input-error' : ''
+            }`}
             disabled={isLoading}
           />
           {errors.points_reward && (
@@ -220,8 +251,10 @@ const GoalForm = ({ onSubmit, initialData = null, isLoading = false }) => {
               <span className="btn-spinner"></span>
               {initialData ? 'Updating...' : 'Creating...'}
             </>
+          ) : initialData ? (
+            'Update Goal'
           ) : (
-            initialData ? 'Update Goal' : 'Create Goal'
+            'Create Goal'
           )}
         </button>
       </div>

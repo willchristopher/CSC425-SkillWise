@@ -6,6 +6,8 @@
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.0.18",
     "@hookform/resolvers": "^3.10.0",
+    "@sentry/browser": "^10.27.0",
+    "@sentry/react": "^7.120.4",
     "axios": "^1.12.2",
     "cookie-parser": "^1.4.7",
     "react": "^18.3.1",

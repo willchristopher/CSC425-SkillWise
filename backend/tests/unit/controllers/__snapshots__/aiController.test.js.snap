@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AI Controller generateChallenge response structure should match snapshot 1`] = `
+{
+  "data": {
+    "description": "Create a RESTful API",
+    "difficulty_level": "intermediate",
+    "estimated_time_minutes": 60,
+    "generated_at": "2024-01-01T00:00:00.000Z",
+    "generated_by_ai": true,
+    "hints": [
+      "Use Express",
+    ],
+    "requirements": [
+      "CRUD operations",
+      "Error handling",
+    ],
+    "title": "Build a REST API",
+  },
+  "success": true,
+}
+`;

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { getCategoryList } from '../../constants/categories';
 
 // Validation schema
 const challengeSchema = z.object({
@@ -10,7 +11,10 @@ const challengeSchema = z.object({
   instructions: z.string().min(1, 'Instructions are required'),
   category: z.string().min(1, 'Category is required'),
   difficulty_level: z.enum(['easy', 'medium', 'hard']),
-  estimated_time_minutes: z.number().min(1, 'Must be at least 1 minute').optional(),
+  estimated_time_minutes: z
+    .number()
+    .min(1, 'Must be at least 1 minute')
+    .optional(),
   points_reward: z.number().min(1, 'Must be at least 1 point').default(10),
   max_attempts: z.number().min(1, 'Must allow at least 1 attempt').default(3),
   requires_peer_review: z.boolean().default(false),
@@ -18,29 +22,52 @@ const challengeSchema = z.object({
   learning_objectives: z.array(z.string()).default([]),
 });
 
-const ChallengeForm = ({ challenge = null, onSubmit, onCancel, isLoading = false }) => {
+// Default form values - defined outside component to prevent recreation on each render
+const defaultFormValues = {
+  title: '',
+  description: '',
+  instructions: '',
+  category: '',
+  difficulty_level: 'medium',
+  estimated_time_minutes: 30,
+  points_reward: 10,
+  max_attempts: 3,
+  requires_peer_review: false,
+  tags: [],
+  learning_objectives: [],
+};
+
+const ChallengeForm = ({
+  challenge = null,
+  onSubmit,
+  onCancel,
+  isLoading = false,
+}) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
     watch,
+    reset,
   } = useForm({
     resolver: zodResolver(challengeSchema),
-    defaultValues: challenge || {
-      title: '',
-      description: '',
-      instructions: '',
-      category: '',
-      difficulty_level: 'medium',
-      estimated_time_minutes: 30,
-      points_reward: 10,
-      max_attempts: 3,
-      requires_peer_review: false,
-      tags: [],
-      learning_objectives: [],
-    },
+    defaultValues: challenge || defaultFormValues,
   });
+
+  // Reset form when challenge prop changes (e.g., AI-generated challenge)
+  useEffect(() => {
+    if (challenge) {
+      reset({
+        ...defaultFormValues,
+        ...challenge,
+        // Ensure instructions field is filled
+        instructions: challenge.instructions || challenge.description || '',
+      });
+    } else {
+      reset(defaultFormValues);
+    }
+  }, [challenge, reset]);
 
   const watchedTags = watch('tags');
   const watchedObjectives = watch('learning_objectives');
@@ -53,39 +80,37 @@ const ChallengeForm = ({ challenge = null, onSubmit, onCancel, isLoading = false
   };
 
   const handleRemoveTag = (index) => {
-    setValue('tags', watchedTags.filter((_, i) => i !== index));
+    setValue(
+      'tags',
+      watchedTags.filter((_, i) => i !== index)
+    );
   };
 
   const handleAddObjective = () => {
     const newObjective = prompt('Enter a learning objective:');
     if (newObjective && newObjective.trim()) {
-      setValue('learning_objectives', [...watchedObjectives, newObjective.trim()]);
+      setValue('learning_objectives', [
+        ...watchedObjectives,
+        newObjective.trim(),
+      ]);
     }
   };
 
   const handleRemoveObjective = (index) => {
-    setValue('learning_objectives', watchedObjectives.filter((_, i) => i !== index));
+    setValue(
+      'learning_objectives',
+      watchedObjectives.filter((_, i) => i !== index)
+    );
   };
 
-  const categories = [
-    'Programming',
-    'Web Development',
-    'Data Science',
-    'Machine Learning',
-    'Design',
-    'DevOps',
-    'Database',
-    'Security',
-    'Mobile Development',
-    'Game Development',
-    'Other',
-  ];
+  // Get categories from shared constants
+  const categories = getCategoryList();
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="challenge-form">
       <div className="form-section">
         <h3>Basic Information</h3>
-        
+
         <div className="form-group">
           <label htmlFor="title" className="form-label required">
             Challenge Title
@@ -137,7 +162,7 @@ const ChallengeForm = ({ challenge = null, onSubmit, onCancel, isLoading = false
 
       <div className="form-section">
         <h3>Challenge Settings</h3>
-        
+
         <div className="form-row">
           <div className="form-group">
             <label htmlFor="category" className="form-label required">
@@ -150,8 +175,8 @@ const ChallengeForm = ({ challenge = null, onSubmit, onCancel, isLoading = false
             >
               <option value="">Select a category</option>
               {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
+                <option key={cat.id} value={cat.id}>
+                  {cat.icon} {cat.name}
                 </option>
               ))}
             </select>
@@ -167,14 +192,18 @@ const ChallengeForm = ({ challenge = null, onSubmit, onCancel, isLoading = false
             <select
               id="difficulty_level"
               {...register('difficulty_level')}
-              className={`form-select ${errors.difficulty_level ? 'error' : ''}`}
+              className={`form-select ${
+                errors.difficulty_level ? 'error' : ''
+              }`}
             >
               <option value="easy">Easy</option>
               <option value="medium">Medium</option>
               <option value="hard">Hard</option>
             </select>
             {errors.difficulty_level && (
-              <span className="form-error">{errors.difficulty_level.message}</span>
+              <span className="form-error">
+                {errors.difficulty_level.message}
+              </span>
             )}
           </div>
         </div>
@@ -189,11 +218,15 @@ const ChallengeForm = ({ challenge = null, onSubmit, onCancel, isLoading = false
               type="number"
               min="1"
               {...register('estimated_time_minutes', { valueAsNumber: true })}
-              className={`form-input ${errors.estimated_time_minutes ? 'error' : ''}`}
+              className={`form-input ${
+                errors.estimated_time_minutes ? 'error' : ''
+              }`}
               placeholder="30"
             />
             {errors.estimated_time_minutes && (
-              <span className="form-error">{errors.estimated_time_minutes.message}</span>
+              <span className="form-error">
+                {errors.estimated_time_minutes.message}
+              </span>
             )}
           </div>
 
@@ -248,7 +281,7 @@ const ChallengeForm = ({ challenge = null, onSubmit, onCancel, isLoading = false
 
       <div className="form-section">
         <h3>Additional Information</h3>
-        
+
         <div className="form-group">
           <label className="form-label">Tags</label>
           <div className="tag-manager">
@@ -315,12 +348,12 @@ const ChallengeForm = ({ challenge = null, onSubmit, onCancel, isLoading = false
         >
           Cancel
         </button>
-        <button
-          type="submit"
-          className="btn btn-primary"
-          disabled={isLoading}
-        >
-          {isLoading ? 'Saving...' : (challenge ? 'Update Challenge' : 'Create Challenge')}
+        <button type="submit" className="btn btn-primary" disabled={isLoading}>
+          {isLoading
+            ? 'Saving...'
+            : challenge
+            ? 'Update Challenge'
+            : 'Create Challenge'}
         </button>
       </div>
     </form>

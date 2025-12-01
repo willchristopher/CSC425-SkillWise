@@ -494,7 +494,8 @@
 }
 
 /* Goal Modal Styles */
-.modal-overlay {
+.modal-overlay,
+.modal-backdrop {
   position: fixed;
   top: 0;
   left: 0;
@@ -572,7 +573,7 @@
 }
 
 .form-label.required::after {
-  content: " *";
+  content: ' *';
   color: #e53e3e;
 }
 
@@ -614,6 +615,11 @@
   font-weight: 500;
 }
 
+.form-input-error {
+  border-color: #e53e3e !important;
+  box-shadow: 0 0 0 2px rgba(229, 62, 62, 0.2) !important;
+}
+
 /* Form Actions */
 .form-actions {
   display: flex;
@@ -644,8 +650,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-message {
@@ -720,8 +730,14 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Focus management */
@@ -742,11 +758,11 @@
   .goal-card {
     border: 2px solid #000;
   }
-  
+
   .btn {
     border: 2px solid transparent;
   }
-  
+
   .btn-primary {
     border-color: #000;
   }
@@ -760,7 +776,7 @@
   .progress-fill {
     transition: none;
   }
-  
+
   .spinner {
     animation: none;
   }

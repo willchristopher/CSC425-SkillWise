@@ -1,0 +1,316 @@
+/* AI Generate Modal Styles */
+.ai-generate-modal {
+  background: white;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px 12px 0 0;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.close-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.modal-content {
+  padding: 24px;
+}
+
+.modal-description {
+  color: #6b7280;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.form-group select,
+.form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group select:focus,
+.form-group input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group select:disabled,
+.form-group input:disabled {
+  background: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.error-message {
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 1px solid #fecaca;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.btn-secondary:hover {
+  background: #e5e7eb;
+}
+
+.generate-btn {
+  min-width: 180px;
+  justify-content: center;
+}
+
+/* Generated Challenge Display */
+.generated-challenge {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.generated-challenge h3 {
+  font-size: 1.5rem;
+  color: #1f2937;
+  margin: 0 0 16px 0;
+}
+
+.challenge-meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.challenge-meta span {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.challenge-meta .difficulty {
+  text-transform: capitalize;
+}
+
+.challenge-meta .difficulty.easy {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.challenge-meta .difficulty.medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.challenge-meta .difficulty.hard {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.challenge-meta .category {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.challenge-meta .time {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.challenge-section {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.challenge-section h4 {
+  margin: 0 0 12px 0;
+  color: #374151;
+  font-size: 1rem;
+}
+
+.challenge-section p {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.challenge-section ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.challenge-section li {
+  color: #4b5563;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.hints-list {
+  list-style: none;
+  padding: 0;
+}
+
+.hints-list li {
+  padding: 8px 12px;
+  background: #fffbeb;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.challenge-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.challenge-tags .tag {
+  background: #e5e7eb;
+  color: #374151;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .ai-generate-modal {
+    width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .modal-header {
+    border-radius: 0;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

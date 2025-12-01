@@ -6,6 +6,21 @@ const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
 const pino = require('pino');
 const pinoHttp = require('pino-http');
+const Sentry = require('@sentry/node');
+
+// Initialize Sentry for error tracking (Story 3.8)
+if (
+  process.env.SENTRY_DSN &&
+  process.env.SENTRY_DSN !== 'your-sentry-dsn-url'
+) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV || 'development',
+    tracesSampleRate: 1.0,
+    integrations: [new Sentry.Integrations.Http({ tracing: true })],
+  });
+  console.log('Sentry initialized for backend error tracking');
+}
 
 // Import middleware
 const errorHandler = require('./middleware/errorHandler');
@@ -31,57 +46,65 @@ const logger = pino({
 });
 
 // Add request logging middleware
-app.use(pinoHttp({
-  logger,
-  autoLogging: true,
-  serializers: {
-    req: (req) => ({
-      method: req.method,
-      url: req.url,
-      headers: {
-        'user-agent': req.headers['user-agent'],
-        'content-type': req.headers['content-type'],
-      },
-    }),
-    res: (res) => ({
-      statusCode: res.statusCode,
-    }),
-  },
-}));
+app.use(
+  pinoHttp({
+    logger,
+    autoLogging: true,
+    serializers: {
+      req: (req) => ({
+        method: req.method,
+        url: req.url,
+        headers: {
+          'user-agent': req.headers['user-agent'],
+          'content-type': req.headers['content-type'],
+        },
+      }),
+      res: (res) => ({
+        statusCode: res.statusCode,
+      }),
+    },
+  })
+);
 
 // Security middleware
-app.use(helmet({
-  crossOriginEmbedderPolicy: false,
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ['\'self\''],
-      styleSrc: ['\'self\'', '\'unsafe-inline\''],
-      scriptSrc: ['\'self\''],
-      imgSrc: ['\'self\'', 'data:', 'https:'],
+app.use(
+  helmet({
+    crossOriginEmbedderPolicy: false,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+      },
     },
-  },
-}));
+  })
+);
 
 // CORS configuration
 const allowedOrigins = ['http://localhost:3000', 'http://localhost:3002'];
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-}));// Rate limiting
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  })
+); // Rate limiting
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // limit each IP to 100 requests per windowMs
   message: {
     error: 'Too many requests from this IP, please try again later.',
-    retryAfter: Math.ceil((parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000) / 1000),
+    retryAfter: Math.ceil(
+      (parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000) / 1000
+    ),
   },
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
@@ -90,15 +113,19 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Body parsing middleware
-app.use(express.json({
-  limit: '10mb',
-  strict: true,
-}));
+app.use(
+  express.json({
+    limit: '10mb',
+    strict: true,
+  })
+);
 
-app.use(express.urlencoded({
-  extended: true,
-  limit: '10mb',
-}));
+app.use(
+  express.urlencoded({
+    extended: true,
+    limit: '10mb',
+  })
+);
 
 // Cookie parsing middleware (needed for refresh tokens)
 app.use(cookieParser());
@@ -112,6 +139,21 @@ app.get('/healthz', (req, res) => {
     environment: process.env.NODE_ENV || 'development',
     version: process.env.npm_package_version || '1.0.0',
   });
+});
+
+// Test error endpoint for Sentry (Story 3.8)
+app.get('/api/test-error', (req, res, next) => {
+  try {
+    throw new Error('Test Sentry error from backend');
+  } catch (error) {
+    if (
+      process.env.SENTRY_DSN &&
+      process.env.SENTRY_DSN !== 'your-sentry-dsn-url'
+    ) {
+      Sentry.captureException(error);
+    }
+    next(error);
+  }
 });
 
 // Mount API routes

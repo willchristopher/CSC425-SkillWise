@@ -1,10 +1,18 @@
-// AI routes for OpenAI integration
+// AI routes for Gemini API integration
 const express = require('express');
 const router = express.Router();
 const aiController = require('../controllers/aiController');
 const auth = require('../middleware/auth');
 
-// POST /api/ai/feedback - Generate AI feedback for a submission
+// POST /api/ai/generateChallenge - Generate a challenge using AI (Story 3.1, 3.2)
+// Body: { skill, difficulty, category, topic }
+router.post('/generateChallenge', auth, aiController.generateChallenge);
+
+// POST /api/ai/submitForFeedback - Submit work for AI feedback (Story 3.4, 3.5)
+// Body: { submissionText, challengeContext: { title, description }, submissionId? }
+router.post('/submitForFeedback', auth, aiController.submitForFeedback);
+
+// POST /api/ai/feedback - Generate AI feedback for a submission (legacy)
 // Body: { submissionText, challengeContext: { title, description, requirements } }
 router.post('/feedback', auth, aiController.generateFeedback);
 

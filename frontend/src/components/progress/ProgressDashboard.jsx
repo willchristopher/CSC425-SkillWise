@@ -16,7 +16,7 @@ const ProgressDashboard = () => {
     goals: { completed: 0, total: 0 },
     byDifficulty: [],
     byCategory: [],
-    recent: []
+    recent: [],
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -28,30 +28,36 @@ const ProgressDashboard = () => {
 
       // Fetch user progress statistics with error handling
       const [challengesResponse, goalsResponse] = await Promise.all([
-        apiService.challenges.getAll().catch(err => {
+        apiService.challenges.getAll().catch((err) => {
           console.error('Failed to fetch challenges:', err);
           return { data: [] };
         }),
-        apiService.goals.getAll().catch(err => {
+        apiService.goals.getAll().catch((err) => {
           console.error('Failed to fetch goals:', err);
           return { data: [] };
-        })
+        }),
       ]);
 
       // Handle both response.data and response.data.data structures
-      const challengesData = challengesResponse.data?.data || challengesResponse.data || [];
+      const challengesData =
+        challengesResponse.data?.data || challengesResponse.data || [];
       const goalsData = goalsResponse.data?.data || goalsResponse.data || [];
-      
+
       const challenges = Array.isArray(challengesData) ? challengesData : [];
       const goals = Array.isArray(goalsData) ? goalsData : [];
 
       // Calculate progress metrics
-      const completedChallenges = challenges.filter(c => c.status === 'completed' || c.is_completed).length;
-      const completedGoals = goals.filter(g => g.status === 'completed' || g.is_completed).length;
-      
+      const completedChallenges = challenges.filter(
+        (c) => c.status === 'completed' || c.is_completed
+      ).length;
+      const completedGoals = goals.filter(
+        (g) => g.status === 'completed' || g.is_completed
+      ).length;
+
       // Group challenges by difficulty
       const difficultyStats = challenges.reduce((acc, challenge) => {
-        const difficulty = challenge.difficulty_level || challenge.difficulty || 'medium';
+        const difficulty =
+          challenge.difficulty_level || challenge.difficulty || 'medium';
         if (!acc[difficulty]) {
           acc[difficulty] = { total: 0, completed: 0 };
         }
@@ -66,7 +72,7 @@ const ProgressDashboard = () => {
       const categoryStats = challenges.reduce((acc, challenge) => {
         const tags = challenge.tags || [challenge.category] || ['General'];
         const tagArray = Array.isArray(tags) ? tags : [tags];
-        tagArray.forEach(tag => {
+        tagArray.forEach((tag) => {
           if (!acc[tag]) {
             acc[tag] = { total: 0, completed: 0 };
           }
@@ -79,14 +85,16 @@ const ProgressDashboard = () => {
       }, {});
 
       // Format data for components
-      const byDifficulty = Object.entries(difficultyStats).map(([difficulty, data]) => ({
-        id: difficulty,
-        label: difficulty.charAt(0).toUpperCase() + difficulty.slice(1),
-        completed: data.completed,
-        total: data.total,
-        icon: getDifficultyIcon(difficulty),
-        color: getDifficultyColor(difficulty)
-      }));
+      const byDifficulty = Object.entries(difficultyStats).map(
+        ([difficulty, data]) => ({
+          id: difficulty,
+          label: difficulty.charAt(0).toUpperCase() + difficulty.slice(1),
+          completed: data.completed,
+          total: data.total,
+          icon: getDifficultyIcon(difficulty),
+          color: getDifficultyColor(difficulty),
+        })
+      );
 
       const byCategory = Object.entries(categoryStats)
         .sort(([, a], [, b]) => b.total - a.total)
@@ -96,31 +104,44 @@ const ProgressDashboard = () => {
           label: category,
           completed: data.completed,
           total: data.total,
-          icon: '📚',
-          color: getCategoryColor(index)
+          icon: (
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+              />
+            </svg>
+          ),
+          color: getCategoryColor(index),
         }));
 
       setProgressData({
         overall: {
           completed: completedChallenges + completedGoals,
-          total: challenges.length + goals.length
+          total: challenges.length + goals.length,
         },
         challenges: {
           completed: completedChallenges,
-          total: challenges.length
+          total: challenges.length,
         },
         goals: {
           completed: completedGoals,
-          total: goals.length
+          total: goals.length,
         },
         byDifficulty,
         byCategory,
         recent: challenges
-          .filter(c => c.status === 'completed')
+          .filter((c) => c.status === 'completed')
           .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-          .slice(0, 5)
+          .slice(0, 5),
       });
-
     } catch (err) {
       console.error('Error fetching progress data:', err);
       setError('Failed to load progress data');
@@ -134,19 +155,25 @@ const ProgressDashboard = () => {
   }, [fetchProgressData]);
 
   const getDifficultyIcon = (difficulty) => {
-    const icons = {
-      easy: '🟢',
-      medium: '🟡',
-      hard: '🔴'
+    // Return colored circle SVG based on difficulty
+    const colors = {
+      easy: '#38a169',
+      medium: '#ed8936',
+      hard: '#e53e3e',
     };
-    return icons[difficulty] || '⚪';
+    const color = colors[difficulty] || '#a0aec0';
+    return (
+      <svg className="w-4 h-4" fill={color} viewBox="0 0 20 20">
+        <circle cx="10" cy="10" r="8" />
+      </svg>
+    );
   };
 
   const getDifficultyColor = (difficulty) => {
     const colors = {
       easy: '#38a169',
       medium: '#ed8936',
-      hard: '#e53e3e'
+      hard: '#e53e3e',
     };
     return colors[difficulty] || '#3182ce';
   };
@@ -157,7 +184,12 @@ const ProgressDashboard = () => {
   };
 
   const calculatePercentage = (completed, total) => {
-    if (!total || total === 0 || !Number.isFinite(completed) || !Number.isFinite(total)) {
+    if (
+      !total ||
+      total === 0 ||
+      !Number.isFinite(completed) ||
+      !Number.isFinite(total)
+    ) {
       return 0;
     }
     const percentage = (completed / total) * 100;
@@ -181,10 +213,7 @@ const ProgressDashboard = () => {
         <div className="error-message">
           <h3>Error Loading Progress</h3>
           <p>{error}</p>
-          <button 
-            onClick={fetchProgressData}
-            className="btn btn-primary"
-          >
+          <button onClick={fetchProgressData} className="btn btn-primary">
             Retry
           </button>
         </div>
@@ -212,11 +241,16 @@ const ProgressDashboard = () => {
                 details="Create goals and challenges to begin"
                 animated={false}
               />
-              <p className="placeholder-hint">Start your learning journey today!</p>
+              <p className="placeholder-hint">
+                Start your learning journey today!
+              </p>
             </div>
           ) : (
             <CircularProgress
-              percentage={calculatePercentage(progressData.overall.completed, progressData.overall.total)}
+              percentage={calculatePercentage(
+                progressData.overall.completed,
+                progressData.overall.total
+              )}
               size={150}
               label="Complete"
               details={`${progressData.overall.completed} of ${progressData.overall.total} items completed`}
@@ -228,11 +262,14 @@ const ProgressDashboard = () => {
         {/* Challenges Progress */}
         <div className="dashboard-section challenges-progress">
           <LinearProgress
-            percentage={calculatePercentage(progressData.challenges.completed, progressData.challenges.total)}
+            percentage={calculatePercentage(
+              progressData.challenges.completed,
+              progressData.challenges.total
+            )}
             title="Challenges"
             details={{
               completed: progressData.challenges.completed,
-              total: progressData.challenges.total
+              total: progressData.challenges.total,
             }}
             color="#3182ce"
             showStripes={progressData.challenges.completed > 0}
@@ -243,11 +280,14 @@ const ProgressDashboard = () => {
         {/* Goals Progress */}
         <div className="dashboard-section goals-progress">
           <LinearProgress
-            percentage={calculatePercentage(progressData.goals.completed, progressData.goals.total)}
+            percentage={calculatePercentage(
+              progressData.goals.completed,
+              progressData.goals.total
+            )}
             title="Goals"
             details={{
               completed: progressData.goals.completed,
-              total: progressData.goals.total
+              total: progressData.goals.total,
             }}
             color="#38a169"
             animated={true}
@@ -285,10 +325,24 @@ const ProgressDashboard = () => {
             <div className="recent-list">
               {progressData.recent.map((item, index) => (
                 <div key={item.id} className="recent-item">
-                  <div className="recent-icon">🏆</div>
+                  <div className="recent-icon">
+                    <svg
+                      className="w-6 h-6 text-yellow-500"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5 5a3 3 0 015-2.236A3 3 0 0114.83 6H16a2 2 0 110 4h-1.17a3.001 3.001 0 01-5.66 0H4a2 2 0 110-4h1.17A3.001 3.001 0 015 5zm4 4a1 1 0 100-2 1 1 0 000 2zm2 3a1 1 0 10-2 0v3a1 1 0 102 0v-3z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
                   <div className="recent-content">
                     <h4>{item.title}</h4>
-                    <p>{item.points} points • {item.difficulty}</p>
+                    <p>
+                      {item.points} points • {item.difficulty}
+                    </p>
                   </div>
                   <div className="recent-date">
                     {new Date(item.updatedAt).toLocaleDateString()}
@@ -310,7 +364,7 @@ const ProgressDashboard = () => {
               { name: 'Thu', completed: 45, remaining: 55 },
               { name: 'Fri', completed: 80, remaining: 20 },
               { name: 'Sat', completed: 30, remaining: 70 },
-              { name: 'Sun', completed: 95, remaining: 5 }
+              { name: 'Sun', completed: 95, remaining: 5 },
             ]}
             type="vertical"
             height={200}

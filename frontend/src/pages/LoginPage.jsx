@@ -17,14 +17,14 @@ const LoginPage = () => {
   const handleLogin = async (formData) => {
     setIsLoading(true);
     setError('');
-    
+
     const result = await login({
       email: formData.email,
-      password: formData.password
+      password: formData.password,
     });
-    
+
     setIsLoading(false);
-    
+
     if (result.success) {
       // Redirect to dashboard or intended page
       navigate(from, { replace: true });
@@ -34,20 +34,30 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50">
       {/* Header with Back Button */}
       <div className="absolute top-0 left-0 right-0 z-10">
         <div className="flex justify-between items-center p-6">
-          <Link 
-            to="/" 
-            className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
+          <Link
+            to="/"
+            className="flex items-center text-gray-600 hover:text-emerald-600 transition-colors"
           >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            <svg
+              className="w-5 h-5 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              />
             </svg>
             Back to Home
           </Link>
-          <Link to="/" className="text-2xl font-bold text-blue-600">
+          <Link to="/" className="text-2xl font-bold text-emerald-600">
             SkillWise
           </Link>
         </div>
@@ -61,32 +71,61 @@ const LoginPage = () => {
               Welcome Back to SkillWise
             </h1>
             <p className="text-lg text-gray-600 mb-8">
-              Continue your learning journey with AI-powered tutoring and personalized study plans.
+              Continue your learning journey with AI-powered tutoring and
+              personalized study plans.
             </p>
-            
+
             <div className="space-y-4">
               <div className="flex items-center">
-                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <div className="flex-shrink-0 w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-4 h-4 text-emerald-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 </div>
-                <p className="ml-3 text-gray-700">Track your progress across all subjects</p>
+                <p className="ml-3 text-gray-700">
+                  Track your progress across all subjects
+                </p>
               </div>
-              
+
               <div className="flex items-center">
-                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <div className="flex-shrink-0 w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-4 h-4 text-emerald-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 </div>
-                <p className="ml-3 text-gray-700">Get instant AI tutoring support</p>
+                <p className="ml-3 text-gray-700">
+                  Get instant AI tutoring support
+                </p>
               </div>
-              
+
               <div className="flex items-center">
-                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                <div className="flex-shrink-0 w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-4 h-4 text-emerald-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 </div>
                 <p className="ml-3 text-gray-700">Connect with study groups</p>
@@ -99,10 +138,15 @@ const LoginPage = () => {
         <div className="flex-1 flex flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
           <div className="mx-auto w-full max-w-sm lg:w-96">
             <div className="text-center lg:text-left">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Sign in to your account</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                Sign in to your account
+              </h2>
               <p className="text-gray-600">
                 Don't have an account?{' '}
-                <Link to="/signup" className="text-blue-600 hover:text-blue-500 font-semibold">
+                <Link
+                  to="/signup"
+                  className="text-emerald-600 hover:text-emerald-500 font-semibold"
+                >
                   Create one here
                 </Link>
               </p>
@@ -113,8 +157,16 @@ const LoginPage = () => {
                 <div className="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded">
                   <div className="flex">
                     <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      <svg
+                        className="h-5 w-5 text-red-400"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                     </div>
                     <div className="ml-3">
@@ -125,32 +177,11 @@ const LoginPage = () => {
               )}
 
               <div className="bg-white py-8 px-6 shadow-xl rounded-lg border">
-                <LoginForm 
-                  onSubmit={handleLogin} 
+                <LoginForm
+                  onSubmit={handleLogin}
                   isLoading={isLoading}
                   error={error}
                 />
-              </div>
-
-              {/* Additional Options */}
-              <div className="mt-6">
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300" />
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-gray-50 text-gray-500">Need help?</span>
-                  </div>
-                </div>
-
-                <div className="mt-6 text-center">
-                  <Link 
-                    to="/forgot-password" 
-                    className="text-blue-600 hover:text-blue-500 text-sm font-medium"
-                  >
-                    Forgot your password?
-                  </Link>
-                </div>
               </div>
             </div>
           </div>
