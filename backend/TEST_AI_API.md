@@ -3,11 +3,13 @@
 ## Setup
 
 1. **Get a Gemini API key from Google AI Studio:**
+
    - Go to https://makersuite.google.com/app/apikey
    - Click "Create API key"
    - Copy your API key
 
 2. **Add your Gemini API key to `.env` file:**
+
 ```bash
 GEMINI_API_KEY=your-actual-api-key-here
 ```
@@ -19,11 +21,13 @@ GEMINI_API_KEY=your-actual-api-key-here
 All endpoints require authentication (Bearer token in Authorization header).
 
 ### 1. Generate Feedback
+
 **POST** `/api/ai/feedback`
 
 Generate AI feedback for a code submission.
 
 **Request Body:**
+
 ```json
 {
   "submissionText": "function add(a, b) { return a + b; }",
@@ -36,6 +40,7 @@ Generate AI feedback for a code submission.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -48,11 +53,13 @@ Generate AI feedback for a code submission.
 ```
 
 ### 2. Get Hints
+
 **POST** `/api/ai/hints/:challengeId`
 
 Get helpful hints for a challenge without revealing the solution.
 
 **Request Body:**
+
 ```json
 {
   "challenge": {
@@ -64,10 +71,12 @@ Get helpful hints for a challenge without revealing the solution.
 ```
 
 **Query Parameters:**
+
 - `attempts` (optional): Number of attempts made
 - `lastAttempt` (optional): Summary of last attempt
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -80,11 +89,13 @@ Get helpful hints for a challenge without revealing the solution.
 ```
 
 ### 3. Get Challenge Suggestions
+
 **POST** `/api/ai/suggestions`
 
 Get personalized challenge recommendations based on user profile.
 
 **Request Body:**
+
 ```json
 {
   "userProfile": {
@@ -99,6 +110,7 @@ Get personalized challenge recommendations based on user profile.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -114,11 +126,13 @@ Get personalized challenge recommendations based on user profile.
 ```
 
 ### 4. Analyze Learning Progress
+
 **POST** `/api/ai/analysis`
 
 Get AI-powered analysis of learning patterns and recommendations.
 
 **Request Body:**
+
 ```json
 {
   "userId": "user123",
@@ -135,6 +149,7 @@ Get AI-powered analysis of learning patterns and recommendations.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -149,6 +164,7 @@ Get AI-powered analysis of learning patterns and recommendations.
 ## Testing with curl
 
 ### Example 1: Generate Feedback
+
 ```bash
 curl -X POST http://localhost:3001/api/ai/feedback \
   -H "Content-Type: application/json" \
@@ -163,6 +179,7 @@ curl -X POST http://localhost:3001/api/ai/feedback \
 ```
 
 ### Example 2: Get Hints
+
 ```bash
 curl -X POST http://localhost:3001/api/ai/hints/123?attempts=2 \
   -H "Content-Type: application/json" \
@@ -188,6 +205,7 @@ All endpoints return errors in this format:
 ```
 
 Common errors:
+
 - `400 Bad Request`: Missing required fields
 - `401 Unauthorized`: Invalid or missing auth token
 - `500 Internal Server Error`: Gemini API error or server issue

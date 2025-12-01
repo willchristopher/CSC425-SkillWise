@@ -14,6 +14,7 @@ This document explains how to run all tests for the SkillWise application.
 ### 1. Unit Tests
 
 #### Backend Unit Tests
+
 ```bash
 cd backend
 npm install
@@ -27,6 +28,7 @@ npm run test:watch
 ```
 
 #### Frontend Unit Tests
+
 ```bash
 cd frontend
 npm install
@@ -57,6 +59,7 @@ docker-compose down
 E2E tests require both backend and frontend servers to be running:
 
 #### Option 1: Manual Setup
+
 ```bash
 # Terminal 1: Start backend
 cd backend
@@ -75,6 +78,7 @@ npm run cypress:open
 ```
 
 #### Option 2: Using Docker Compose
+
 ```bash
 # Start all services
 docker-compose up
@@ -87,6 +91,7 @@ npm run cypress:run
 ### 4. Linting
 
 #### Backend Linting
+
 ```bash
 cd backend
 npm run lint
@@ -96,6 +101,7 @@ npm run lint:fix
 ```
 
 #### Frontend Linting
+
 ```bash
 cd frontend
 npm run lint
@@ -107,6 +113,7 @@ npm run lint:fix
 ## Test Coverage
 
 ### Backend Test Coverage
+
 ```bash
 cd backend
 npm run test:coverage
@@ -115,6 +122,7 @@ npm run test:coverage
 Coverage reports will be generated in `backend/coverage/`
 
 ### Frontend Test Coverage
+
 ```bash
 cd frontend
 npm run test:coverage
@@ -125,15 +133,18 @@ Coverage reports will be generated in `frontend/coverage/`
 ## Continuous Integration (CI)
 
 All tests run automatically on GitHub Actions when:
+
 - A pull request is opened to `main`
 - Code is pushed to `main`
 
 The CI pipeline includes:
+
 1. **Linting** - Checks code style for backend and frontend
 2. **Unit Tests** - Runs all unit tests with coverage
 3. **E2E Tests** - Runs Cypress tests against a test environment
 
 ### CI Workflow
+
 See `.github/workflows/ci.yml` for the complete CI configuration.
 
 ## Test Structure
@@ -167,12 +178,13 @@ frontend/
 ## Writing Tests
 
 ### Backend Unit Test Example
+
 ```javascript
 describe('GoalService', () => {
   it('should create a goal', async () => {
     const goal = await goalService.createGoal({
       title: 'Learn React',
-      userId: 1
+      userId: 1,
     });
     expect(goal.title).toBe('Learn React');
   });
@@ -180,6 +192,7 @@ describe('GoalService', () => {
 ```
 
 ### Frontend Unit Test Example
+
 ```javascript
 import { render, screen } from '@testing-library/react';
 import GoalCard from './GoalCard';
@@ -191,6 +204,7 @@ test('renders goal title', () => {
 ```
 
 ### Cypress E2E Test Example
+
 ```javascript
 describe('Goal Creation', () => {
   it('should create a new goal', () => {
@@ -228,6 +242,7 @@ describe('Goal Creation', () => {
 ## Test Environment Variables
 
 ### Backend Test Environment
+
 ```env
 NODE_ENV=test
 DATABASE_URL=postgresql://user:password@localhost:5432/skillwise_test
@@ -237,6 +252,7 @@ JWT_REFRESH_SECRET=test_refresh_secret
 ```
 
 ### Frontend Test Environment
+
 ```env
 REACT_APP_API_URL=http://localhost:3001/api
 CI=true  # Prevents interactive mode in CI

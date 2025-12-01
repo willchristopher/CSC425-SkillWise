@@ -159,8 +159,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-message {
@@ -290,7 +294,7 @@
   .dashboard-grid {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   }
-  
+
   .difficulty-progress,
   .category-progress {
     grid-column: span 1;
@@ -301,30 +305,30 @@
   .progress-dashboard {
     padding: 1rem;
   }
-  
+
   .dashboard-header {
     margin-bottom: 2rem;
   }
-  
+
   .dashboard-header h2 {
     font-size: 2rem;
   }
-  
+
   .dashboard-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
-  
+
   .dashboard-section {
     grid-column: span 1 !important;
   }
-  
+
   .recent-item {
     flex-direction: column;
     align-items: flex-start;
     text-align: left;
   }
-  
+
   .recent-date {
     align-self: flex-end;
     text-align: right;
@@ -335,27 +339,27 @@
   .progress-dashboard {
     padding: 0.75rem;
   }
-  
+
   .dashboard-header h2 {
     font-size: 1.75rem;
   }
-  
+
   .dashboard-header p {
     font-size: 1rem;
   }
-  
+
   .dashboard-section h3 {
     font-size: 1.1rem;
     padding: 1rem 1rem 0 1rem;
   }
-  
+
   .dashboard-section .progress-bar-container,
   .dashboard-section .linear-progress-container,
   .dashboard-section .multi-progress-container,
   .dashboard-section .circular-progress-container {
     padding: 0 1rem 1rem 1rem;
   }
-  
+
   .recent-completions {
     padding: 1rem;
   }
@@ -366,7 +370,7 @@
   .dashboard-section {
     border: 2px solid #000;
   }
-  
+
   .recent-item {
     border: 2px solid #000;
   }
@@ -389,28 +393,28 @@
   .progress-dashboard {
     background-color: #1a202c;
   }
-  
+
   .dashboard-section {
     background-color: #2d3748;
     border-color: #4a5568;
   }
-  
+
   .dashboard-header h2,
   .dashboard-section h3,
   .recent-content h4 {
     color: #f7fafc;
   }
-  
+
   .dashboard-header p,
   .recent-content p {
     color: #a0aec0;
   }
-  
+
   .recent-item {
     background-color: #4a5568;
     border-color: #718096;
   }
-  
+
   .recent-date {
     color: #718096;
   }

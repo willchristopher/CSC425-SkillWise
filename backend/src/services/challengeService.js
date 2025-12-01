@@ -1,6 +1,7 @@
 // Challenge business logic and operations
 const { query, withTransaction } = require('../database/connection');
 const { z } = require('zod');
+const aiService = require('./aiService');
 
 // Validation schemas
 const challengeCreateSchema = z.object({
@@ -9,9 +10,27 @@ const challengeCreateSchema = z.object({
   instructions: z.string().min(1),
   category: z.string().min(1).max(100),
   difficulty_level: z.enum(['easy', 'medium', 'hard']).default('medium'),
-  estimated_time_minutes: z.number().int().positive().optional(),
-  points_reward: z.number().int().min(1).default(10),
-  max_attempts: z.number().int().min(1).default(3),
+  estimated_time_minutes: z.preprocess((val) => {
+    if (typeof val === 'string') {
+      const parsed = parseInt(val, 10);
+      return isNaN(parsed) ? undefined : parsed;
+    }
+    return val;
+  }, z.number().int().positive().optional()),
+  points_reward: z.preprocess((val) => {
+    if (typeof val === 'string') {
+      const parsed = parseInt(val, 10);
+      return isNaN(parsed) ? 10 : parsed;
+    }
+    return val;
+  }, z.number().int().min(1).default(10)),
+  max_attempts: z.preprocess((val) => {
+    if (typeof val === 'string') {
+      const parsed = parseInt(val, 10);
+      return isNaN(parsed) ? 3 : parsed;
+    }
+    return val;
+  }, z.number().int().min(1).default(3)),
   requires_peer_review: z.boolean().default(false),
   goal_id: z.number().int().positive().optional(),
   tags: z.array(z.string()).default([]),
@@ -217,44 +236,52 @@ const challengeService = {
 
       return await withTransaction(async (transactionQuery) => {
         // Create the challenge
-        const challengeResult = await transactionQuery(`
+        const challengeResult = await transactionQuery(
+          `
           INSERT INTO challenges (
             title, description, instructions, category, difficulty_level,
             estimated_time_minutes, points_reward, max_attempts, requires_peer_review,
             created_by, tags, prerequisites, learning_objectives
           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
           RETURNING *
-        `, [
-          validatedData.title,
-          validatedData.description,
-          validatedData.instructions,
-          validatedData.category,
-          validatedData.difficulty_level,
-          validatedData.estimated_time_minutes,
-          validatedData.points_reward,
-          validatedData.max_attempts,
-          validatedData.requires_peer_review,
-          creatorId,
-          validatedData.tags,
-          validatedData.prerequisites,
-          validatedData.learning_objectives,
-        ]);
+        `,
+          [
+            validatedData.title,
+            validatedData.description,
+            validatedData.instructions,
+            validatedData.category,
+            validatedData.difficulty_level,
+            validatedData.estimated_time_minutes,
+            validatedData.points_reward,
+            validatedData.max_attempts,
+            validatedData.requires_peer_review,
+            creatorId,
+            validatedData.tags,
+            validatedData.prerequisites,
+            validatedData.learning_objectives,
+          ]
+        );
 
         const challenge = challengeResult.rows[0];
 
         // Link to goal if specified
         if (validatedData.goal_id) {
-          await transactionQuery(`
+          await transactionQuery(
+            `
             INSERT INTO challenge_goals (challenge_id, goal_id, created_by)
             VALUES ($1, $2, $3)
-          `, [challenge.id, validatedData.goal_id, creatorId]);
+          `,
+            [challenge.id, validatedData.goal_id, creatorId]
+          );
         }
 
         return challenge;
       });
     } catch (error) {
       if (error.name === 'ZodError') {
-        throw new Error(`Validation error: ${error.errors.map(e => e.message).join(', ')}`);
+        throw new Error(
+          `Validation error: ${error.errors.map((e) => e.message).join(', ')}`
+        );
       }
       throw new Error(`Failed to create challenge: ${error.message}`);
     }
@@ -268,7 +295,7 @@ const challengeService = {
       // Check if user can update this challenge
       const existingChallenge = await query(
         'SELECT created_by FROM challenges WHERE id = $1',
-        [challengeId],
+        [challengeId]
       );
 
       if (existingChallenge.rows.length === 0) {
@@ -313,7 +340,9 @@ const challengeService = {
       return result.rows[0];
     } catch (error) {
       if (error.name === 'ZodError') {
-        throw new Error(`Validation error: ${error.errors.map(e => e.message).join(', ')}`);
+        throw new Error(
+          `Validation error: ${error.errors.map((e) => e.message).join(', ')}`
+        );
       }
       throw new Error(`Failed to update challenge: ${error.message}`);
     }
@@ -327,7 +356,7 @@ const challengeService = {
       // Check if user can delete this challenge
       const existingChallenge = await query(
         'SELECT created_by FROM challenges WHERE id = $1',
-        [challengeId],
+        [challengeId]
       );
 
       if (existingChallenge.rows.length === 0) {
@@ -341,7 +370,7 @@ const challengeService = {
       // Soft delete by setting is_active to false
       const result = await query(
         'UPDATE challenges SET is_active = false, updated_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *',
-        [challengeId],
+        [challengeId]
       );
 
       return result.rows[0];
@@ -359,7 +388,7 @@ const challengeService = {
         // Check if goal belongs to user
         const goalCheck = await transactionQuery(
           'SELECT id FROM goals WHERE id = $1 AND user_id = $2',
-          [goalId, userId],
+          [goalId, userId]
         );
 
         if (goalCheck.rows.length === 0) {
@@ -369,7 +398,7 @@ const challengeService = {
         // Check if challenge exists
         const challengeCheck = await transactionQuery(
           'SELECT id FROM challenges WHERE id = $1 AND is_active = true',
-          [challengeId],
+          [challengeId]
         );
 
         if (challengeCheck.rows.length === 0) {
@@ -379,7 +408,7 @@ const challengeService = {
         // Check if link already exists
         const existingLink = await transactionQuery(
           'SELECT id FROM challenge_goals WHERE challenge_id = $1 AND goal_id = $2',
-          [challengeId, goalId],
+          [challengeId, goalId]
         );
 
         if (existingLink.rows.length > 0) {
@@ -387,11 +416,14 @@ const challengeService = {
         }
 
         // Create the link
-        const result = await transactionQuery(`
+        const result = await transactionQuery(
+          `
           INSERT INTO challenge_goals (challenge_id, goal_id, created_by)
           VALUES ($1, $2, $3)
           RETURNING *
-        `, [challengeId, goalId, userId]);
+        `,
+          [challengeId, goalId, userId]
+        );
 
         return result.rows[0];
       });
@@ -408,7 +440,7 @@ const challengeService = {
       // Check if goal belongs to user
       const goalCheck = await query(
         'SELECT id FROM goals WHERE id = $1 AND user_id = $2',
-        [goalId, userId],
+        [goalId, userId]
       );
 
       if (goalCheck.rows.length === 0) {
@@ -417,7 +449,7 @@ const challengeService = {
 
       const result = await query(
         'DELETE FROM challenge_goals WHERE challenge_id = $1 AND goal_id = $2 RETURNING *',
-        [challengeId, goalId],
+        [challengeId, goalId]
       );
 
       if (result.rows.length === 0) {
@@ -435,7 +467,8 @@ const challengeService = {
    */
   getChallengeStatistics: async (challengeId) => {
     try {
-      const result = await query(`
+      const result = await query(
+        `
         SELECT 
           COUNT(s.id) as total_submissions,
           COUNT(CASE WHEN s.status = 'completed' THEN 1 END) as completed_submissions,
@@ -447,7 +480,9 @@ const challengeService = {
           COUNT(DISTINCT s.user_id) as unique_participants
         FROM submissions s
         WHERE s.challenge_id = $1
-      `, [challengeId]);
+      `,
+        [challengeId]
+      );
 
       const stats = result.rows[0];
 
@@ -456,10 +491,15 @@ const challengeService = {
         completed_submissions: parseInt(stats.completed_submissions) || 0,
         pending_submissions: parseInt(stats.pending_submissions) || 0,
         failed_submissions: parseInt(stats.failed_submissions) || 0,
-        completion_rate: stats.total_submissions > 0
-          ? Math.round((stats.completed_submissions / stats.total_submissions) * 100)
-          : 0,
-        average_score: stats.average_score ? parseFloat(stats.average_score).toFixed(1) : null,
+        completion_rate:
+          stats.total_submissions > 0
+            ? Math.round(
+                (stats.completed_submissions / stats.total_submissions) * 100
+              )
+            : 0,
+        average_score: stats.average_score
+          ? parseFloat(stats.average_score).toFixed(1)
+          : null,
         min_score: stats.min_score || null,
         max_score: stats.max_score || null,
         unique_participants: parseInt(stats.unique_participants) || 0,
@@ -541,6 +581,127 @@ const challengeService = {
       return result.rows;
     } catch (error) {
       throw new Error(`Failed to get popular categories: ${error.message}`);
+    }
+  },
+
+  /**
+   * Submit a challenge solution
+   */
+  submitChallenge: async (challengeId, userId, code) => {
+    try {
+      // Check if challenge exists
+      const challengeResult = await query(
+        'SELECT id, max_attempts, points_reward FROM challenges WHERE id = $1 AND is_active = true',
+        [challengeId]
+      );
+
+      if (challengeResult.rows.length === 0) {
+        throw new Error('Challenge not found');
+      }
+
+      const challenge = challengeResult.rows[0];
+
+      // Check user's previous attempts
+      const attemptsResult = await query(
+        'SELECT COUNT(*) as attempt_count FROM submissions WHERE challenge_id = $1 AND user_id = $2',
+        [challengeId, userId]
+      );
+
+      const attemptCount = parseInt(attemptsResult.rows[0].attempt_count, 10);
+
+      if (attemptCount >= challenge.max_attempts) {
+        throw new Error(
+          `Maximum attempts (${challenge.max_attempts}) reached for this challenge`
+        );
+      }
+
+      // Create submission
+      return await withTransaction(async (transactionQuery) => {
+        const submissionResult = await transactionQuery(
+          `
+          INSERT INTO submissions (
+            challenge_id, user_id, submission_text, status, submitted_at, attempt_number
+          ) VALUES ($1, $2, $3, $4, NOW(), $5)
+          RETURNING *
+        `,
+          [challengeId, userId, code, 'submitted', attemptCount + 1]
+        );
+
+        const submission = submissionResult.rows[0];
+
+        // Generate AI feedback for the submission
+        try {
+          const feedbackResult = await aiService.generateFeedback(
+            code,
+            {
+              title: challenge.title,
+              description: challenge.description,
+              requirements: challenge.instructions || '',
+              previousAttempts: attemptCount,
+            },
+            userId
+          );
+
+          // Update submission with AI feedback
+          const updateResult = await transactionQuery(
+            `
+            UPDATE submissions
+            SET status = $1, feedback = $2, score = $3
+            WHERE id = $4
+            RETURNING *
+          `,
+            ['completed', feedbackResult.feedback, 75, submission.id]
+          );
+
+          return updateResult.rows[0];
+        } catch (feedbackError) {
+          console.error('Failed to generate AI feedback:', feedbackError);
+
+          // If feedback generation fails, still return the submission but without feedback
+          const updateResult = await transactionQuery(
+            `
+            UPDATE submissions
+            SET status = $1, feedback = $2
+            WHERE id = $3
+            RETURNING *
+          `,
+            [
+              'completed',
+              'Feedback generation failed. Please try again later.',
+              submission.id,
+            ]
+          );
+
+          return updateResult.rows[0];
+        }
+      });
+    } catch (error) {
+      throw new Error(`Failed to submit challenge: ${error.message}`);
+    }
+  },
+
+  /**
+   * Get submissions for a challenge by user
+   */
+  getChallengeSubmissions: async (challengeId, userId) => {
+    try {
+      const result = await query(
+        `
+        SELECT 
+          s.*,
+          c.title as challenge_title,
+          c.max_attempts
+        FROM submissions s
+        JOIN challenges c ON s.challenge_id = c.id
+        WHERE s.challenge_id = $1 AND s.user_id = $2
+        ORDER BY s.submitted_at DESC
+      `,
+        [challengeId, userId]
+      );
+
+      return result.rows;
+    } catch (error) {
+      throw new Error(`Failed to get challenge submissions: ${error.message}`);
     }
   },
 };

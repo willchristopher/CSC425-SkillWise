@@ -7,6 +7,7 @@ I've successfully implemented the Google Gemini API integration in your SkillWis
 ### 📁 Files Modified
 
 1. **`backend/src/services/aiService.js`** - Core AI service
+
    - `callGemini()` - Main function that calls Google's Gemini API
    - `generateFeedback()` - AI feedback for code submissions
    - `generateHints()` - Context-aware hints for challenges
@@ -14,6 +15,7 @@ I've successfully implemented the Google Gemini API integration in your SkillWis
    - `suggestNextChallenges()` - Personalized challenge recommendations
 
 2. **`backend/src/controllers/aiController.js`** - API controllers
+
    - `generateFeedback()` - Handle feedback requests
    - `getHints()` - Handle hint requests
    - `suggestChallenges()` - Handle suggestion requests
@@ -38,6 +40,7 @@ I've successfully implemented the Google Gemini API integration in your SkillWis
 ## 🚀 Next Steps to Make It Work
 
 ### 1. Get a Gemini API Key
+
 ```
 1. Go to: https://makersuite.google.com/app/apikey
 2. Sign in with your Google account
@@ -56,12 +59,14 @@ GEMINI_API_KEY=your-actual-key-here
 ### 3. Restart Your Backend Server
 
 If running with Docker:
+
 ```bash
 cd /Users/zachwalters/CSC425-SkillWise
 docker-compose restart backend
 ```
 
 Or if running directly:
+
 ```bash
 cd /Users/zachwalters/CSC425-SkillWise/backend
 npm run dev
@@ -72,6 +77,7 @@ npm run dev
 Use the examples in `backend/TEST_AI_API.md` to test the endpoints.
 
 Quick test with curl:
+
 ```bash
 curl -X POST http://localhost:3001/api/ai/feedback \
   -H "Content-Type: application/json" \
@@ -87,12 +93,12 @@ curl -X POST http://localhost:3001/api/ai/feedback \
 
 ## 📋 API Endpoints Available
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/ai/feedback` | POST | Generate AI feedback for submissions |
-| `/api/ai/hints/:challengeId` | POST | Get hints for challenges |
-| `/api/ai/suggestions` | POST | Get personalized challenge suggestions |
-| `/api/ai/analysis` | POST | Analyze learning progress |
+| Endpoint                     | Method | Purpose                                |
+| ---------------------------- | ------ | -------------------------------------- |
+| `/api/ai/feedback`           | POST   | Generate AI feedback for submissions   |
+| `/api/ai/hints/:challengeId` | POST   | Get hints for challenges               |
+| `/api/ai/suggestions`        | POST   | Get personalized challenge suggestions |
+| `/api/ai/analysis`           | POST   | Analyze learning progress              |
 
 ## 💰 Gemini API Pricing Note
 
@@ -107,6 +113,7 @@ RPM = Requests per minute, TPM = Tokens per minute, RPD = Requests per day
 Check usage at: https://makersuite.google.com/app/apikey
 
 To use a different model, change model in `aiService.js`:
+
 ```javascript
 const model = options.model || 'gemini-1.5-pro'; // Higher quality
 // or

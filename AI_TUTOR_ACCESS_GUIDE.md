@@ -7,6 +7,7 @@ The application compiled successfully. Here's how to use the AI Tutor:
 ## 🔍 Where to Find It
 
 ### Option 1: Dashboard Page (After Login)
+
 1. Go to **http://localhost:3000/login**
 2. Log in to your account
 3. On the Dashboard, you'll see:
@@ -14,10 +15,12 @@ The application compiled successfully. Here's how to use the AI Tutor:
    - **Quick Actions Section** - A purple "🤖 AI Tutor" button (first button in the row)
 
 ### Option 2: Direct Link
+
 Go directly to: **http://localhost:3000/ai-tutor**
 (You need to be logged in)
 
 ### Option 3: From Homepage
+
 1. Go to **http://localhost:3000**
 2. Click "Try AI Tutor" button in the hero section
 3. If not logged in, you'll be redirected to login first
@@ -27,12 +30,14 @@ Go directly to: **http://localhost:3000/ai-tutor**
 After logging in, you'll see:
 
 ### Top Grid (4 Cards):
+
 1. **🤖 AI Tutor** (NEW! - Purple gradient card with "Try AI Tutor →" link)
 2. **🎯 Your Goals**
-3. **🚀 Challenges**  
+3. **🚀 Challenges**
 4. **📈 Progress**
 
 ### Quick Actions (5 Buttons):
+
 1. **🤖 AI Tutor** (NEW! - Purple button)
 2. **🎯 Create Goal**
 3. **🚀 Start Challenge**
@@ -42,10 +47,12 @@ After logging in, you'll see:
 ## 🧪 How to Test It
 
 1. **Login first** (or create an account):
+
    - Go to http://localhost:3000/login
    - Use your credentials
 
 2. **From Dashboard**, click either:
+
    - The purple **"Try AI Tutor →"** link in the AI Tutor card
    - The purple **"🤖 AI Tutor"** button in Quick Actions
 
@@ -64,6 +71,7 @@ After logging in, you'll see:
 ## 🐛 If You Still Have Issues
 
 ### Check Authentication:
+
 ```bash
 # Make sure you're logged in
 # Check localStorage in browser console:
@@ -72,12 +80,14 @@ localStorage.getItem('accessToken')
 ```
 
 ### Check Backend:
+
 ```bash
 # Verify backend is running:
 curl http://localhost:3001/api/health
 ```
 
 ### Check Frontend Route:
+
 - The route `/ai-tutor` is now registered in App.jsx
 - It's a protected route (requires login)
 
