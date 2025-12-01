@@ -1,9 +1,10 @@
 // TODO: Test environment setup and configuration
 const { Pool } = require('pg');
 
-// Test database configuration
+// Test database configuration - use DATABASE_URL from CI if available
 const testDbConfig = {
   connectionString:
+    process.env.DATABASE_URL ||
     process.env.TEST_DATABASE_URL ||
     'postgresql://skillwise_user:skillwise_pass@localhost:5433/skillwise_db',
   // Reduce connections for test environment
