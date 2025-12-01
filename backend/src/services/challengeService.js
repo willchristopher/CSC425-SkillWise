@@ -2,6 +2,7 @@
 const { query, withTransaction } = require('../database/connection');
 const { z } = require('zod');
 const aiService = require('./aiService');
+const aiFeedbackService = require('./aiFeedbackService');
 
 // Validation schemas
 const challengeCreateSchema = z.object({
@@ -631,6 +632,7 @@ const challengeService = {
 
         // Generate AI feedback for the submission
         try {
+          const startTime = Date.now();
           const feedbackResult = await aiService.generateFeedback(
             code,
             {
@@ -641,8 +643,19 @@ const challengeService = {
             },
             userId
           );
+          const processingTime = Date.now() - startTime;
 
-          // Update submission with AI feedback
+          // Store feedback in ai_feedback table
+          await aiFeedbackService.createAIFeedback({
+            submissionId: submission.id,
+            prompt: feedbackResult.prompt.combined,
+            response: feedbackResult.feedback,
+            feedbackType: 'submission_review',
+            aiModel: 'gemini-2.5-flash',
+            processingTimeMs: processingTime,
+          });
+
+          // Also update submission with AI feedback for backwards compatibility
           const updateResult = await transactionQuery(
             `
             UPDATE submissions

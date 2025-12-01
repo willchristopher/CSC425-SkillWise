@@ -291,6 +291,16 @@ export const apiService = {
     generateChallenge: (params) =>
       api.post('/ai/generateChallenge', params, { timeout: 30000 }), // 30 second timeout for AI generation
   },
+
+  // Feedback methods - for retrieving stored AI feedback
+  feedback: {
+    getBySubmission: (submissionId) =>
+      api.get(`/feedback/submission/${submissionId}`),
+    getLatest: (submissionId) =>
+      api.get(`/feedback/submission/${submissionId}/latest`),
+    getUserFeedback: () => api.get('/feedback/user'),
+    delete: (feedbackId) => api.delete(`/feedback/${feedbackId}`),
+  },
 };
 
 // Export utilities for external use

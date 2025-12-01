@@ -256,6 +256,7 @@ const aiController = {
       const submission = submissionResult.rows[0];
 
       // Generate AI feedback
+      const startTime = Date.now();
       const feedbackResult = await aiService.generateFeedback(
         submission.submission_text,
         {
@@ -266,6 +267,7 @@ const aiController = {
         },
         userId
       );
+      const processingTime = Date.now() - startTime;
 
       // Parse the feedback to structure it better
       const feedbackText = feedbackResult.feedback;
@@ -281,7 +283,21 @@ const aiController = {
         /suggestions?[:\n]+([\s\S]*?)$/i
       );
 
-      // Store feedback in database
+      // Store feedback in ai_feedback table
+      const aiFeedbackService = require('../services/aiFeedbackService');
+      await aiFeedbackService.createAIFeedback({
+        submissionId: submission.id,
+        prompt: feedbackResult.prompt.combined,
+        response: feedbackText,
+        feedbackType: 'on_demand',
+        suggestions: suggestionsMatch ? [suggestionsMatch[1].trim()] : [],
+        strengths: positiveMatch ? [positiveMatch[1].trim()] : [],
+        improvements: improvementsMatch ? [improvementsMatch[1].trim()] : [],
+        aiModel: 'gemini-2.5-flash',
+        processingTimeMs: processingTime,
+      });
+
+      // Also update submission for backwards compatibility
       await query(
         `
         UPDATE submissions

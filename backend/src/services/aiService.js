@@ -222,6 +222,11 @@ const aiService = {
 
     return {
       feedback: response,
+      prompt: {
+        system: systemPrompt,
+        user: userPrompt,
+        combined: `${systemPrompt}\n\n${userPrompt}`,
+      },
       metadata: {
         validated: validation.isValid,
         validationErrors: validation.errors,
