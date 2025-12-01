@@ -28,6 +28,7 @@ const aiRoutes = require('./ai');
 const reviewRoutes = require('./reviews');
 const leaderboardRoutes = require('./leaderboard');
 const feedbackRoutes = require('./feedback');
+const sentryRoutes = require('./sentry');
 
 // API Documentation endpoint
 router.get('/', (req, res) => {
@@ -47,6 +48,7 @@ router.get('/', (req, res) => {
       reviews: '/api/reviews - Peer review system',
       leaderboard: '/api/leaderboard - Rankings and achievements',
       health: '/api/health - Health check',
+      sentry: '/api/sentry - Sentry error tracking (testing)',
     },
     documentation: '/api/docs',
     timestamp: new Date().toISOString(),
@@ -64,6 +66,7 @@ router.use('/ai', aiRoutes);
 router.use('/feedback', feedbackRoutes);
 router.use('/reviews', reviewRoutes);
 router.use('/leaderboard', leaderboardRoutes);
+router.use('/sentry', sentryRoutes);
 
 // API Health check endpoint
 router.get('/health', (req, res) => {
@@ -87,6 +90,7 @@ router.get('/health', (req, res) => {
         'feedback',
         'reviews',
         'leaderboard',
+        'sentry',
       ],
     },
   });

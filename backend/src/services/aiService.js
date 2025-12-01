@@ -104,6 +104,14 @@ const callGemini = async (systemPrompt, userPrompt, options = {}) => {
     if (response.data?.candidates?.[0]?.content?.parts?.[0]?.text) {
       const responseText = response.data.candidates[0].content.parts[0].text;
       const tokensUsed = response.data?.usageMetadata?.totalTokenCount;
+      const finishReason = response.data.candidates[0].finishReason;
+
+      // Warn if response was truncated due to MAX_TOKENS
+      if (finishReason === 'MAX_TOKENS') {
+        console.warn(
+          '⚠️  Response truncated: MAX_TOKENS limit reached. Consider increasing maxOutputTokens.'
+        );
+      }
 
       // Log successful interaction (if endpoint provided in options)
       if (options.endpoint) {
@@ -118,8 +126,11 @@ const callGemini = async (systemPrompt, userPrompt, options = {}) => {
           maxTokens: maxOutputTokens,
           tokensUsed,
           responseTimeMs: responseTime,
-          status: 'success',
-          metadata: options.metadata,
+          status: finishReason === 'MAX_TOKENS' ? 'truncated' : 'success',
+          metadata: {
+            ...options.metadata,
+            finishReason,
+          },
         });
       }
 
@@ -201,8 +212,9 @@ const aiService = {
     });
 
     // Call Gemini API with logging
+    // Use higher token limit (2500) to avoid truncation in long feedback
     const response = await callGemini(systemPrompt, userPrompt, {
-      maxOutputTokens: 1500,
+      maxOutputTokens: 2500,
       temperature: 0.7,
       endpoint: 'generateFeedback',
       userId,
