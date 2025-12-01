@@ -260,16 +260,20 @@ describe('Authentication Integration', () => {
 
   describe('JWT Session Handling', () => {
     test('should persist session on token refresh', async () => {
-      // First login to get fresh tokens
-      const loginResponse = await request(app)
-        .post('/api/auth/login')
+      // Register a fresh user for this test
+      const uniqueEmail = `session-test-${Date.now()}@example.com`;
+      const registerResponse = await request(app)
+        .post('/api/auth/register')
         .send({
-          email: 'test@example.com',
+          email: uniqueEmail,
           password: 'TestPassword123',
+          confirmPassword: 'TestPassword123',
+          firstName: 'Session',
+          lastName: 'Test',
         })
-        .expect(200);
+        .expect(201);
 
-      const newRefreshToken = loginResponse.headers['set-cookie']
+      const newRefreshToken = registerResponse.headers['set-cookie']
         .find((cookie) => cookie.startsWith('refreshToken='))
         .split('refreshToken=')[1]
         .split(';')[0];
@@ -285,6 +289,9 @@ describe('Authentication Integration', () => {
       // Verify the new token works (this would require a protected route)
       // For now, just verify the token format
       expect(refreshResponse.body.data.accessToken.split('.').length).toBe(3); // JWT format
+
+      // Clean up
+      await query('DELETE FROM users WHERE email = $1', [uniqueEmail]);
     });
   });
 });
