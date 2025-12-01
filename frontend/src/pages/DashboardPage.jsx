@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import './DashboardPage.css';
 
 const DashboardPage = () => {
   const { user, logout } = useAuth();
@@ -13,7 +14,6 @@ const DashboardPage = () => {
       navigate('/login');
     } catch (error) {
       console.error('Logout error:', error);
-      // Still navigate to login even if logout fails
       navigate('/login');
     }
   };
@@ -28,53 +28,108 @@ const DashboardPage = () => {
     { path: '/profile', label: 'Profile', icon: '👤' },
   ];
 
-  // ProtectedRoute already handles the loading/auth check
+  const stats = [
+    {
+      icon: '🎯',
+      value: '0',
+      label: 'Active Goals',
+      color: '#f093fb',
+      link: '/goals',
+    },
+    {
+      icon: '🚀',
+      value: '0',
+      label: 'Challenges',
+      color: '#4facfe',
+      link: '/challenges',
+    },
+    {
+      icon: '🏆',
+      value: '0',
+      label: 'Points Earned',
+      color: '#fee140',
+      link: '/leaderboard',
+    },
+    {
+      icon: '📈',
+      value: '0%',
+      label: 'Progress',
+      color: '#43e97b',
+      link: '/progress',
+    },
+  ];
+
+  const quickActions = [
+    {
+      icon: '🤖',
+      label: 'AI Tutor',
+      path: '/ai-tutor',
+      color: '#667eea',
+      description: 'Get instant feedback',
+    },
+    {
+      icon: '🎯',
+      label: 'Create Goal',
+      path: '/goals',
+      color: '#f093fb',
+      description: 'Set new objectives',
+    },
+    {
+      icon: '🚀',
+      label: 'Start Challenge',
+      path: '/challenges',
+      color: '#4facfe',
+      description: 'Practice coding',
+    },
+    {
+      icon: '👥',
+      label: 'Peer Review',
+      path: '/peer-review',
+      color: '#fa709a',
+      description: 'Review code',
+    },
+    {
+      icon: '🏆',
+      label: 'Leaderboard',
+      path: '/leaderboard',
+      color: '#fee140',
+      description: 'View rankings',
+    },
+  ];
+
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard...</p>
-        </div>
+      <div className="dashboard-loading">
+        <div className="loading-spinner"></div>
+        <p>Loading dashboard...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="dashboard-modern">
       {/* Navigation Bar */}
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link to="/dashboard" className="text-2xl font-bold text-blue-600">
-                SkillWise
-              </Link>
-            </div>
-            
-            {/* Navigation Items */}
-            <div className="hidden md:flex items-center space-x-8">
+      <nav className="dashboard-nav">
+        <div className="nav-container">
+          <div className="nav-content">
+            <Link to="/dashboard" className="nav-logo">
+              <span className="logo-text">SkillWise</span>
+            </Link>
+
+            <div className="nav-items">
               {navigationItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium flex items-center space-x-1"
-                >
-                  <span>{item.icon}</span>
-                  <span>{item.label}</span>
+                <Link key={item.path} to={item.path} className="nav-item">
+                  <span className="nav-icon">{item.icon}</span>
+                  <span className="nav-label">{item.label}</span>
                 </Link>
               ))}
             </div>
 
-            {/* User Menu */}
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700 text-sm">
-                Welcome, {user?.firstName || user?.first_name || 'User'}!
+            <div className="nav-user">
+              <span className="user-greeting">
+                {user?.firstName || user?.first_name || 'User'}
               </span>
-              <button
-                onClick={handleLogout}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
-              >
+              <button onClick={handleLogout} className="btn-logout">
                 Logout
               </button>
             </div>
@@ -82,179 +137,89 @@ const DashboardPage = () => {
         </div>
       </nav>
 
-      {/* Main Dashboard Content */}
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, {user?.firstName || user?.first_name || 'User'}!
-          </h1>
-          <p className="mt-2 text-gray-600">
-            Continue your learning journey and track your progress.
-          </p>
-        </div>
-
-        {/* Dashboard Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* AI Tutor Section - NEW */}
-          <div className="bg-gradient-to-br from-purple-50 to-blue-50 overflow-hidden shadow-lg rounded-lg border-2 border-purple-200">
-            <div className="p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <span className="text-3xl">🤖</span>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">AI Tutor</h3>
-                  <p className="text-sm text-gray-500">Get instant AI feedback</p>
-                </div>
-              </div>
-              <div className="mt-4">
-                <div className="bg-white rounded-md p-4 border border-purple-200">
-                  <p className="text-purple-700 text-sm font-medium">✨ Powered by Gemini AI</p>
-                  <Link 
-                    to="/ai-tutor" 
-                    className="mt-2 inline-flex text-purple-600 hover:text-purple-500 text-sm font-bold"
-                  >
-                    Try AI Tutor →
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Goals Section Placeholder */}
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <span className="text-3xl">🎯</span>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">Your Goals</h3>
-                  <p className="text-sm text-gray-500">Track your learning objectives</p>
-                </div>
-              </div>
-              <div className="mt-4">
-                <div className="bg-gray-50 rounded-md p-4">
-                  <p className="text-gray-600 text-sm">No goals set yet</p>
-                  <Link 
-                    to="/goals" 
-                    className="mt-2 inline-flex text-blue-600 hover:text-blue-500 text-sm font-medium"
-                  >
-                    Create your first goal →
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Challenges Section Placeholder */}
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <span className="text-3xl">🚀</span>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">Challenges</h3>
-                  <p className="text-sm text-gray-500">Practice with coding challenges</p>
-                </div>
-              </div>
-              <div className="mt-4">
-                <div className="bg-gray-50 rounded-md p-4">
-                  <p className="text-gray-600 text-sm">No challenges completed</p>
-                  <Link 
-                    to="/challenges" 
-                    className="mt-2 inline-flex text-blue-600 hover:text-blue-500 text-sm font-medium"
-                  >
-                    Start a challenge →
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Progress Section Placeholder */}
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <span className="text-3xl">📈</span>
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">Progress</h3>
-                  <p className="text-sm text-gray-500">View your learning analytics</p>
-                </div>
-              </div>
-              <div className="mt-4">
-                <div className="bg-gray-50 rounded-md p-4">
-                  <p className="text-gray-600 text-sm">Start learning to see progress</p>
-                  <Link 
-                    to="/progress" 
-                    className="mt-2 inline-flex text-blue-600 hover:text-blue-500 text-sm font-medium"
-                  >
-                    View progress →
-                  </Link>
-                </div>
-              </div>
-            </div>
+      {/* Main Dashboard */}
+      <main className="dashboard-main">
+        <div className="dashboard-background">
+          <div className="bg-gradient"></div>
+          <div className="bg-shapes">
+            <div className="shape shape-1"></div>
+            <div className="shape shape-2"></div>
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="dashboard-content">
+          {/* Welcome Section */}
+          <div className="welcome-section">
+            <div className="welcome-badge">
+              <span>✨</span>
+              <span>Dashboard</span>
+            </div>
+            <h1 className="welcome-title">
+              Welcome back,{' '}
+              <span className="gradient-text">
+                {user?.firstName || user?.first_name || 'User'}
+              </span>
+              !
+            </h1>
+            <p className="welcome-subtitle">
+              Continue your learning journey and track your progress
+            </p>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="stats-grid">
+            {stats.map((stat, index) => (
               <Link
-                to="/ai-tutor"
-                className="bg-purple-50 hover:bg-purple-100 p-4 rounded-lg text-center transition-colors border-2 border-purple-300"
+                key={index}
+                to={stat.link}
+                className="stat-card"
+                style={{ '--stat-color': stat.color }}
               >
-                <span className="text-2xl block mb-2">🤖</span>
-                <span className="text-sm font-medium text-purple-900">AI Tutor</span>
+                <div className="stat-icon-wrapper">
+                  <span className="stat-icon">{stat.icon}</span>
+                </div>
+                <div className="stat-details">
+                  <div className="stat-value">{stat.value}</div>
+                  <div className="stat-label">{stat.label}</div>
+                </div>
+                <div className="stat-hover-effect"></div>
               </Link>
-              <Link
-                to="/goals"
-                className="bg-blue-50 hover:bg-blue-100 p-4 rounded-lg text-center transition-colors"
-              >
-                <span className="text-2xl block mb-2">🎯</span>
-                <span className="text-sm font-medium text-blue-900">Create Goal</span>
-              </Link>
-              <Link
-                to="/challenges"
-                className="bg-green-50 hover:bg-green-100 p-4 rounded-lg text-center transition-colors"
-              >
-                <span className="text-2xl block mb-2">🚀</span>
-                <span className="text-sm font-medium text-green-900">Start Challenge</span>
-              </Link>
-              <Link
-                to="/peer-review"
-                className="bg-purple-50 hover:bg-purple-100 p-4 rounded-lg text-center transition-colors"
-              >
-                <span className="text-2xl block mb-2">👥</span>
-                <span className="text-sm font-medium text-purple-900">Peer Review</span>
-              </Link>
-              <Link
-                to="/leaderboard"
-                className="bg-yellow-50 hover:bg-yellow-100 p-4 rounded-lg text-center transition-colors"
-              >
-                <span className="text-2xl block mb-2">🏆</span>
-                <span className="text-sm font-medium text-yellow-900">Leaderboard</span>
-              </Link>
+            ))}
+          </div>
+
+          {/* Quick Actions */}
+          <div className="quick-actions-section">
+            <h2 className="section-heading">Quick Actions</h2>
+            <div className="quick-actions-grid">
+              {quickActions.map((action, index) => (
+                <Link
+                  key={index}
+                  to={action.path}
+                  className="action-card"
+                  style={{ '--action-color': action.color }}
+                >
+                  <div className="action-icon-wrapper">
+                    <span className="action-icon">{action.icon}</span>
+                  </div>
+                  <h3 className="action-label">{action.label}</h3>
+                  <p className="action-description">{action.description}</p>
+                  <div className="action-hover-effect"></div>
+                </Link>
+              ))}
             </div>
           </div>
-        </div>
 
-        {/* Recent Activity Placeholder */}
-        <div className="mt-8 bg-white shadow rounded-lg">
-          <div className="p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h2>
-            <div className="text-center py-8">
-              <span className="text-4xl block mb-4">📝</span>
-              <p className="text-gray-500">No recent activity</p>
-              <p className="text-sm text-gray-400 mt-2">
-                Complete challenges and set goals to see your activity here
-              </p>
+          {/* Recent Activity */}
+          <div className="recent-activity-section">
+            <h2 className="section-heading">Recent Activity</h2>
+            <div className="activity-card">
+              <div className="activity-empty">
+                <span className="empty-icon">📝</span>
+                <p className="empty-title">No recent activity</p>
+                <p className="empty-subtitle">
+                  Complete challenges and set goals to see your activity here
+                </p>
+              </div>
             </div>
           </div>
         </div>
