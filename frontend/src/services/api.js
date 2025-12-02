@@ -214,10 +214,11 @@ export const apiService = {
 
   // User methods
   user: {
-    getProfile: () => api.get('/user/profile'),
-    updateProfile: (data) => api.put('/user/profile', data),
-    deleteAccount: () => api.delete('/user/profile'),
-    changePassword: (data) => api.put('/user/change-password', data),
+    getProfile: () => api.get('/users/profile'),
+    updateProfile: (data) => api.put('/users/profile', data),
+    deleteAccount: () => api.delete('/users/profile'),
+    changePassword: (data) => api.put('/users/change-password', data),
+    getStatistics: () => api.get('/users/statistics'),
   },
 
   // Goals methods
@@ -234,6 +235,8 @@ export const apiService = {
   // Challenges methods
   challenges: {
     getAll: (params) => api.get('/challenges', { params }),
+    getMy: () => api.get('/challenges/my'),
+    getRecommended: () => api.get('/challenges/recommended'),
     getById: (id) => api.get(`/challenges/${id}`),
     create: (challenge) => api.post('/challenges', challenge),
     update: (id, challenge) => api.put(`/challenges/${id}`, challenge),
@@ -241,6 +244,18 @@ export const apiService = {
     submit: (id, submission) =>
       api.post(`/challenges/${id}/submit`, submission),
     getSubmissions: (id) => api.get(`/challenges/${id}/submissions`),
+    markComplete: (challengeId, submissionId) =>
+      api.post('/challenges/submit/complete', {
+        challenge_id: challengeId,
+        submission_id: submissionId,
+      }),
+  },
+
+  // Submissions methods
+  submissions: {
+    getById: (id) => api.get(`/submissions/${id}`),
+    delete: (id) => api.delete(`/submissions/${id}`),
+    update: (id, data) => api.put(`/submissions/${id}`, data),
   },
 
   // Progress methods
@@ -255,6 +270,9 @@ export const apiService = {
   leaderboard: {
     getGlobal: (params) => api.get('/leaderboard/global', { params }),
     getUserRank: () => api.get('/leaderboard/user-rank'),
+    getAchievements: () => api.get('/leaderboard/achievements'),
+    getAllAchievements: () => api.get('/leaderboard/achievements/all'),
+    getStats: () => api.get('/leaderboard/stats'),
   },
 
   // Peer Review methods
@@ -265,6 +283,16 @@ export const apiService = {
       api.post(`/peer-review/submissions/${submissionId}/review`, review),
     getReviewDetails: (submissionId) =>
       api.get(`/peer-review/submissions/${submissionId}`),
+    submitWorkForReview: (data) => api.post('/peer-review/submit-work', data),
+    updateSubmission: (submissionId, data) =>
+      api.put(`/peer-review/submissions/${submissionId}`, data),
+    deleteSubmission: (submissionId) =>
+      api.delete(`/peer-review/submissions/${submissionId}`),
+    getReceivedFeedback: (params) =>
+      api.get('/peer-review/feedback', { params }),
+    markFeedbackRead: (reviewId) =>
+      api.put(`/peer-review/feedback/${reviewId}/read`),
+    getReviewHistory: () => api.get('/peer-review/history'),
   },
 
   // Notifications methods

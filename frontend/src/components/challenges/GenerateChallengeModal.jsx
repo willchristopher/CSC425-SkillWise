@@ -8,7 +8,7 @@ const GenerateChallengeModal = ({ isOpen, onClose, onChallengeGenerated }) => {
   const [generatedChallenge, setGeneratedChallenge] = useState(null);
 
   // Form state
-  const [category, setCategory] = useState('JavaScript');
+  const [category, setCategory] = useState('Python');
   const [difficulty, setDifficulty] = useState('medium');
   const [topic, setTopic] = useState('');
   const [requirements, setRequirements] = useState('');
@@ -52,7 +52,7 @@ const GenerateChallengeModal = ({ isOpen, onClose, onChallengeGenerated }) => {
   const handleClose = () => {
     setGeneratedChallenge(null);
     setError(null);
-    setCategory('JavaScript');
+    setCategory('Python');
     setDifficulty('medium');
     setTopic('');
     setRequirements('');
@@ -81,14 +81,65 @@ const GenerateChallengeModal = ({ isOpen, onClose, onChallengeGenerated }) => {
                 <label htmlFor="category">
                   Category <span className="required">*</span>
                 </label>
-                <input
-                  type="text"
+                <select
                   id="category"
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  placeholder="e.g., JavaScript, Python, React, etc."
                   disabled={loading}
-                />
+                >
+                  <option value="">Select a category...</option>
+                  <optgroup label="Programming">
+                    <option value="JavaScript">JavaScript</option>
+                    <option value="Python">Python</option>
+                    <option value="Java">Java</option>
+                    <option value="C++">C++</option>
+                    <option value="React">React</option>
+                    <option value="Web Development">Web Development</option>
+                    <option value="Backend Development">
+                      Backend Development
+                    </option>
+                  </optgroup>
+                  <optgroup label="Mathematics">
+                    <option value="Algebra">Algebra</option>
+                    <option value="Geometry">Geometry</option>
+                    <option value="Calculus">Calculus</option>
+                    <option value="Statistics">Statistics</option>
+                    <option value="Trigonometry">Trigonometry</option>
+                  </optgroup>
+                  <optgroup label="Science">
+                    <option value="Physics">Physics</option>
+                    <option value="Chemistry">Chemistry</option>
+                    <option value="Biology">Biology</option>
+                    <option value="Environmental Science">
+                      Environmental Science
+                    </option>
+                  </optgroup>
+                  <optgroup label="Language & Writing">
+                    <option value="English">English</option>
+                    <option value="Spanish">Spanish</option>
+                    <option value="French">French</option>
+                    <option value="German">German</option>
+                    <option value="Chinese">Chinese</option>
+                    <option value="Creative Writing">Creative Writing</option>
+                  </optgroup>
+                  <optgroup label="History & Social Studies">
+                    <option value="World History">World History</option>
+                    <option value="US History">US History</option>
+                    <option value="Economics">Economics</option>
+                    <option value="Political Science">Political Science</option>
+                  </optgroup>
+                  <optgroup label="Arts & Music">
+                    <option value="Music Theory">Music Theory</option>
+                    <option value="Visual Arts">Visual Arts</option>
+                    <option value="Photography">Photography</option>
+                    <option value="Design">Design</option>
+                  </optgroup>
+                  <optgroup label="Other">
+                    <option value="General Knowledge">General Knowledge</option>
+                    <option value="Critical Thinking">Critical Thinking</option>
+                    <option value="Problem Solving">Problem Solving</option>
+                  </optgroup>
+                </select>
               </div>
 
               <div className="form-group">

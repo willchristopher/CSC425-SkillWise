@@ -2,9 +2,9 @@
 
 .progress-bar-container {
   width: 100%;
-  background-color: white;
+  background-color: var(--color-bg-secondary);
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border-primary);
   overflow: hidden;
   position: relative;
 }
@@ -50,7 +50,7 @@
 }
 
 .tooltip-dot.completed {
-  background-color: #3182ce;
+  background-color: var(--color-brand-primary);
 }
 
 .tooltip-dot.remaining {
@@ -94,12 +94,12 @@
 .progress-percentage {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #3182ce;
+  color: var(--color-brand-primary);
 }
 
 .progress-count {
   font-size: 0.75rem;
-  color: #718096;
+  color: var(--color-text-tertiary);
   font-weight: 500;
 }
 
@@ -109,11 +109,11 @@
   justify-content: center;
   align-items: center;
   height: 150px;
-  color: #718096;
+  color: var(--color-text-tertiary);
   font-style: italic;
   background-color: #f7fafc;
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border-primary);
 }
 
 .progress-empty p {
@@ -127,9 +127,9 @@
   flex-direction: column;
   align-items: center;
   padding: 1.5rem;
-  background-color: white;
+  background-color: var(--color-bg-secondary);
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border-primary);
 }
 
 .circular-progress {
@@ -168,13 +168,13 @@
 .circular-progress-percentage {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #3182ce;
+  color: var(--color-brand-primary);
   line-height: 1;
 }
 
 .circular-progress-label {
   font-size: 0.75rem;
-  color: #718096;
+  color: var(--color-text-tertiary);
   margin-top: 0.25rem;
 }
 
@@ -185,7 +185,7 @@
 
 .circular-progress-count {
   font-size: 1rem;
-  color: #4a5568;
+  color: var(--color-text-secondary);
   font-weight: 500;
 }
 
@@ -193,9 +193,9 @@
 .linear-progress-container {
   width: 100%;
   padding: 1rem;
-  background-color: white;
+  background-color: var(--color-bg-secondary);
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border-primary);
 }
 
 .linear-progress-header {
@@ -208,14 +208,14 @@
 .linear-progress-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #1a202c;
+  color: var(--color-text-primary);
   margin: 0;
 }
 
 .linear-progress-percentage {
   font-size: 1rem;
   font-weight: 600;
-  color: #3182ce;
+  color: var(--color-brand-primary);
 }
 
 .linear-progress-bar {
@@ -268,7 +268,7 @@
   align-items: center;
   margin-top: 0.75rem;
   font-size: 0.875rem;
-  color: #718096;
+  color: var(--color-text-tertiary);
 }
 
 .linear-progress-count {
@@ -283,9 +283,9 @@
 .multi-progress-container {
   width: 100%;
   padding: 1.5rem;
-  background-color: white;
+  background-color: var(--color-bg-secondary);
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border-primary);
 }
 
 .multi-progress-header {
@@ -295,13 +295,13 @@
 .multi-progress-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #1a202c;
+  color: var(--color-text-primary);
   margin: 0 0 0.5rem 0;
 }
 
 .multi-progress-subtitle {
   font-size: 0.875rem;
-  color: #718096;
+  color: var(--color-text-tertiary);
   margin: 0;
 }
 
@@ -325,7 +325,7 @@
 .multi-progress-item-label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #4a5568;
+  color: var(--color-text-secondary);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -334,7 +334,7 @@
 .multi-progress-item-percentage {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #3182ce;
+  color: var(--color-brand-primary);
 }
 
 .multi-progress-item-bar {
@@ -366,9 +366,9 @@
   flex-direction: column;
   align-items: center;
   padding: 2rem;
-  background-color: white;
+  background-color: var(--color-bg-secondary);
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border-primary);
 }
 
 .progress-ring {
@@ -409,13 +409,13 @@
 .progress-ring-percentage {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #3182ce;
+  color: var(--color-brand-primary);
   line-height: 1;
 }
 
 .progress-ring-label {
   font-size: 0.75rem;
-  color: #718096;
+  color: var(--color-text-tertiary);
   margin-top: 0.25rem;
 }
 
@@ -427,13 +427,13 @@
 .progress-ring-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #1a202c;
+  color: var(--color-text-primary);
   margin: 0 0 0.5rem 0;
 }
 
 .progress-ring-count {
   font-size: 0.875rem;
-  color: #718096;
+  color: var(--color-text-tertiary);
   margin: 0;
 }
 
@@ -493,12 +493,12 @@
   .multi-progress-container,
   .progress-ring-container {
     background-color: #2d3748;
-    border-color: #4a5568;
+    border-color: var(--color-text-secondary);
   }
 
   .progress-labels {
-    background-color: #4a5568;
-    border-color: #718096;
+    background-color: var(--color-text-secondary);
+    border-color: var(--color-text-tertiary);
   }
 
   .progress-percentage,
@@ -525,7 +525,7 @@
 .empty-progress-state {
   text-align: center;
   padding: 4rem 2rem;
-  background: white;
+  background: var(--color-bg-secondary);
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
@@ -543,7 +543,7 @@
 }
 
 .empty-progress-state p {
-  color: #718096;
+  color: var(--color-text-tertiary);
   font-size: 1rem;
   margin-bottom: 2rem;
 }
@@ -563,7 +563,7 @@
 }
 
 .empty-actions .btn-primary {
-  background-color: #3182ce;
+  background-color: var(--color-brand-primary);
   color: white;
   border-radius: 8px;
 }
@@ -591,7 +591,7 @@
 }
 
 .placeholder-hint {
-  color: #718096;
+  color: var(--color-text-tertiary);
   font-size: 0.875rem;
   margin: 0;
   text-align: center;

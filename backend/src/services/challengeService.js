@@ -3,6 +3,7 @@ const { query, withTransaction } = require('../database/connection');
 const { z } = require('zod');
 const aiService = require('./aiService');
 const aiFeedbackService = require('./aiFeedbackService');
+const { AppError } = require('../middleware/errorHandler');
 
 // Validation schemas
 const challengeCreateSchema = z.object({
@@ -45,7 +46,7 @@ const challengeService = {
   /**
    * Get all challenges with filtering options
    */
-  getAllChallenges: async (filters = {}) => {
+  getAllChallenges: async (filters = {}, userId = null) => {
     try {
       let sql = `
         SELECT 
@@ -53,15 +54,19 @@ const challengeService = {
           u.first_name as creator_first_name,
           u.last_name as creator_last_name,
           COUNT(s.id) as submission_count,
-          AVG(CASE WHEN s.status = 'completed' THEN s.score ELSE NULL END) as average_score
+          AVG(CASE WHEN s.status = 'completed' THEN s.score ELSE NULL END) as average_score,
+          (SELECT status FROM submissions WHERE challenge_id = c.id AND user_id = $1 ORDER BY submitted_at DESC LIMIT 1) as user_submission_status,
+          (SELECT id FROM submissions WHERE challenge_id = c.id AND user_id = $1 ORDER BY submitted_at DESC LIMIT 1) as user_submission_id,
+          (SELECT score FROM submissions WHERE challenge_id = c.id AND user_id = $1 ORDER BY submitted_at DESC LIMIT 1) as user_score,
+          (SELECT COUNT(*) FROM submissions WHERE challenge_id = c.id AND user_id = $1) as user_attempts
         FROM challenges c
         LEFT JOIN users u ON c.created_by = u.id
         LEFT JOIN submissions s ON c.id = s.challenge_id
         WHERE c.is_active = true
       `;
 
-      const params = [];
-      let paramCount = 0;
+      const params = [userId || null];
+      let paramCount = 1;
 
       // Apply filters
       if (filters.category) {
@@ -130,7 +135,7 @@ const challengeService = {
           COUNT(CASE WHEN s.status = 'completed' THEN 1 END) as completion_count
         FROM challenges c
         LEFT JOIN submissions s ON c.id = s.challenge_id
-        WHERE c.created_by = $1
+        WHERE c.created_by = $1 AND (c.is_active IS NULL OR c.is_active = true)
         GROUP BY c.id
         ORDER BY c.created_at DESC
       `;
@@ -361,11 +366,15 @@ const challengeService = {
       );
 
       if (existingChallenge.rows.length === 0) {
-        throw new Error('Challenge not found');
+        throw new AppError('Challenge not found', 404, 'CHALLENGE_NOT_FOUND');
       }
 
       if (existingChallenge.rows[0].created_by !== userId) {
-        throw new Error('Not authorized to delete this challenge');
+        throw new AppError(
+          'Not authorized to delete this challenge',
+          403,
+          'UNAUTHORIZED'
+        );
       }
 
       // Soft delete by setting is_active to false
@@ -376,7 +385,8 @@ const challengeService = {
 
       return result.rows[0];
     } catch (error) {
-      throw new Error(`Failed to delete challenge: ${error.message}`);
+      if (error instanceof AppError) throw error;
+      throw new AppError('Failed to delete challenge', 500, 'DELETE_ERROR');
     }
   },
 
@@ -588,16 +598,21 @@ const challengeService = {
   /**
    * Submit a challenge solution
    */
-  submitChallenge: async (challengeId, userId, code) => {
+  submitChallenge: async (
+    challengeId,
+    userId,
+    code,
+    requestPeerReview = false
+  ) => {
     try {
       // Check if challenge exists
       const challengeResult = await query(
-        'SELECT id, max_attempts, points_reward FROM challenges WHERE id = $1 AND is_active = true',
+        'SELECT id, max_attempts, points_reward, category, title, description, instructions FROM challenges WHERE id = $1 AND is_active = true',
         [challengeId]
       );
 
       if (challengeResult.rows.length === 0) {
-        throw new Error('Challenge not found');
+        throw new AppError('Challenge not found', 404, 'CHALLENGE_NOT_FOUND');
       }
 
       const challenge = challengeResult.rows[0];
@@ -611,14 +626,19 @@ const challengeService = {
       const attemptCount = parseInt(attemptsResult.rows[0].attempt_count, 10);
 
       if (attemptCount >= challenge.max_attempts) {
-        throw new Error(
-          `Maximum attempts (${challenge.max_attempts}) reached for this challenge`
+        throw new AppError(
+          `Maximum attempts (${challenge.max_attempts}) reached for this challenge`,
+          400,
+          'MAX_ATTEMPTS_REACHED'
         );
       }
 
-      // Create submission
+      // Create submission and mark as completed immediately
       const submissionResult = await withTransaction(
         async (transactionQuery) => {
+          // Determine status based on peer review request
+          const status = requestPeerReview ? 'pending_review' : 'completed';
+
           const submissionRes = await transactionQuery(
             `
           INSERT INTO submissions (
@@ -626,90 +646,120 @@ const challengeService = {
           ) VALUES ($1, $2, $3, $4, NOW(), $5)
           RETURNING *
         `,
-            [challengeId, userId, code, 'submitted', attemptCount + 1]
+            [challengeId, userId, code, status, attemptCount + 1]
           );
 
           const submission = submissionRes.rows[0];
 
-          // Generate AI feedback for the submission
-          try {
-            const startTime = Date.now();
-            const feedbackResult = await aiService.generateFeedback(
-              code,
-              {
-                title: challenge.title,
-                description: challenge.description,
-                requirements: challenge.instructions || '',
-                previousAttempts: attemptCount,
-              },
-              userId
-            );
-            const processingTime = Date.now() - startTime;
+          // Award points immediately since challenge is complete
+          const points = Math.min(challenge.points_reward || 10, 5); // Cap at 5 points
 
-            // Update submission with AI feedback for backwards compatibility
-            const updateResult = await transactionQuery(
-              `
-            UPDATE submissions
-            SET status = $1, feedback = $2, score = $3
-            WHERE id = $4
-            RETURNING *
-          `,
-              ['completed', feedbackResult.feedback, 75, submission.id]
-            );
+          // Update user statistics
+          await transactionQuery(
+            `INSERT INTO user_statistics (user_id, total_points, total_challenges_completed, last_activity_date)
+             VALUES ($1, $2, 1, CURRENT_DATE)
+             ON CONFLICT (user_id) DO UPDATE SET 
+               total_points = user_statistics.total_points + $2,
+               total_challenges_completed = user_statistics.total_challenges_completed + 1,
+               last_activity_date = CURRENT_DATE,
+               updated_at = CURRENT_TIMESTAMP`,
+            [userId, points]
+          );
 
-            // Return both the submission and feedback data for storage after transaction
-            return {
-              submission: updateResult.rows[0],
-              feedbackData: {
-                submissionId: submission.id,
-                prompt: feedbackResult.prompt.combined,
-                response: feedbackResult.feedback,
-                feedbackType: 'submission_review',
-                aiModel: 'gemini-2.5-flash',
-                processingTimeMs: processingTime,
-              },
-            };
-          } catch (feedbackError) {
-            console.error('Failed to generate AI feedback:', feedbackError);
+          // Log progress event
+          await transactionQuery(
+            `INSERT INTO progress_events (
+              user_id, event_type, event_data, related_challenge_id, related_submission_id, points_earned
+            ) VALUES ($1, $2, $3, $4, $5, $6)`,
+            [
+              userId,
+              'challenge_completed',
+              JSON.stringify({
+                challenge_title: challenge.title,
+                attempt_number: attemptCount + 1,
+                challenge_category: challenge.category,
+                requested_peer_review: requestPeerReview,
+              }),
+              challengeId,
+              submission.id,
+              points,
+            ]
+          );
 
-            // If feedback generation fails, still return the submission but without feedback
-            const updateResult = await transactionQuery(
-              `
-            UPDATE submissions
-            SET status = $1, feedback = $2
-            WHERE id = $3
-            RETURNING *
-          `,
-              [
-                'completed',
-                'Feedback generation failed. Please try again later.',
-                submission.id,
-              ]
-            );
-
-            return { submission: updateResult.rows[0], feedbackData: null };
-          }
+          return { ...submission, points_earned: points };
         }
       );
 
-      // Store feedback in ai_feedback table AFTER transaction commits
-      if (submissionResult.feedbackData) {
-        try {
-          await aiFeedbackService.createAIFeedback(
-            submissionResult.feedbackData
-          );
-        } catch (feedbackStoreError) {
-          console.error(
-            'Failed to store feedback in ai_feedback table:',
-            feedbackStoreError
-          );
-          // Submission is already completed, just log the error
-        }
-      }
-
-      return submissionResult.submission;
+      return submissionResult;
     } catch (error) {
-      throw new Error(`Failed to submit challenge: ${error.message}`);
+      // Re-throw AppErrors as-is to preserve status codes
+      if (error instanceof AppError) {
+        throw error;
+      }
+      // Wrap other errors
+      throw new AppError(
+        `Failed to submit challenge: ${error.message}`,
+        500,
+        'SUBMISSION_ERROR'
+      );
+    }
+  },
+
+  /**
+   * Mark a submission as complete and award points
+   */
+  markSubmissionComplete: async (submissionId, userId, challengeId) => {
+    try {
+      return await withTransaction(async (transactionQuery) => {
+        // Verify submission belongs to user
+        const submissionCheck = await transactionQuery(
+          'SELECT * FROM submissions WHERE id = $1 AND user_id = $2',
+          [submissionId, userId]
+        );
+
+        if (submissionCheck.rows.length === 0) {
+          throw new Error('Submission not found or not authorized');
+        }
+
+        const submission = submissionCheck.rows[0];
+
+        // Check if already completed
+        if (submission.status === 'completed') {
+          throw new Error('Submission is already marked as complete');
+        }
+
+        // Get challenge points
+        const challengeCheck = await transactionQuery(
+          'SELECT points_reward FROM challenges WHERE id = $1',
+          [challengeId]
+        );
+
+        if (challengeCheck.rows.length === 0) {
+          throw new Error('Challenge not found');
+        }
+
+        const points = Math.min(challengeCheck.rows[0].points_reward || 10, 5); // Cap at 5 points
+
+        // Update submission to completed
+        const updateResult = await transactionQuery(
+          "UPDATE submissions SET status = 'completed', score = 75 WHERE id = $1 RETURNING *",
+          [submissionId]
+        );
+
+        // Award points and update statistics
+        const submissionService = require('./submissionService');
+        await submissionService.awardPointsForCompletion(
+          transactionQuery,
+          userId,
+          challengeId,
+          points,
+          submissionId
+        );
+
+        return updateResult.rows[0];
+      });
+    } catch (error) {
+      throw new Error(`Failed to mark submission complete: ${error.message}`);
     }
   },
 

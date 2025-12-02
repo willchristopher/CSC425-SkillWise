@@ -21,10 +21,14 @@ const GoalCard = ({ goal, onEdit, onDelete, onUpdateProgress }) => {
 
   const getDifficultyColor = (difficulty) => {
     switch (difficulty?.toLowerCase()) {
-      case 'easy': return 'difficulty-easy';
-      case 'medium': return 'difficulty-medium';
-      case 'hard': return 'difficulty-hard';
-      default: return 'difficulty-medium';
+      case 'easy':
+        return 'difficulty-easy';
+      case 'medium':
+        return 'difficulty-medium';
+      case 'hard':
+        return 'difficulty-hard';
+      default:
+        return 'difficulty-medium';
     }
   };
 
@@ -36,12 +40,17 @@ const GoalCard = ({ goal, onEdit, onDelete, onUpdateProgress }) => {
     return 'progress-start';
   };
 
-  const isOverdue = goal.target_completion_date &&
+  const isOverdue =
+    goal.target_completion_date &&
     new Date(goal.target_completion_date) < new Date() &&
     !goal.is_completed;
 
   return (
-    <div className={`goal-card ${goal.is_completed ? 'goal-completed' : ''} ${isOverdue ? 'goal-overdue' : ''}`}>
+    <div
+      className={`goal-card ${goal.is_completed ? 'goal-completed' : ''} ${
+        isOverdue ? 'goal-overdue' : ''
+      }`}
+    >
       <div className="goal-header">
         <div className="goal-title-section">
           <h3 className="goal-title">{goal.title}</h3>
@@ -59,11 +68,19 @@ const GoalCard = ({ goal, onEdit, onDelete, onUpdateProgress }) => {
           </button>
           {isMenuOpen && (
             <div className="goal-menu">
-              <button onClick={() => { onEdit(goal); setIsMenuOpen(false); }}>
+              <button
+                onClick={() => {
+                  onEdit(goal);
+                  setIsMenuOpen(false);
+                }}
+              >
                 Edit
               </button>
               <button
-                onClick={() => { onDelete(goal.id); setIsMenuOpen(false); }}
+                onClick={() => {
+                  onDelete(goal.id);
+                  setIsMenuOpen(false);
+                }}
                 className="delete-btn"
               >
                 Delete
@@ -88,22 +105,32 @@ const GoalCard = ({ goal, onEdit, onDelete, onUpdateProgress }) => {
         </div>
         <div className="progress-bar">
           <div
-            className={`progress-fill ${getProgressColor(goal.progress_percentage || 0)}`}
+            className={`progress-fill ${getProgressColor(
+              goal.progress_percentage || 0
+            )}`}
             style={{ width: `${goal.progress_percentage || 0}%` }}
           />
         </div>
-        
+
         {!goal.is_completed && (
           <div className="progress-controls">
             <button
-              onClick={() => handleProgressUpdate(Math.min(100, (goal.progress_percentage || 0) + 10))}
+              onClick={() =>
+                handleProgressUpdate(
+                  Math.min(100, (goal.progress_percentage || 0) + 10)
+                )
+              }
               className="progress-btn"
               disabled={goal.progress_percentage >= 100}
             >
               +10%
             </button>
             <button
-              onClick={() => handleProgressUpdate(Math.max(0, (goal.progress_percentage || 0) - 10))}
+              onClick={() =>
+                handleProgressUpdate(
+                  Math.max(0, (goal.progress_percentage || 0) - 10)
+                )
+              }
               className="progress-btn"
               disabled={goal.progress_percentage <= 0}
             >
@@ -115,14 +142,13 @@ const GoalCard = ({ goal, onEdit, onDelete, onUpdateProgress }) => {
 
       <div className="goal-footer">
         <div className="goal-meta">
-          <span className={`goal-difficulty ${getDifficultyColor(goal.difficulty_level)}`}>
+          <span
+            className={`goal-difficulty ${getDifficultyColor(
+              goal.difficulty_level
+            )}`}
+          >
             {goal.difficulty_level}
           </span>
-          {goal.points_reward > 0 && (
-            <span className="goal-points">
-              {goal.points_reward} pts
-            </span>
-          )}
         </div>
 
         {goal.target_completion_date && (

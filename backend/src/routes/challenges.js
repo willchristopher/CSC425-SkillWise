@@ -31,6 +31,13 @@ router.post('/', auth, challengeController.createChallenge);
 // POST /:id/link-goal route for linking challenge to goal
 router.post('/:id/link-goal', auth, challengeController.linkChallengeToGoal);
 
+// POST /submit/complete route for marking submission as complete (must come before /:id/submit)
+router.post(
+  '/submit/complete',
+  auth,
+  challengeController.markSubmissionComplete
+);
+
 // POST /:id/submit route for submitting a challenge solution
 router.post('/:id/submit', auth, challengeController.submitChallenge);
 

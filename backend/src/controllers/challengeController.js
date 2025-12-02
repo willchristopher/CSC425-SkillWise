@@ -16,6 +16,7 @@ const challengeController = {
         tags,
         limit,
       } = req.query;
+      const userId = req.user?.id || null;
 
       const filters = {};
       if (category) filters.category = category;
@@ -28,7 +29,10 @@ const challengeController = {
       if (tags) filters.tags = Array.isArray(tags) ? tags : [tags];
       if (limit) filters.limit = parseInt(limit, 10);
 
-      const challenges = await challengeService.getAllChallenges(filters);
+      const challenges = await challengeService.getAllChallenges(
+        filters,
+        userId
+      );
 
       res.json({
         success: true,
@@ -197,16 +201,12 @@ const challengeController = {
         message: 'Challenge deleted successfully',
       });
     } catch (error) {
-      if (error.message === 'Challenge not found') {
-        return res.status(404).json({
+      // Handle AppError instances
+      if (error.statusCode) {
+        return res.status(error.statusCode).json({
           success: false,
           message: error.message,
-        });
-      }
-      if (error.message === 'Not authorized to delete this challenge') {
-        return res.status(403).json({
-          success: false,
-          message: error.message,
+          code: error.code,
         });
       }
       next(error);
@@ -354,7 +354,7 @@ const challengeController = {
     try {
       const challengeId = parseInt(req.params.id, 10);
       const userId = req.user.id;
-      const { code } = req.body;
+      const { code, requestPeerReview } = req.body;
 
       if (!code || !code.trim()) {
         return res.status(400).json({
@@ -366,26 +366,63 @@ const challengeController = {
       const submission = await challengeService.submitChallenge(
         challengeId,
         userId,
-        code
+        code,
+        requestPeerReview || false
       );
 
       res.status(201).json({
         success: true,
         data: submission,
-        message: 'Challenge submitted successfully',
+        message:
+          submission.status === 'pending_review'
+            ? 'Challenge submitted for peer review!'
+            : 'Challenge completed successfully!',
       });
     } catch (error) {
-      if (error.message.includes('not found')) {
+      // Handle AppError instances with proper status codes
+      if (error.statusCode) {
+        return res.status(error.statusCode).json({
+          success: false,
+          message: error.message,
+          code: error.code,
+        });
+      }
+
+      // Fallback: Use case-insensitive matching for error messages
+      const errorMessage = error.message.toLowerCase();
+
+      if (errorMessage.includes('not found')) {
         return res.status(404).json({
           success: false,
           message: error.message,
         });
       }
-      if (error.message.includes('maximum attempts')) {
+      if (errorMessage.includes('maximum attempts')) {
         return res.status(400).json({
           success: false,
           message: error.message,
         });
+      }
+      if (errorMessage.includes('failed to submit')) {
+        // Extract the actual error from the wrapped message
+        const actualError = error.message.replace(
+          /^Failed to submit challenge: /i,
+          ''
+        );
+        const actualErrorLower = actualError.toLowerCase();
+
+        if (actualErrorLower.includes('maximum attempts')) {
+          return res.status(400).json({
+            success: false,
+            message: actualError,
+          });
+        }
+        if (actualErrorLower.includes('not found')) {
+          return res.status(404).json({
+            success: false,
+            message: actualError,
+          });
+        }
       }
       next(error);
     }
@@ -410,6 +447,53 @@ const challengeController = {
         message: 'Submissions retrieved successfully',
       });
     } catch (error) {
+      next(error);
+    }
+  },
+
+  /**
+   * Mark a submission as complete and award points
+   */
+  markSubmissionComplete: async (req, res, next) => {
+    try {
+      const submissionId = parseInt(req.body.submission_id, 10);
+      const challengeId = parseInt(req.body.challenge_id, 10);
+      const userId = req.user.id;
+
+      if (!submissionId || !challengeId) {
+        return res.status(400).json({
+          success: false,
+          message: 'Submission ID and Challenge ID are required',
+        });
+      }
+
+      const submission = await challengeService.markSubmissionComplete(
+        submissionId,
+        userId,
+        challengeId
+      );
+
+      res.status(200).json({
+        success: true,
+        data: submission,
+        message: 'Challenge marked as complete and points awarded',
+      });
+    } catch (error) {
+      if (
+        error.message.includes('not found') ||
+        error.message.includes('not authorized')
+      ) {
+        return res.status(404).json({
+          success: false,
+          message: error.message,
+        });
+      }
+      if (error.message.includes('already marked')) {
+        return res.status(400).json({
+          success: false,
+          message: error.message,
+        });
+      }
       next(error);
     }
   },

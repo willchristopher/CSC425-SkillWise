@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { apiService } from '../../services/api';
+import '../../styles/ai-tutor.css';
 
 const AITutor = ({ challengeId, challengeTitle, challengeDescription }) => {
-  const [code, setCode] = useState('');
+  const [content, setContent] = useState('');
   const [feedback, setFeedback] = useState('');
   const [hints, setHints] = useState('');
   const [loading, setLoading] = useState(false);
@@ -10,8 +11,8 @@ const AITutor = ({ challengeId, challengeTitle, challengeDescription }) => {
   const [activeTab, setActiveTab] = useState('feedback');
 
   const handleGetFeedback = async () => {
-    if (!code.trim()) {
-      setError('Please enter some code to get feedback');
+    if (!content.trim()) {
+      setError('Please enter your work to get feedback');
       return;
     }
 
@@ -20,14 +21,17 @@ const AITutor = ({ challengeId, challengeTitle, challengeDescription }) => {
     setFeedback('');
 
     try {
-      const response = await apiService.ai.generateFeedback(code, {
-        title: challengeTitle || 'Code Review',
-        description: challengeDescription || 'General code submission',
+      const response = await apiService.ai.generateFeedback(content, {
+        title: challengeTitle || 'Learning Review',
+        description: challengeDescription || 'General learning submission',
       });
 
       setFeedback(response.data.data.feedback);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to generate feedback. Please try again.');
+      setError(
+        err.response?.data?.message ||
+          'Failed to generate feedback. Please try again.'
+      );
       console.error('AI Feedback Error:', err);
     } finally {
       setLoading(false);
@@ -43,19 +47,22 @@ const AITutor = ({ challengeId, challengeTitle, challengeDescription }) => {
       const response = await apiService.ai.getHints(
         challengeId || 'general',
         {
-          title: challengeTitle || 'Programming Challenge',
-          description: challengeDescription || 'General programming help',
+          title: challengeTitle || 'Learning Challenge',
+          description: challengeDescription || 'General learning help',
           difficulty: 'Medium',
         },
         {
           attempts: 0,
-          lastAttempt: code.trim() || 'No attempts yet',
+          lastAttempt: content.trim() || 'No attempts yet',
         }
       );
 
       setHints(response.data.data.hints);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to generate hints. Please try again.');
+      setError(
+        err.response?.data?.message ||
+          'Failed to generate hints. Please try again.'
+      );
       console.error('AI Hints Error:', err);
     } finally {
       setLoading(false);
@@ -63,68 +70,61 @@ const AITutor = ({ challengeId, challengeTitle, challengeDescription }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="mb-4">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">
-          🤖 AI Tutor Assistant
-        </h2>
-        <p className="text-gray-600">
-          Powered by Google Gemini - Get instant feedback and hints for your code!
+    <div className="ai-tutor-widget">
+      <div className="ai-tutor-widget-header">
+        <h2 className="ai-tutor-widget-title">🤖 AI Learning Assistant</h2>
+        <p className="ai-tutor-widget-subtitle">
+          Powered by Google Gemini - Get instant feedback and hints for your
+          learning journey!
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 mb-4">
+      <div className="ai-tutor-tabs">
         <button
           onClick={() => setActiveTab('feedback')}
-          className={`px-4 py-2 font-medium transition-colors ${
-            activeTab === 'feedback'
-              ? 'text-blue-600 border-b-2 border-blue-600'
-              : 'text-gray-500 hover:text-gray-700'
+          className={`ai-tutor-tab ${
+            activeTab === 'feedback' ? 'ai-tutor-tab--active' : ''
           }`}
         >
           📝 Get Feedback
         </button>
         <button
           onClick={() => setActiveTab('hints')}
-          className={`px-4 py-2 font-medium transition-colors ${
-            activeTab === 'hints'
-              ? 'text-blue-600 border-b-2 border-blue-600'
-              : 'text-gray-500 hover:text-gray-700'
+          className={`ai-tutor-tab ${
+            activeTab === 'hints' ? 'ai-tutor-tab--active' : ''
           }`}
         >
           💡 Get Hints
         </button>
       </div>
 
-      {/* Code Input */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Your Code:
-        </label>
+      {/* Content Input */}
+      <div className="ai-tutor-input-group">
+        <label className="ai-tutor-label">Your Work:</label>
         <textarea
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          placeholder="Paste your code here..."
-          className="w-full h-48 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="Paste your work here... This can be code, writing, notes, or any learning content you want feedback on."
+          className="ai-tutor-textarea"
         />
       </div>
 
       {/* Action Button */}
-      <div className="mb-4">
+      <div className="ai-tutor-input-group">
         {activeTab === 'feedback' ? (
           <button
             onClick={handleGetFeedback}
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
+            className="ai-tutor-btn ai-tutor-btn--primary"
           >
-            {loading ? '🔄 Analyzing your code...' : '📝 Get AI Feedback'}
+            {loading ? '🔄 Analyzing your work...' : '📝 Get AI Feedback'}
           </button>
         ) : (
           <button
             onClick={handleGetHints}
             disabled={loading}
-            className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
+            className="ai-tutor-btn ai-tutor-btn--success"
           >
             {loading ? '🔄 Getting hints...' : '💡 Get Hints'}
           </button>
@@ -132,32 +132,28 @@ const AITutor = ({ challengeId, challengeTitle, challengeDescription }) => {
       </div>
 
       {/* Error Message */}
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-800 text-sm">⚠️ {error}</p>
-        </div>
-      )}
+      {error && <div className="ai-tutor-error">⚠️ {error}</div>}
 
       {/* Feedback/Hints Display */}
       {activeTab === 'feedback' && feedback && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="font-bold text-blue-900 mb-2">AI Feedback:</h3>
-          <div className="text-gray-800 whitespace-pre-wrap">{feedback}</div>
+        <div className="ai-tutor-result ai-tutor-result--feedback">
+          <h3 className="ai-tutor-result-title">AI Feedback:</h3>
+          <div className="ai-tutor-result-content">{feedback}</div>
         </div>
       )}
 
       {activeTab === 'hints' && hints && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <h3 className="font-bold text-green-900 mb-2">AI Hints:</h3>
-          <div className="text-gray-800 whitespace-pre-wrap">{hints}</div>
+        <div className="ai-tutor-result ai-tutor-result--hints">
+          <h3 className="ai-tutor-result-title">AI Hints:</h3>
+          <div className="ai-tutor-result-content">{hints}</div>
         </div>
       )}
 
       {/* Loading State */}
       {loading && (
-        <div className="text-center py-8">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="mt-2 text-gray-600">AI is thinking...</p>
+        <div className="ai-tutor-loading">
+          <div className="ai-tutor-spinner"></div>
+          <p className="ai-tutor-loading-text">AI is thinking...</p>
         </div>
       )}
     </div>

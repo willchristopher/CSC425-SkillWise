@@ -11,12 +11,13 @@ const promptTemplates = {
    * Placeholders: {{category}}, {{difficulty}}, {{topic}}, {{requirements}}
    */
   generateChallenge: {
-    systemPrompt: `You are an expert programming instructor creating educational coding challenges. 
-Generate well-structured, clear, and engaging programming challenges that help students learn effectively.
+    systemPrompt: `You are an expert educator creating engaging learning challenges across all subjects.
+Generate well-structured, clear, and engaging challenges that help students learn effectively.
+Challenges can be in any subject: programming, mathematics, science, history, language arts, music, art, etc.
 Each challenge should have a clear goal, specific requirements, and appropriate difficulty level.
 IMPORTANT: Return ONLY valid JSON without any markdown formatting, code blocks, or explanatory text.`,
 
-    userPrompt: `Create a programming challenge with the following parameters:
+    userPrompt: `Create a learning challenge with the following parameters:
 - Category: {{category}}
 - Difficulty: {{difficulty}}
 {{#if topic}}- Topic/Focus: {{topic}}{{/if}}
@@ -33,12 +34,12 @@ Generate a complete challenge as a JSON object (no markdown, no code blocks, jus
   "points_reward": <appropriate points based on difficulty (easy: 10-20, medium: 25-40, hard: 45-60)>,
   "learning_objectives": ["objective 1", "objective 2", "objective 3"],
   "tags": ["tag1", "tag2", "tag3"],
-  "starter_code": "Optional starter code or boilerplate if applicable",
-  "test_cases": ["Example test case 1", "Example test case 2"],
+  "starter_code": "Optional starter material, template, or boilerplate if applicable (can be for any subject)",
+  "test_cases": ["Example test case or success criteria 1", "Example test case or success criteria 2"],
   "hints": ["Hint 1", "Hint 2"]
 }
 
-Make sure the challenge is educational, engaging, and appropriate for {{difficulty}} level.
+Make sure the challenge is educational, engaging, appropriate for {{difficulty}} level, and suited to the {{category}} subject.
 Return ONLY the JSON object, no other text.`,
 
     config: {
@@ -95,7 +96,7 @@ Keep the feedback constructive, clear, and actionable.`,
     expectedResponseFormat: {
       type: 'text',
       minLength: 100,
-      maxLength: 3000,
+      maxLength: 10000,
     },
   },
 
@@ -104,8 +105,9 @@ Keep the feedback constructive, clear, and actionable.`,
    * Placeholders: {{challengeTitle}}, {{challengeDescription}}, {{userProgress}}
    */
   generateHints: {
-    systemPrompt: `You are a helpful coding tutor providing strategic hints without giving away the complete solution.
-Guide students toward discovering the answer themselves through thoughtful questions and gentle nudges.`,
+    systemPrompt: `You are a helpful tutor providing strategic hints without giving away the complete solution.
+Guide students toward discovering the answer themselves through thoughtful questions and gentle nudges.
+Work across any subject area: programming, mathematics, science, writing, history, language arts, etc.`,
 
     userPrompt: `Challenge: {{challengeTitle}}
 
@@ -116,7 +118,7 @@ Student Progress: {{userProgress}}
 Provide 2-3 progressive hints that:
 1. Start with conceptual guidance
 2. Move toward implementation strategy
-3. Give specific technical pointers (but not the complete solution)
+3. Give specific pointers (but not the complete solution)
 
 Format each hint on a new line starting with "💡 Hint: "`,
 
@@ -138,8 +140,9 @@ Format each hint on a new line starting with "💡 Hint: "`,
    * Placeholders: {{skillLevel}}, {{completedCount}}, {{preferredCategories}}, {{weakAreas}}
    */
   generateSuggestions: {
-    systemPrompt: `You are a personalized learning advisor recommending coding challenges based on student progress.
-Suggest challenges that are appropriately challenging while building on existing skills.`,
+    systemPrompt: `You are a personalized learning advisor recommending challenges based on student progress.
+Suggest challenges that are appropriately challenging while building on existing skills.
+Consider all subject areas including programming, mathematics, science, history, languages, arts, and more.`,
 
     userPrompt: `Student Profile:
 - Skill Level: {{skillLevel}}
@@ -168,8 +171,9 @@ For each suggestion, briefly explain why it would be beneficial for their learni
    *              {{avgTimePerChallenge}}, {{streak}}, {{recentActivity}}
    */
   analyzeProgress: {
-    systemPrompt: `You are an educational data analyst. Analyze student learning patterns and provide 
-actionable insights to help them improve their learning journey. Be specific and encouraging.`,
+    systemPrompt: `You are an educational data analyst. Analyze student learning patterns across all subjects and provide 
+actionable insights to help them improve their learning journey. Be specific and encouraging.
+Students may be learning programming, mathematics, languages, sciences, arts, or any other subject area.`,
 
     userPrompt: `Student Learning Data:
 - Total challenges completed: {{completedChallenges}}

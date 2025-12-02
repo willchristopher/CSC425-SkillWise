@@ -13,20 +13,92 @@ const ChallengeDetailsModal = ({
     userSubmission?.submission_text || userSubmission?.code || ''
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPeerReviewPrompt, setShowPeerReviewPrompt] = useState(false);
+  const [submissionSuccess, setSubmissionSuccess] = useState(false);
+  const [error, setError] = useState('');
 
   if (!isOpen || !challenge) return null;
 
-  const handleSubmit = async (e) => {
+  // Determine if this is a code-based challenge
+  const isCodeChallenge = () => {
+    const codeCategories = [
+      'JavaScript',
+      'Python',
+      'Java',
+      'C++',
+      'React',
+      'Web Development',
+      'Backend Development',
+    ];
+    return codeCategories.includes(challenge.category);
+  };
+
+  // Get submission label based on category
+  const getSubmissionLabel = () => {
+    if (isCodeChallenge()) {
+      return 'Code Submission';
+    }
+    switch (challenge.category) {
+      case 'Creative Writing':
+      case 'English':
+        return 'Your Response';
+      case 'Music Theory':
+      case 'Visual Arts':
+      case 'Photography':
+      case 'Design':
+        return 'Your Work';
+      default:
+        return 'Your Answer';
+    }
+  };
+
+  // Get placeholder text based on category
+  const getPlaceholder = () => {
+    if (isCodeChallenge()) {
+      return 'Paste your code here...';
+    }
+    switch (challenge.category) {
+      case 'Creative Writing':
+        return 'Write your story or essay here...';
+      case 'Music Theory':
+        return 'Describe your answer or paste notation...';
+      case 'Visual Arts':
+      case 'Photography':
+      case 'Design':
+        return 'Describe your work, paste a link, or upload details...';
+      default:
+        return 'Enter your answer or response here...';
+    }
+  };
+
+  const handleSubmitClick = (e) => {
     e.preventDefault();
+    if (!submissionCode.trim()) return;
+    // Show peer review prompt before submitting
+    setShowPeerReviewPrompt(true);
+  };
+
+  const handleConfirmSubmit = async (requestPeerReview) => {
+    setShowPeerReviewPrompt(false);
     setIsSubmitting(true);
+    setError('');
 
     try {
       await onSubmit({
         challenge_id: challenge.id,
         code: submissionCode,
+        requestPeerReview: requestPeerReview,
       });
-      onClose();
+
+      setSubmissionSuccess(true);
+      // Close modal after showing success message
+      setTimeout(() => {
+        onClose();
+      }, 2000);
     } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || 'Failed to submit solution';
+      setError(errorMessage);
       console.error('Failed to submit challenge:', error);
     } finally {
       setIsSubmitting(false);
@@ -179,65 +251,116 @@ const ChallengeDetailsModal = ({
           )}
 
           {/* Submission Form */}
-          <div className="challenge-section">
-            <h3>Your Solution</h3>
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label htmlFor="submission-code">
-                  Code Submission
-                  {!canSubmit && (
-                    <span className="error-text">
-                      {' '}
-                      (Maximum attempts reached)
-                    </span>
-                  )}
-                </label>
-                <textarea
-                  id="submission-code"
-                  className="code-editor"
-                  value={submissionCode}
-                  onChange={(e) => setSubmissionCode(e.target.value)}
-                  placeholder="Paste your code here..."
-                  rows={15}
-                  disabled={!canSubmit}
-                  required
-                />
-              </div>
-
-              {challenge.requires_peer_review && (
-                <div className="peer-review-notice">
-                  <span className="notice-icon">👥</span>
-                  <span>
-                    This challenge requires peer review after submission
-                  </span>
+          {!submissionSuccess && !showPeerReviewPrompt && (
+            <div className="challenge-section">
+              <h3>Your Solution</h3>
+              {error && (
+                <div className="alert alert-danger" role="alert">
+                  {error}
                 </div>
               )}
+              <form onSubmit={handleSubmitClick}>
+                <div className="form-group">
+                  <label htmlFor="submission-code">
+                    {getSubmissionLabel()}
+                    {!canSubmit && (
+                      <span className="error-text">
+                        {' '}
+                        (Maximum attempts reached)
+                      </span>
+                    )}
+                  </label>
+                  <textarea
+                    id="submission-code"
+                    className={
+                      isCodeChallenge() ? 'code-editor' : 'text-editor'
+                    }
+                    value={submissionCode}
+                    onChange={(e) => setSubmissionCode(e.target.value)}
+                    placeholder={getPlaceholder()}
+                    rows={15}
+                    disabled={!canSubmit}
+                    required
+                  />
+                </div>
 
-              <div className="form-actions">
+                <div className="form-actions">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={onClose}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={
+                      isSubmitting || !canSubmit || !submissionCode.trim()
+                    }
+                  >
+                    {isSubmitting ? 'Submitting...' : 'Submit Solution'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* Peer Review Prompt */}
+          {showPeerReviewPrompt && (
+            <div className="challenge-section peer-review-prompt-section">
+              <h3>👥 Would you like peer feedback?</h3>
+              <p className="prompt-description">
+                Your submission will be saved and the challenge marked as
+                complete. Would you also like to submit your work for peer
+                review to get feedback from other learners?
+              </p>
+              {error && (
+                <div className="alert alert-danger" role="alert">
+                  {error}
+                </div>
+              )}
+              <div className="form-actions peer-review-actions">
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  onClick={onClose}
+                  onClick={() => handleConfirmSubmit(false)}
+                  disabled={isSubmitting}
                 >
-                  Cancel
+                  {isSubmitting ? 'Submitting...' : 'No, just complete it'}
                 </button>
                 <button
-                  type="submit"
+                  type="button"
                   className="btn btn-primary"
-                  disabled={
-                    isSubmitting || !canSubmit || !submissionCode.trim()
-                  }
+                  onClick={() => handleConfirmSubmit(true)}
+                  disabled={isSubmitting}
                 >
-                  {isSubmitting ? 'Submitting...' : 'Submit Solution'}
+                  {isSubmitting
+                    ? 'Submitting...'
+                    : '✓ Yes, request peer review'}
                 </button>
               </div>
-            </form>
-          </div>
+            </div>
+          )}
 
-          {/* Previous Submission Feedback */}
-          {userSubmission && userSubmission.feedback && (
+          {/* Success Message */}
+          {submissionSuccess && (
+            <div className="challenge-section success-section">
+              <div className="success-message">
+                <span className="success-icon">🎉</span>
+                <h3>Challenge Completed!</h3>
+                <p>
+                  Great job! Your solution has been saved and points have been
+                  awarded.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Previous Submission Info */}
+          {userSubmission && userSubmission.feedback && !submissionSuccess && (
             <div className="challenge-section feedback-section">
-              <h3>Feedback</h3>
+              <h3>Previous Feedback</h3>
               <div className="feedback-content">{userSubmission.feedback}</div>
             </div>
           )}

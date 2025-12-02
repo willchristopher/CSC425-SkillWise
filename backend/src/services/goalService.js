@@ -17,8 +17,10 @@ const goalService = {
           is_completed, 
           completion_date, 
           progress_percentage, 
-          points_reward, 
-          is_public, 
+          is_public,
+          challenges_target,
+          challenges_period,
+          challenges_completed,
           created_at, 
           updated_at
         FROM goals 
@@ -61,7 +63,7 @@ const goalService = {
     try {
       const result = await db.query(
         'SELECT * FROM goals WHERE id = $1 AND user_id = $2',
-        [goalId, userId],
+        [goalId, userId]
       );
 
       if (result.rows.length === 0) {
@@ -86,8 +88,9 @@ const goalService = {
         category,
         difficulty_level = 'medium',
         target_completion_date,
-        points_reward = 10,
         is_public = false,
+        challenges_target = 0,
+        challenges_period = 'week',
       } = goalData;
 
       // Validate required fields
@@ -99,15 +102,45 @@ const goalService = {
         throw new AppError('Goal title is too long', 400, 'INVALID_GOAL_DATA');
       }
 
+      // Validate challenges_period if provided
+      const validPeriods = ['day', 'week', 'month'];
+      if (challenges_period && !validPeriods.includes(challenges_period)) {
+        throw new AppError(
+          'Invalid challenges period',
+          400,
+          'INVALID_CHALLENGES_PERIOD'
+        );
+      }
+
+      // Validate challenges_target
+      if (challenges_target < 0 || challenges_target > 100) {
+        throw new AppError(
+          'Challenges target must be between 0 and 100',
+          400,
+          'INVALID_CHALLENGES_TARGET'
+        );
+      }
+
       // Validate difficulty level
       const validDifficultyLevels = ['easy', 'medium', 'hard'];
       if (!validDifficultyLevels.includes(difficulty_level)) {
-        throw new AppError('Invalid difficulty level', 400, 'INVALID_DIFFICULTY');
+        throw new AppError(
+          'Invalid difficulty level',
+          400,
+          'INVALID_DIFFICULTY'
+        );
       }
 
       // Validate target completion date
-      if (target_completion_date && new Date(target_completion_date) < new Date()) {
-        throw new AppError('Target completion date cannot be in the past', 400, 'INVALID_DATE');
+      if (
+        target_completion_date &&
+        new Date(target_completion_date) < new Date()
+      ) {
+        throw new AppError(
+          'Target completion date cannot be in the past',
+          400,
+          'INVALID_DATE'
+        );
       }
 
       const insertQuery = `
@@ -118,9 +151,11 @@ const goalService = {
           category, 
           difficulty_level, 
           target_completion_date, 
-          points_reward, 
-          is_public
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+          is_public,
+          challenges_target,
+          challenges_period,
+          challenges_completed
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 0)
         RETURNING *
       `;
 
@@ -131,8 +166,9 @@ const goalService = {
         category?.trim() || null,
         difficulty_level,
         target_completion_date || null,
-        points_reward,
         is_public,
+        challenges_target,
+        challenges_period,
       ]);
 
       return result.rows[0];
@@ -156,11 +192,18 @@ const goalService = {
 
       // Build dynamic update query
       const allowedFields = [
-        'title', 'description', 'category', 'difficulty_level',
-        'target_completion_date', 'points_reward', 'is_public',
+        'title',
+        'description',
+        'category',
+        'difficulty_level',
+        'target_completion_date',
+        'is_public',
+        'challenges_target',
+        'challenges_period',
+        'challenges_completed',
       ];
 
-      allowedFields.forEach(field => {
+      allowedFields.forEach((field) => {
         if (updateData[field] !== undefined) {
           fields.push(`${field} = $${paramCount}`);
           values.push(updateData[field]);
@@ -169,16 +212,28 @@ const goalService = {
       });
 
       if (fields.length === 0) {
-        throw new AppError('No valid fields to update', 400, 'NO_UPDATE_FIELDS');
+        throw new AppError(
+          'No valid fields to update',
+          400,
+          'NO_UPDATE_FIELDS'
+        );
       }
 
       // Validate title if being updated
       if (updateData.title !== undefined) {
         if (!updateData.title || updateData.title.trim().length === 0) {
-          throw new AppError('Goal title is required', 400, 'INVALID_GOAL_DATA');
+          throw new AppError(
+            'Goal title is required',
+            400,
+            'INVALID_GOAL_DATA'
+          );
         }
         if (updateData.title.length > 255) {
-          throw new AppError('Goal title is too long', 400, 'INVALID_GOAL_DATA');
+          throw new AppError(
+            'Goal title is too long',
+            400,
+            'INVALID_GOAL_DATA'
+          );
         }
       }
 
@@ -186,7 +241,37 @@ const goalService = {
       if (updateData.difficulty_level !== undefined) {
         const validDifficultyLevels = ['easy', 'medium', 'hard'];
         if (!validDifficultyLevels.includes(updateData.difficulty_level)) {
-          throw new AppError('Invalid difficulty level', 400, 'INVALID_DIFFICULTY');
+          throw new AppError(
+            'Invalid difficulty level',
+            400,
+            'INVALID_DIFFICULTY'
+          );
+        }
+      }
+
+      // Validate challenges_period if being updated
+      if (updateData.challenges_period !== undefined) {
+        const validPeriods = ['day', 'week', 'month'];
+        if (!validPeriods.includes(updateData.challenges_period)) {
+          throw new AppError(
+            'Invalid challenges period',
+            400,
+            'INVALID_CHALLENGES_PERIOD'
+          );
+        }
+      }
+
+      // Validate challenges_target if being updated
+      if (updateData.challenges_target !== undefined) {
+        if (
+          updateData.challenges_target < 0 ||
+          updateData.challenges_target > 100
+        ) {
+          throw new AppError(
+            'Challenges target must be between 0 and 100',
+            400,
+            'INVALID_CHALLENGES_TARGET'
+          );
         }
       }
 
@@ -215,14 +300,31 @@ const goalService = {
 
       // Validate progress percentage
       if (progress_percentage < 0 || progress_percentage > 100) {
-        throw new AppError('Progress must be between 0 and 100', 400, 'INVALID_PROGRESS');
+        throw new AppError(
+          'Progress must be between 0 and 100',
+          400,
+          'INVALID_PROGRESS'
+        );
       }
 
-      // Check if goal is completed
+      // Get current goal state first
+      const currentGoal = await db.query(
+        'SELECT is_completed FROM goals WHERE id = $1 AND user_id = $2',
+        [goalId, userId]
+      );
+
+      if (currentGoal.rows.length === 0) {
+        throw new AppError('Goal not found', 404, 'GOAL_NOT_FOUND');
+      }
+
+      const wasCompleted = currentGoal.rows[0].is_completed;
+
+      // Check if goal is being completed for the first time
       const is_completed = progress_percentage === 100;
       const completion_date = is_completed ? new Date() : null;
 
-      const result = await db.query(`
+      const result = await db.query(
+        `
         UPDATE goals 
         SET 
           progress_percentage = $1,
@@ -231,15 +333,12 @@ const goalService = {
           updated_at = CURRENT_TIMESTAMP
         WHERE id = $4 AND user_id = $5
         RETURNING *
-      `, [progress_percentage, is_completed, completion_date, goalId, userId]);
+      `,
+        [progress_percentage, is_completed, completion_date, goalId, userId]
+      );
 
       if (result.rows.length === 0) {
         throw new AppError('Goal not found', 404, 'GOAL_NOT_FOUND');
-      }
-
-      // If goal is completed, award points to user
-      if (is_completed && !result.rows[0].completion_date) {
-        await goalService.awardPoints(userId, result.rows[0].points_reward);
       }
 
       return result.rows[0];
@@ -247,7 +346,11 @@ const goalService = {
       if (error instanceof AppError) {
         throw error;
       }
-      throw new AppError('Failed to update progress', 500, 'UPDATE_PROGRESS_ERROR');
+      throw new AppError(
+        'Failed to update progress',
+        500,
+        'UPDATE_PROGRESS_ERROR'
+      );
     }
   },
 
@@ -256,7 +359,7 @@ const goalService = {
     try {
       const result = await db.query(
         'DELETE FROM goals WHERE id = $1 AND user_id = $2 RETURNING id',
-        [goalId, userId],
+        [goalId, userId]
       );
 
       if (result.rows.length === 0) {
@@ -280,8 +383,7 @@ const goalService = {
           COUNT(*) as total_goals,
           COUNT(CASE WHEN is_completed = true THEN 1 END) as completed_goals,
           COUNT(CASE WHEN is_completed = false THEN 1 END) as active_goals,
-          ROUND(AVG(progress_percentage), 2) as average_progress,
-          SUM(CASE WHEN is_completed = true THEN points_reward ELSE 0 END) as total_points_earned
+          ROUND(AVG(progress_percentage), 2) as average_progress
         FROM goals 
         WHERE user_id = $1
       `;
@@ -295,19 +397,32 @@ const goalService = {
         completed_goals: parseInt(stats.completed_goals) || 0,
         active_goals: parseInt(stats.active_goals) || 0,
         average_progress: parseFloat(stats.average_progress) || 0,
-        total_points_earned: parseInt(stats.total_points_earned) || 0,
       };
     } catch (error) {
-      throw new AppError('Failed to get goal statistics', 500, 'GET_STATS_ERROR');
+      throw new AppError(
+        'Failed to get goal statistics',
+        500,
+        'GET_STATS_ERROR'
+      );
     }
   },
 
-  // Award points to user (placeholder for now)
+  // Award points to user
   awardPoints: async (userId, points) => {
     try {
-      // This would integrate with user_statistics table
-      // For now, just log the points award
-      console.log(`Awarding ${points} points to user ${userId}`);
+      // First, ensure user_statistics row exists
+      await db.query(
+        `
+        INSERT INTO user_statistics (user_id, total_points)
+        VALUES ($1, $2)
+        ON CONFLICT (user_id) DO UPDATE
+        SET total_points = user_statistics.total_points + $2,
+            last_activity_date = CURRENT_DATE,
+            updated_at = CURRENT_TIMESTAMP
+      `,
+        [userId, points]
+      );
+
       return true;
     } catch (error) {
       console.error('Failed to award points:', error);
@@ -331,7 +446,11 @@ const goalService = {
 
       return result.rows;
     } catch (error) {
-      throw new AppError('Failed to get popular categories', 500, 'GET_CATEGORIES_ERROR');
+      throw new AppError(
+        'Failed to get popular categories',
+        500,
+        'GET_CATEGORIES_ERROR'
+      );
     }
   },
 };

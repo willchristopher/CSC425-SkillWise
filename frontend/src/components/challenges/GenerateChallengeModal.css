@@ -285,3 +285,163 @@
     transform: rotate(360deg);
   }
 }
+
+/* Dark Mode Support */
+[data-theme='dark'] .generate-challenge-modal,
+.dark .generate-challenge-modal {
+  background: #1e293b;
+  border: 1px solid #334155;
+}
+
+[data-theme='dark'] .generate-challenge-modal .modal-header,
+.dark .generate-challenge-modal .modal-header {
+  border-bottom-color: #334155;
+}
+
+[data-theme='dark'] .generate-challenge-modal .modal-header h2,
+.dark .generate-challenge-modal .modal-header h2 {
+  color: #f1f5f9;
+}
+
+[data-theme='dark'] .generate-challenge-modal .close-btn,
+.dark .generate-challenge-modal .close-btn {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .generate-challenge-modal .close-btn:hover,
+.dark .generate-challenge-modal .close-btn:hover {
+  background-color: #334155;
+  color: #f1f5f9;
+}
+
+[data-theme='dark'] .generate-challenge-modal .form-group label,
+.dark .generate-challenge-modal .form-group label {
+  color: #e2e8f0;
+}
+
+[data-theme='dark'] .generate-challenge-modal .form-group input,
+[data-theme='dark'] .generate-challenge-modal .form-group select,
+[data-theme='dark'] .generate-challenge-modal .form-group textarea,
+.dark .generate-challenge-modal .form-group input,
+.dark .generate-challenge-modal .form-group select,
+.dark .generate-challenge-modal .form-group textarea {
+  background-color: #0f172a;
+  border-color: #475569;
+  color: #f1f5f9;
+}
+
+[data-theme='dark'] .generate-challenge-modal .form-group input::placeholder,
+[data-theme='dark'] .generate-challenge-modal .form-group textarea::placeholder,
+.dark .generate-challenge-modal .form-group input::placeholder,
+.dark .generate-challenge-modal .form-group textarea::placeholder {
+  color: #64748b;
+}
+
+[data-theme='dark'] .generate-challenge-modal .form-group input:focus,
+[data-theme='dark'] .generate-challenge-modal .form-group select:focus,
+[data-theme='dark'] .generate-challenge-modal .form-group textarea:focus,
+.dark .generate-challenge-modal .form-group input:focus,
+.dark .generate-challenge-modal .form-group select:focus,
+.dark .generate-challenge-modal .form-group textarea:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+[data-theme='dark'] .generate-challenge-modal .form-group input:disabled,
+[data-theme='dark'] .generate-challenge-modal .form-group select:disabled,
+[data-theme='dark'] .generate-challenge-modal .form-group textarea:disabled,
+.dark .generate-challenge-modal .form-group input:disabled,
+.dark .generate-challenge-modal .form-group select:disabled,
+.dark .generate-challenge-modal .form-group textarea:disabled {
+  background-color: #1e293b;
+  color: #64748b;
+}
+
+[data-theme='dark'] .generate-challenge-modal .help-text,
+.dark .generate-challenge-modal .help-text {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .generate-challenge-modal .error-message,
+.dark .generate-challenge-modal .error-message {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+
+[data-theme='dark'] .generate-challenge-modal .generated-challenge h3,
+.dark .generate-challenge-modal .generated-challenge h3 {
+  color: #f1f5f9;
+}
+
+[data-theme='dark'] .generate-challenge-modal .challenge-section h4,
+.dark .generate-challenge-modal .challenge-section h4 {
+  color: #e2e8f0;
+}
+
+[data-theme='dark'] .generate-challenge-modal .challenge-section p,
+[data-theme='dark'] .generate-challenge-modal .challenge-section .instructions,
+[data-theme='dark'] .generate-challenge-modal .challenge-section ul,
+.dark .generate-challenge-modal .challenge-section p,
+.dark .generate-challenge-modal .challenge-section .instructions,
+.dark .generate-challenge-modal .challenge-section ul {
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .generate-challenge-modal .challenge-meta,
+.dark .generate-challenge-modal .challenge-meta {
+  background-color: #0f172a;
+}
+
+[data-theme='dark'] .generate-challenge-modal .challenge-meta span,
+.dark .generate-challenge-modal .challenge-meta span {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .generate-challenge-modal .modal-footer,
+.dark .generate-challenge-modal .modal-footer {
+  border-top-color: #334155;
+}
+
+[data-theme='dark'] .generate-challenge-modal .btn-secondary,
+.dark .generate-challenge-modal .btn-secondary {
+  background-color: #334155;
+  color: #e2e8f0;
+}
+
+[data-theme='dark']
+  .generate-challenge-modal
+  .btn-secondary:hover:not(:disabled),
+.dark .generate-challenge-modal .btn-secondary:hover:not(:disabled) {
+  background-color: #475569;
+}
+
+[data-theme='dark'] .generate-challenge-modal .difficulty-badge.easy,
+.dark .generate-challenge-modal .difficulty-badge.easy {
+  background-color: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+}
+
+[data-theme='dark'] .generate-challenge-modal .difficulty-badge.medium,
+.dark .generate-challenge-modal .difficulty-badge.medium {
+  background-color: rgba(251, 191, 36, 0.2);
+  color: #fbbf24;
+}
+
+[data-theme='dark'] .generate-challenge-modal .difficulty-badge.hard,
+.dark .generate-challenge-modal .difficulty-badge.hard {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+[data-theme='dark'] .generate-challenge-modal .category-badge,
+.dark .generate-challenge-modal .category-badge {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}
+
+[data-theme='dark'] .generate-challenge-modal .ai-badge,
+.dark .generate-challenge-modal .ai-badge {
+  background-color: rgba(139, 92, 246, 0.2);
+  color: #a78bfa;
+}

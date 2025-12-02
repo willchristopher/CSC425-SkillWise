@@ -221,13 +221,9 @@ const aiService = {
     });
 
     // Validate the response has expected content
-    const validation = validateResponse(response, {
-      minLength: 50,
-      requiredKeywords: ['feedback', 'code', 'suggestion'],
-      maxLength: 5000,
-    });
+    const validation = validateResponse('generateFeedback', response);
 
-    if (!validation.isValid) {
+    if (!validation.valid) {
       console.warn('Feedback validation failed:', validation.errors);
       // Still return the response but log the issue
     }

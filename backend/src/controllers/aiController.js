@@ -208,7 +208,12 @@ const aiController = {
       });
     } catch (error) {
       console.error('Error generating challenge:', error);
-      next(error);
+      // Return a more helpful error message to the client
+      return res.status(500).json({
+        success: false,
+        message:
+          error.message || 'Failed to generate challenge. Please try again.',
+      });
     }
   },
 
