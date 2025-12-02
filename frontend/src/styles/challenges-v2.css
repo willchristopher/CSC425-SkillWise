@@ -1608,6 +1608,488 @@
 }
 
 /* ============================================
+   CHALLENGE CARD COMPONENT STYLES
+   ============================================ */
+.challenge-card {
+  background: white;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  transition: all 0.25s ease;
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.challenge-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.15);
+  border-color: #3b82f6;
+}
+
+.challenge-card.status-completed {
+  border-left: 4px solid #22c55e;
+}
+
+.challenge-card.status-in-progress {
+  border-left: 4px solid #eab308;
+}
+
+.challenge-card.status-failed {
+  border-left: 4px solid #ef4444;
+}
+
+.challenge-card.status-not-started {
+  border-left: 4px solid #94a3b8;
+}
+
+/* Challenge Header */
+.challenge-header {
+  padding: 1.5rem 1.5rem 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.header-content {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  width: 100%;
+}
+
+.challenge-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.4;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.challenge-status {
+  flex-shrink: 0;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.35rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+}
+
+.status-badge.status-completed {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.status-badge.status-in-progress {
+  background: #fef9c3;
+  color: #a16207;
+}
+
+.status-badge.status-failed {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.status-badge.status-not-started {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.challenge-menu {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.menu-button {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.menu-button:hover {
+  color: #1e293b;
+  transform: scale(1.1);
+}
+
+.menu-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  min-width: 150px;
+  overflow: hidden;
+}
+
+.menu-item {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  color: #475569;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.menu-item:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.menu-item.delete {
+  color: #dc2626;
+}
+
+.menu-item.delete:hover {
+  background: #fee2e2;
+}
+
+/* Challenge Content */
+.challenge-content {
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.challenge-description {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.challenge-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.85rem;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.meta-label {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.meta-value {
+  color: #475569;
+  font-weight: 600;
+}
+
+.meta-value.points {
+  color: #3b82f6;
+}
+
+.difficulty-badge {
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+.difficulty-badge.difficulty-easy {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.difficulty-badge.difficulty-medium {
+  background: #fef9c3;
+  color: #a16207;
+}
+
+.difficulty-badge.difficulty-hard {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.challenge-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: #f1f5f9;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  color: #475569;
+  font-weight: 500;
+}
+
+.tag.more {
+  background: #dbeafe;
+  color: #0369a1;
+}
+
+.submission-info {
+  display: flex;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+  font-size: 0.85rem;
+}
+
+.score-info,
+.attempts-info,
+.submitted-info {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.score-label,
+.attempts-label,
+.submitted-label {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.score-value,
+.attempts-value,
+.submitted-value {
+  color: #475569;
+  font-weight: 600;
+}
+
+.challenge-progress {
+  margin-top: 1rem;
+}
+
+.requirements {
+  padding: 0.75rem 1rem;
+  background: #f0f9ff;
+  border-radius: 8px;
+  border: 1px solid #bae6fd;
+}
+
+.requirement-badge {
+  display: inline-block;
+  font-size: 0.85rem;
+  color: #0369a1;
+  font-weight: 600;
+}
+
+/* Challenge Footer */
+.challenge-footer {
+  padding: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.footer-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: none;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+  flex: 1;
+  min-width: 140px;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: #f1f5f9;
+  color: #475569;
+  flex: 1;
+  min-width: 140px;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  flex: 0 1 auto;
+}
+
+.btn-outline:hover:not(:disabled) {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.challenge-stats {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  cursor: pointer;
+  z-index: 1;
+}
+
+/* Dark mode styles */
+[data-theme='dark'] .challenge-card,
+.dark .challenge-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .challenge-card:hover,
+.dark .challenge-card:hover {
+  border-color: #60a5fa;
+}
+
+[data-theme='dark'] .challenge-title,
+.dark .challenge-title {
+  color: #f1f5f9;
+}
+
+[data-theme='dark'] .challenge-description,
+.dark .challenge-description {
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .meta-label,
+.dark .meta-label {
+  color: #64748b;
+}
+
+[data-theme='dark'] .meta-value,
+.dark .meta-value {
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .challenge-header,
+.dark .challenge-header {
+  border-bottom: none;
+}
+
+[data-theme='dark'] .challenge-footer,
+.dark .challenge-footer {
+  border-top-color: #334155;
+}
+
+[data-theme='dark'] .menu-button,
+.dark .menu-button {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .menu-button:hover,
+.dark .menu-button:hover {
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .menu-dropdown,
+.dark .menu-dropdown {
+  background: #334155;
+  border-color: #475569;
+}
+
+[data-theme='dark'] .menu-item,
+.dark .menu-item {
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .menu-item:hover,
+.dark .menu-item:hover {
+  background: #475569;
+  color: #f1f5f9;
+}
+
+[data-theme='dark'] .tag,
+.dark .tag {
+  background: #334155;
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .btn-secondary,
+.dark .btn-secondary {
+  background: #334155;
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .btn-secondary:hover,
+.dark .btn-secondary:hover {
+  background: #475569;
+  color: #f1f5f9;
+}
+
+/* ============================================
    RESPONSIVE
    ============================================ */
 @media (max-width: 768px) {
