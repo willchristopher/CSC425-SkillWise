@@ -29,6 +29,7 @@ const ChallengesPage = () => {
     total: 0,
     completed: 0,
     inProgress: 0,
+    notStarted: 0,
     totalPoints: 0,
   });
 
@@ -37,7 +38,7 @@ const ChallengesPage = () => {
     category: '',
     difficulty: '',
     search: '',
-    tab: 'all', // 'all', 'my', 'recommended'
+    tab: 'not-started', // 'not-started', 'in-progress', 'completed'
   });
 
   // Fetch user goals
@@ -57,10 +58,10 @@ const ChallengesPage = () => {
   const fetchUserStats = useCallback(async () => {
     try {
       const response = await apiService.user.getStatistics();
-      if (response.data) {
+      if (response.data?.data) {
         setStats((prev) => ({
           ...prev,
-          totalPoints: response.data.total_points || 0,
+          totalPoints: response.data.data.totalPoints || 0,
         }));
       }
     } catch (err) {
@@ -68,7 +69,7 @@ const ChallengesPage = () => {
     }
   }, []);
 
-  // Fetch challenges on component mount
+  // Fetch all challenges on component mount
   const fetchChallenges = useCallback(async () => {
     try {
       setLoading(true);
@@ -76,17 +77,8 @@ const ChallengesPage = () => {
 
       let response;
       try {
-        switch (filters.tab) {
-          case 'my':
-            response = await apiService.challenges.getMy();
-            break;
-          case 'recommended':
-            response = await apiService.challenges.getRecommended();
-            break;
-          default:
-            response = await apiService.challenges.getAll();
-            break;
-        }
+        // Always fetch all challenges and filter locally by status
+        response = await apiService.challenges.getAll();
       } catch (apiError) {
         console.error('API call failed:', apiError);
         response = { data: [] };
@@ -107,12 +99,16 @@ const ChallengesPage = () => {
         (c) =>
           c.user_submission_status && c.user_submission_status !== 'completed'
       ).length;
+      const notStarted = challengesList.filter(
+        (c) => !c.user_submission_status
+      ).length;
 
       setStats((prev) => ({
         ...prev,
         total: challengesList.length,
         completed,
         inProgress,
+        notStarted,
       }));
     } catch (err) {
       const errorMessage =
@@ -126,7 +122,7 @@ const ChallengesPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [filters.tab]);
+  }, []);
 
   useEffect(() => {
     fetchChallenges();
@@ -137,6 +133,20 @@ const ChallengesPage = () => {
   // Filter challenges when filters or challenges change
   const filterChallenges = useCallback(() => {
     let filtered = [...challenges];
+
+    // Filter by tab (status)
+    if (filters.tab === 'not-started') {
+      filtered = filtered.filter((c) => !c.user_submission_status);
+    } else if (filters.tab === 'in-progress') {
+      filtered = filtered.filter(
+        (c) =>
+          c.user_submission_status && c.user_submission_status !== 'completed'
+      );
+    } else if (filters.tab === 'completed') {
+      filtered = filtered.filter(
+        (c) => c.user_submission_status === 'completed'
+      );
+    }
 
     // Filter by category
     if (filters.category && filters.category !== '') {
@@ -500,24 +510,28 @@ const ChallengesPage = () => {
         {/* Tabs */}
         <div className="challenges-tabs">
           <button
-            className={`challenge-tab ${filters.tab === 'all' ? 'active' : ''}`}
-            onClick={() => handleFilterChange('tab', 'all')}
+            className={`challenge-tab ${
+              filters.tab === 'not-started' ? 'active' : ''
+            }`}
+            onClick={() => handleFilterChange('tab', 'not-started')}
           >
-            All Challenges
+            Not Started ({stats.notStarted || 0})
           </button>
           <button
             className={`challenge-tab ${
-              filters.tab === 'recommended' ? 'active' : ''
+              filters.tab === 'in-progress' ? 'active' : ''
             }`}
-            onClick={() => handleFilterChange('tab', 'recommended')}
+            onClick={() => handleFilterChange('tab', 'in-progress')}
           >
-            Recommended
+            In Progress ({stats.inProgress || 0})
           </button>
           <button
-            className={`challenge-tab ${filters.tab === 'my' ? 'active' : ''}`}
-            onClick={() => handleFilterChange('tab', 'my')}
+            className={`challenge-tab ${
+              filters.tab === 'completed' ? 'active' : ''
+            }`}
+            onClick={() => handleFilterChange('tab', 'completed')}
           >
-            My Challenges
+            Completed ({stats.completed || 0})
           </button>
         </div>
 
@@ -705,8 +719,10 @@ const ChallengesPage = () => {
               </svg>
               <h3 className="empty-state-title">No challenges available</h3>
               <p className="empty-state-text">
-                {filters.tab === 'my'
-                  ? "You haven't created any challenges yet!"
+                {filters.tab === 'completed'
+                  ? "You haven't completed any challenges yet. Start one now!"
+                  : filters.tab === 'in-progress'
+                  ? "You don't have any challenges in progress."
                   : 'No challenges found. Be the first to create one!'}
               </p>
               <button

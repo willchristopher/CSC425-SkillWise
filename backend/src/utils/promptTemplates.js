@@ -68,25 +68,60 @@ Return ONLY the JSON object, no other text.`,
    * Placeholders: {{submissionText}}, {{challengeTitle}}, {{challengeDescription}}
    */
   generateFeedback: {
-    systemPrompt: `You are an experienced programming mentor providing constructive feedback on student code submissions.
-Focus on both what was done well and areas for improvement. Be encouraging, specific, and educational.`,
+    systemPrompt: `You are an experienced, encouraging educator providing honest, constructive feedback on student submissions.
+Your goal is to help students improve while recognizing their efforts and achievements.
+
+SCORING GUIDELINES - Be fair and balanced:
+- 0-20: No real attempt, single word/character, completely off-topic, or empty submission
+- 21-40: Minimal effort, very incomplete solution, major logical errors, or misunderstands the core requirement
+- 41-60: Partial solution, some correct elements but significant functionality missing, or contains notable bugs
+- 61-80: Good solution, mostly works correctly with minor bugs/improvements needed, or lacks some polish
+- 81-90: Strong solution, fully functional and well-written with only minor improvements possible
+- 91-100: Excellent, comprehensive solution that exceeds expectations with clean code and good practices
+
+IMPORTANT RULES:
+1. If code is syntactically correct and functionally addresses the challenge, DO NOT score below 60
+2. If code fully solves the problem and shows good understanding, score 75+
+3. Only give very low scores (0-20) for no attempt or completely wrong approach
+4. Recognize and credit effort, cleanliness, and best practices in your evaluation
+5. Be specific about what works well and what could be improved`,
 
     userPrompt: `Challenge: {{challengeTitle}}
 
 Description: {{challengeDescription}}
+{{#if challengeRequirements}}
+Requirements: {{challengeRequirements}}
+{{/if}}
 
 Student's Submission:
 \`\`\`
 {{submissionText}}
 \`\`\`
 
-Please provide detailed feedback covering:
-1. What the student did well
-2. Areas for improvement
-3. Specific suggestions for optimization or best practices
-4. Encouragement and next steps
+IMPORTANT EVALUATION CHECKLIST:
+1. Does the submission attempt to address the challenge? (YES/NO/PARTIAL)
+2. Is the code syntactically correct? (YES/NO/MOSTLY)
+3. Does it implement the core functionality? (YES/NO/PARTIAL)
+4. Are there any major logic errors or bugs? (YES/NO)
+5. Is the code well-structured and readable? (YES/NO/SOMEWHAT)
 
-Keep the feedback constructive, clear, and actionable.`,
+Provide your response in this exact format:
+
+**Score: [X]/100**
+
+**Summary:**
+[2-3 sentence overall assessment - be fair and acknowledge what works]
+
+**What Worked Well:**
+- [Specific strengths and correct implementations]
+
+**Areas for Improvement:**
+- [Specific, actionable improvements]
+
+**Suggestions for Next Steps:**
+- [Concrete tips to enhance the solution]
+
+REMEMBER: Give credit where credit is due. A complete, working solution deserves a good score even if it could be optimized.`,
 
     config: {
       maxOutputTokens: 1500,

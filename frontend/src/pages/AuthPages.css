@@ -5,19 +5,36 @@
   background: var(--color-bg-primary);
 }
 
-/* Light mode gradient background */
+/* Light mode gradient background with animation */
 .auth-page .auth-background {
   background: linear-gradient(
-    135deg,
+    -45deg,
     var(--color-bg-primary) 0%,
     var(--color-bg-secondary) 50%,
     #f3e8ff 100%
   );
+  background-size: 400% 400%;
+  animation: authGradientShift 15s ease infinite;
 }
 
-/* Dark mode overrides */
+/* Dark mode animated gradient */
 [data-theme='dark'] .auth-page .auth-background {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1e1b4b 100%);
+  background: linear-gradient(-45deg, #0f172a 0%, #1e293b 50%, #1e1b4b 100%);
+  background-size: 400% 400%;
+  animation: authGradientShift 15s ease infinite;
+}
+
+/* Animated gradient keyframes */
+@keyframes authGradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* Header navigation */
@@ -377,7 +394,7 @@
 /* Forgot password link */
 .auth-page .forgot-password {
   display: block;
-  text-align: right;
+  text-align: center;
   font-size: 0.875rem;
   color: var(--color-brand-primary);
   text-decoration: none;

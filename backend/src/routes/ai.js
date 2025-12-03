@@ -41,4 +41,12 @@ router.post('/study-guide', auth, aiController.generateStudyGuide);
 // Body: { question, correctAnswer, studentAnswer, questionType }
 router.post('/grade-answer', auth, aiController.gradeAnswer);
 
+// POST /api/ai/grade-submission/:submissionId - Grade a challenge submission using AI
+// Body: { challengeContext: { title, description, requirements } }
+router.post(
+  '/grade-submission/:submissionId',
+  auth,
+  aiController.gradeSubmissionWithAI
+);
+
 module.exports = router;

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './GoalCard.css';
 
 const GoalCard = ({ goal, onEdit, onDelete, onUpdateProgress }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -9,36 +10,58 @@ const GoalCard = ({ goal, onEdit, onDelete, onUpdateProgress }) => {
     }
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return null;
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
-  const getDifficultyColor = (difficulty) => {
+  const getDifficultyEmoji = (difficulty) => {
     switch (difficulty?.toLowerCase()) {
       case 'easy':
-        return 'difficulty-easy';
+        return '🌱';
       case 'medium':
-        return 'difficulty-medium';
+        return '🌿';
       case 'hard':
-        return 'difficulty-hard';
+        return '🔥';
       default:
-        return 'difficulty-medium';
+        return '🌿';
+    }
+  };
+
+  const getCategoryEmoji = (category) => {
+    const emojis = {
+      programming: '💻',
+      design: '🎨',
+      business: '💼',
+      writing: '✍️',
+      language: '🌍',
+      music: '🎵',
+      math: '📊',
+      science: '🔬',
+      fitness: '💪',
+      learning: '📚',
+    };
+    return emojis[category?.toLowerCase()] || '🎯';
+  };
+
+  const getAccentColor = (difficulty) => {
+    switch (difficulty?.toLowerCase()) {
+      case 'easy':
+        return '#10b981';
+      case 'medium':
+        return '#f59e0b';
+      case 'hard':
+        return '#ef4444';
+      default:
+        return '#6366f1';
     }
   };
 
   const getProgressColor = (progress) => {
-    if (progress >= 100) return 'progress-complete';
-    if (progress >= 75) return 'progress-high';
-    if (progress >= 50) return 'progress-medium';
-    if (progress >= 25) return 'progress-low';
-    return 'progress-start';
+    if (progress >= 100) return '#ef4444';
+    if (progress >= 75) return '#f59e0b';
+    if (progress >= 50) return '#10b981';
+    return '#10b981';
   };
+
+  const circumference = 2 * Math.PI * 45;
+  const strokeDashoffset =
+    circumference - ((goal.progress_percentage || 0) / 100) * circumference;
 
   const isOverdue =
     goal.target_completion_date &&
@@ -47,134 +70,101 @@ const GoalCard = ({ goal, onEdit, onDelete, onUpdateProgress }) => {
 
   return (
     <div
-      className={`goal-card ${goal.is_completed ? 'goal-completed' : ''} ${
-        isOverdue ? 'goal-overdue' : ''
+      className={`goal-card-redesign ${goal.is_completed ? 'completed' : ''} ${
+        isOverdue ? 'overdue' : ''
       }`}
+      style={{
+        '--accent-color': getAccentColor(goal.difficulty_level),
+        '--progress-color': getProgressColor(goal.progress_percentage || 0),
+      }}
     >
-      <div className="goal-header">
-        <div className="goal-title-section">
-          <h3 className="goal-title">{goal.title}</h3>
-          {goal.category && (
-            <span className="goal-category">{goal.category}</span>
-          )}
-        </div>
+      {/* Accent Bar */}
+      <div className="accent-bar"></div>
 
-        <div className="goal-actions">
+      {/* Top Section - Icon + Status Badge */}
+      <div className="card-top">
+        <div className="icon-wrapper">{getCategoryEmoji(goal.category)}</div>
+        {goal.is_completed && <div className="status-badge done">✓ DONE</div>}
+      </div>
+
+      {/* Title Section */}
+      <div className="title-section">
+        <h3 className="goal-title">{goal.title}</h3>
+      </div>
+
+      {/* Description */}
+      {goal.description && (
+        <p className="goal-description">{goal.description}</p>
+      )}
+
+      {/* Difficulty Badge */}
+      {goal.difficulty_level && (
+        <div className="difficulty-section">
+          <span className="difficulty-emoji">
+            {getDifficultyEmoji(goal.difficulty_level)}
+          </span>
+          <span className="difficulty-text">{goal.difficulty_level}</span>
+        </div>
+      )}
+
+      {/* Circular Progress */}
+      <div className="progress-circle-wrapper">
+        <svg className="progress-circle" viewBox="0 0 120 120">
+          {/* Background circle */}
+          <circle cx="60" cy="60" r="45" className="progress-bg" />
+          {/* Progress circle */}
+          <circle
+            cx="60"
+            cy="60"
+            r="45"
+            className="progress-ring"
+            style={{
+              strokeDashoffset: strokeDashoffset,
+            }}
+            stroke={getProgressColor(goal.progress_percentage || 0)}
+          />
+        </svg>
+        <div className="progress-text">
+          <span className="progress-value">
+            {goal.progress_percentage || 0}%
+          </span>
+        </div>
+      </div>
+
+      {/* Menu & Actions */}
+      <div className="card-actions">
+        <div className="menu-container">
           <button
-            className="goal-menu-btn"
+            className="menu-btn"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Goal menu"
           >
             ⋯
           </button>
           {isMenuOpen && (
-            <div className="goal-menu">
+            <div className="menu-dropdown">
               <button
                 onClick={() => {
                   onEdit(goal);
                   setIsMenuOpen(false);
                 }}
+                className="menu-item"
               >
-                Edit
+                ✏️ Edit
               </button>
               <button
                 onClick={() => {
                   onDelete(goal.id);
                   setIsMenuOpen(false);
                 }}
-                className="delete-btn"
+                className="menu-item delete-item"
               >
-                Delete
+                🗑️ Delete
               </button>
             </div>
           )}
         </div>
       </div>
-
-      {goal.description && (
-        <div className="goal-description">
-          <p>{goal.description}</p>
-        </div>
-      )}
-
-      <div className="goal-progress-section">
-        <div className="progress-header">
-          <span className="progress-label">Progress</span>
-          <span className="progress-percentage">
-            {goal.progress_percentage || 0}%
-          </span>
-        </div>
-        <div className="progress-bar">
-          <div
-            className={`progress-fill ${getProgressColor(
-              goal.progress_percentage || 0
-            )}`}
-            style={{ width: `${goal.progress_percentage || 0}%` }}
-          />
-        </div>
-
-        {!goal.is_completed && (
-          <div className="progress-controls">
-            <button
-              onClick={() =>
-                handleProgressUpdate(
-                  Math.min(100, (goal.progress_percentage || 0) + 10)
-                )
-              }
-              className="progress-btn"
-              disabled={goal.progress_percentage >= 100}
-            >
-              +10%
-            </button>
-            <button
-              onClick={() =>
-                handleProgressUpdate(
-                  Math.max(0, (goal.progress_percentage || 0) - 10)
-                )
-              }
-              className="progress-btn"
-              disabled={goal.progress_percentage <= 0}
-            >
-              -10%
-            </button>
-          </div>
-        )}
-      </div>
-
-      <div className="goal-footer">
-        <div className="goal-meta">
-          <span
-            className={`goal-difficulty ${getDifficultyColor(
-              goal.difficulty_level
-            )}`}
-          >
-            {goal.difficulty_level}
-          </span>
-        </div>
-
-        {goal.target_completion_date && (
-          <div className={`goal-date ${isOverdue ? 'date-overdue' : ''}`}>
-            <span className="date-label">
-              {isOverdue ? 'Overdue:' : 'Due:'}
-            </span>
-            <span className="date-value">
-              {formatDate(goal.target_completion_date)}
-            </span>
-          </div>
-        )}
-
-        {goal.is_completed && goal.completion_date && (
-          <div className="completion-date">
-            <span className="completion-icon">✅</span>
-            <span>Completed {formatDate(goal.completion_date)}</span>
-          </div>
-        )}
-      </div>
-
-      {goal.is_public && (
-        <div className="goal-visibility">
-          <span className="public-badge">Public</span>
-        </div>
-      )}
     </div>
   );
 };

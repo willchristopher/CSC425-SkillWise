@@ -126,6 +126,9 @@ const progressService = {
    */
   updateStreak: async (transactionQuery, userId) => {
     try {
+      console.log(
+        `[progressService.updateStreak] Updating streak for user: ${userId}`
+      );
       // Get current streak info
       const currentStats = await transactionQuery(
         'SELECT last_activity_date, current_streak_days, longest_streak_days FROM user_statistics WHERE user_id = $1',
@@ -166,6 +169,9 @@ const progressService = {
       }
 
       // Update or insert statistics
+      console.log(
+        `[progressService.updateStreak] Setting streak to ${currentStreak}, longest to ${longestStreak} for user ${userId}`
+      );
       await transactionQuery(
         `INSERT INTO user_statistics (user_id, current_streak_days, longest_streak_days, last_activity_date)
          VALUES ($1, $2, $3, CURRENT_DATE)
@@ -176,6 +182,9 @@ const progressService = {
            last_activity_date = CURRENT_DATE,
            updated_at = CURRENT_TIMESTAMP`,
         [userId, currentStreak, longestStreak]
+      );
+      console.log(
+        `[progressService.updateStreak] Streak update completed for user ${userId}`
       );
     } catch (error) {
       console.error('Update streak error:', error);

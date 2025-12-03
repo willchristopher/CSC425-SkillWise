@@ -243,6 +243,8 @@ export const apiService = {
     delete: (id) => api.delete(`/challenges/${id}`),
     submit: (id, submission) =>
       api.post(`/challenges/${id}/submit`, submission),
+    submitAnswer: (id, submission) =>
+      api.post(`/challenges/${id}/submit`, submission, { timeout: 30000 }),
     getSubmissions: (id) => api.get(`/challenges/${id}/submissions`),
     markComplete: (challengeId, submissionId) =>
       api.post('/challenges/submit/complete', {
@@ -304,12 +306,8 @@ export const apiService = {
 
   // AI methods
   ai: {
-    generateFeedback: (submissionText, challengeContext) =>
-      api.post(
-        '/ai/feedback/direct',
-        { submissionText, challengeContext },
-        { timeout: 30000 }
-      ), // Direct code feedback
+    generateFeedback: (feedbackRequest) =>
+      api.post('/ai/feedback/direct', feedbackRequest, { timeout: 30000 }), // Direct code feedback
     generateSubmissionFeedback: (submissionId) =>
       api.post('/ai/feedback', { submissionId }, { timeout: 30000 }), // Feedback for existing submission
     getHints: (challengeId, challenge, userProgress) =>
@@ -330,6 +328,10 @@ export const apiService = {
       api.post('/ai/study-guide', params, { timeout: 60000 }), // 60 second timeout for study guide
     gradeAnswer: (params) =>
       api.post('/ai/grade-answer', params, { timeout: 30000 }),
+    gradeSubmission: (submissionId, params) =>
+      api.post(`/ai/grade-submission/${submissionId}`, params, {
+        timeout: 30000,
+      }),
   },
 
   // Feedback methods - for retrieving stored AI feedback

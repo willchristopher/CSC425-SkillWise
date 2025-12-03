@@ -195,6 +195,46 @@ const submissionController = {
       next(error);
     }
   },
+
+  // Grade a submission (by AI or instructor)
+  gradeSubmission: async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { score, feedback } = req.body;
+      const userId = req.user.id;
+
+      if (score === undefined || feedback === undefined) {
+        return res.status(400).json({
+          success: false,
+          error: 'Score and feedback are required',
+        });
+      }
+
+      // Verify the submission belongs to the authenticated user (for permission check)
+      const submission = await submissionService.getSubmissionById(id);
+      if (!submission) {
+        return res.status(404).json({
+          success: false,
+          error: 'Submission not found',
+        });
+      }
+
+      // Grade the submission (this will update stats and streak)
+      const gradedSubmission = await submissionService.gradeSubmission(
+        id,
+        { score, feedback },
+        userId // grader ID
+      );
+
+      res.json({
+        success: true,
+        data: gradedSubmission,
+        message: 'Submission graded successfully',
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 };
 
 module.exports = submissionController;

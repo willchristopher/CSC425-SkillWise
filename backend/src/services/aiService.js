@@ -91,7 +91,7 @@ const callGemini = async (systemPrompt, userPrompt, options = {}) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        timeout: 30000, // 30 second timeout
+        timeout: 60000, // 60 second timeout for longer submissions
       }
     );
 
@@ -179,10 +179,19 @@ const callGemini = async (systemPrompt, userPrompt, options = {}) => {
     throw new Error('Invalid response format from Gemini API');
   } catch (error) {
     const responseTime = Date.now() - startTime;
-    console.error(
-      'Error calling Gemini API:',
-      error.response?.data || error.message
-    );
+
+    // Log the full error details
+    if (error.response) {
+      console.error('Gemini API Error Response:', {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data,
+      });
+    } else if (error.request) {
+      console.error('Gemini API Error - No Response:', error.message);
+    } else {
+      console.error('Gemini API Error:', error.message);
+    }
 
     // Log failed interaction
     if (options.endpoint) {

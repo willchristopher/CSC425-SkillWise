@@ -25,6 +25,9 @@ router.get(
   submissionController.getChallengeSubmissions
 );
 
+// Grade a submission
+router.post('/:id/grade', auth, submissionController.gradeSubmission);
+
 // Update submission
 router.put('/:id', auth, submissionController.updateSubmission);
 

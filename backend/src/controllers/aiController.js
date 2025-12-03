@@ -260,18 +260,37 @@ const aiController = {
 
       const submission = submissionResult.rows[0];
 
+      // Truncate submission if it's very long to avoid API issues
+      const maxLength = 8000;
+      const truncatedText =
+        submission.submission_text?.substring(0, maxLength) || '';
+      const wasTruncated = submission.submission_text?.length > maxLength;
+
       // Generate AI feedback
       const startTime = Date.now();
-      const feedbackResult = await aiService.generateFeedback(
-        submission.submission_text,
-        {
-          title: submission.title,
-          description: submission.description,
-          requirements: submission.instructions || '',
-          previousAttempts: submission.attempt_number - 1,
-        },
-        userId
-      );
+      let feedbackResult;
+      try {
+        feedbackResult = await aiService.generateFeedback(
+          truncatedText,
+          {
+            title: submission.title,
+            description: submission.description,
+            requirements: submission.instructions || '',
+            previousAttempts: submission.attempt_number - 1,
+          },
+          userId
+        );
+      } catch (aiError) {
+        console.error('AI Feedback Generation Failed:', aiError.message);
+        // Return error to user with option to retry
+        return res.status(500).json({
+          success: false,
+          message:
+            'AI service is currently unavailable. Please try again in a moment.',
+          error: aiError.message,
+        });
+      }
+
       const processingTime = Date.now() - startTime;
 
       // Parse the feedback to structure it better
@@ -326,6 +345,9 @@ const aiController = {
           },
           submissionId: submission.id,
           generatedAt: new Date().toISOString(),
+          wasTruncated: wasTruncated,
+          originalLength: submission.submission_text?.length,
+          processingTimeMs: processingTime,
         },
       });
     } catch (error) {
@@ -453,6 +475,107 @@ const aiController = {
       });
     } catch (error) {
       console.error('Error grading answer:', error);
+      next(error);
+    }
+  },
+
+  /**
+   * Grade a challenge submission using AI and update stats
+   * POST /api/ai/grade-submission/:submissionId
+   * Body: { challengeContext: { title, description, requirements } }
+   */
+  gradeSubmissionWithAI: async (req, res, next) => {
+    try {
+      const { submissionId } = req.params;
+      const { challengeContext } = req.body;
+      const userId = req.user?.id;
+      const submissionService = require('../services/submissionService');
+      const aiFeedbackService = require('../services/aiFeedbackService');
+
+      if (!challengeContext) {
+        return res.status(400).json({
+          success: false,
+          message: 'challengeContext is required',
+        });
+      }
+
+      // Get the submission
+      const submission = await submissionService.getSubmissionById(
+        submissionId
+      );
+      if (!submission) {
+        return res.status(404).json({
+          success: false,
+          message: 'Submission not found',
+        });
+      }
+
+      // Verify ownership
+      if (submission.user_id !== userId) {
+        return res.status(403).json({
+          success: false,
+          message: 'Not authorized to grade this submission',
+        });
+      }
+
+      // Generate AI feedback
+      const feedbackResult = await aiService.generateFeedback(
+        submission.submission_text,
+        challengeContext,
+        userId
+      );
+
+      // Parse the feedback to extract score and feedback text
+      let score = 75; // Default score
+      let feedbackText = feedbackResult.feedback || 'No feedback provided';
+
+      try {
+        // Try to parse the feedback to extract a score if it's in JSON format
+        const parsed = JSON.parse(feedbackResult.feedback);
+        if (parsed.score) {
+          score = Math.min(100, Math.max(0, parseInt(parsed.score) || 75));
+        }
+        feedbackText =
+          parsed.feedback || parsed.text || feedbackResult.feedback;
+      } catch (e) {
+        // If not JSON, try to extract a score from the text
+        const scoreMatch = feedbackText.match(/score[:\s]+(\d+)/i);
+        if (scoreMatch) {
+          score = Math.min(100, Math.max(0, parseInt(scoreMatch[1])));
+        }
+      }
+
+      // Grade the submission (this updates stats and streak)
+      console.log(
+        `[gradeSubmissionWithAI] Grading submission ${submissionId} with score ${score}`
+      );
+      const gradedSubmission = await submissionService.gradeSubmission(
+        submissionId,
+        { score, feedback: feedbackText },
+        null // No specific grader ID for AI grading
+      );
+
+      // Store the AI feedback for reference
+      await aiFeedbackService.createAIFeedback({
+        submissionId: submissionId,
+        prompt: JSON.stringify(challengeContext),
+        response: feedbackText,
+        feedbackType: 'auto_grade',
+        confidenceScore: score,
+        aiModel: 'gemini-2.5-flash',
+      });
+
+      res.json({
+        success: true,
+        data: {
+          submission: gradedSubmission,
+          feedback: feedbackText,
+          score: score,
+          message: 'Submission graded successfully',
+        },
+      });
+    } catch (error) {
+      console.error('Error grading submission:', error);
       next(error);
     }
   },

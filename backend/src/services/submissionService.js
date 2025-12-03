@@ -1,6 +1,7 @@
 // Submission business logic and database operations
 const { query, withTransaction } = require('../database/connection');
 const { AppError } = require('../middleware/errorHandler');
+const progressService = require('./progressService');
 
 const submissionService = {
   /**
@@ -285,14 +286,30 @@ const submissionService = {
           [score, feedback, newStatus, graderId, submissionId]
         );
 
-        // If passing and doesn't require peer review, award points
+        // If passing and doesn't require peer review, award points and update streak
         if (isPassing && !submission.requires_peer_review) {
+          console.log(
+            `[gradeSubmission] Challenge passing for user ${submission.user_id}, updating stats`
+          );
           await submissionService.awardPointsForCompletion(
             transactionQuery,
             submission.user_id,
             submission.challenge_id,
             submission.points_reward,
             submissionId
+          );
+
+          // Update streak for the completed challenge
+          console.log(
+            `[gradeSubmission] Calling updateStreak for user ${submission.user_id}`
+          );
+          await progressService.updateStreak(
+            transactionQuery,
+            submission.user_id
+          );
+        } else {
+          console.log(
+            `[gradeSubmission] Not updating streak - isPassing: ${isPassing}, requires_peer_review: ${submission.requires_peer_review}`
           );
         }
 
