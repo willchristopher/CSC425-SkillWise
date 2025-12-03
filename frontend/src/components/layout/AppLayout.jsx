@@ -270,7 +270,7 @@ const AppLayout = ({ children, title, subtitle }) => {
       >
         <div className="nav-container">
           <Link to="/dashboard" className={`nav-logo ${navExpanded ? '' : 'logo-centered'}`}>
-            <span className="logo-icon">S</span>
+            <img src="/skillwiselogo.png" alt="SkillWise" className="logo-icon-img" />
             <span className="logo-text">SkillWise</span>
           </Link>
 

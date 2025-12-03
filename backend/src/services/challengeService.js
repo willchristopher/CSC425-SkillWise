@@ -5,43 +5,33 @@ const aiService = require('./aiService');
 const aiFeedbackService = require('./aiFeedbackService');
 const { AppError } = require('../middleware/errorHandler');
 
-// Validation schemas
+// Validation schemas - with preprocessor for string-to-number conversion
+const parseIntPreprocess = (defaultVal, isPositive = true) => {
+  const schema = z.preprocess(
+    (val) => typeof val === 'string' ? (parseInt(val, 10) || defaultVal) : val,
+    z.number().int().min(1).default(defaultVal)
+  );
+  return isPositive ? schema : schema.optional();
+};
+
 const challengeCreateSchema = z.object({
   title: z.string().min(1).max(255),
   description: z.string().min(1),
   instructions: z.string().min(1),
   category: z.string().min(1).max(100),
   difficulty_level: z.enum(['easy', 'medium', 'hard']).default('medium'),
-  estimated_time_minutes: z.preprocess((val) => {
-    if (typeof val === 'string') {
-      const parsed = parseInt(val, 10);
-      return isNaN(parsed) ? undefined : parsed;
-    }
-    return val;
-  }, z.number().int().positive().optional()),
-  points_reward: z.preprocess((val) => {
-    if (typeof val === 'string') {
-      const parsed = parseInt(val, 10);
-      return isNaN(parsed) ? 10 : parsed;
-    }
-    return val;
-  }, z.number().int().min(1).default(10)),
-  max_attempts: z.preprocess((val) => {
-    if (typeof val === 'string') {
-      const parsed = parseInt(val, 10);
-      return isNaN(parsed) ? 3 : parsed;
-    }
-    return val;
-  }, z.number().int().min(1).default(3)),
+  estimated_time_minutes: z.preprocess(
+    (val) => typeof val === 'string' ? parseInt(val, 10) : val,
+    z.number().int().positive().optional()
+  ),
+  points_reward: parseIntPreprocess(10),
+  max_attempts: parseIntPreprocess(3),
   requires_peer_review: z.boolean().default(false),
   goal_id: z.number().int().positive().optional(),
-  progress_contribution: z.preprocess((val) => {
-    if (typeof val === 'string') {
-      const parsed = parseInt(val, 10);
-      return isNaN(parsed) ? 10 : parsed;
-    }
-    return val;
-  }, z.number().int().min(1).max(100).default(10)),
+  progress_contribution: z.preprocess(
+    (val) => typeof val === 'string' ? parseInt(val, 10) : val,
+    z.number().int().min(1).max(100).default(10)
+  ),
   tags: z.array(z.string()).default([]),
   prerequisites: z.array(z.string()).default([]),
   learning_objectives: z.array(z.string()).default([]),
@@ -371,30 +361,17 @@ const challengeService = {
    */
   deleteChallenge: async (challengeId, userId) => {
     try {
-      // Check if user can delete this challenge
-      const existingChallenge = await query(
-        'SELECT created_by FROM challenges WHERE id = $1',
-        [challengeId]
-      );
-
+      const existingChallenge = await query('SELECT created_by FROM challenges WHERE id = $1', [challengeId]);
       if (existingChallenge.rows.length === 0) {
         throw new AppError('Challenge not found', 404, 'CHALLENGE_NOT_FOUND');
       }
-
       if (existingChallenge.rows[0].created_by !== userId) {
-        throw new AppError(
-          'Not authorized to delete this challenge',
-          403,
-          'UNAUTHORIZED'
-        );
+        throw new AppError('Not authorized to delete this challenge', 403, 'UNAUTHORIZED');
       }
-
-      // Soft delete by setting is_active to false
       const result = await query(
         'UPDATE challenges SET is_active = false, updated_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *',
         [challengeId]
       );
-
       return result.rows[0];
     } catch (error) {
       if (error instanceof AppError) throw error;
@@ -407,47 +384,24 @@ const challengeService = {
    */
   linkChallengeToGoal: async (challengeId, goalId, userId) => {
     try {
-      return await withTransaction(async (transactionQuery) => {
+      return await withTransaction(async (tx) => {
         // Check if goal belongs to user
-        const goalCheck = await transactionQuery(
-          'SELECT id FROM goals WHERE id = $1 AND user_id = $2',
-          [goalId, userId]
-        );
-
-        if (goalCheck.rows.length === 0) {
-          throw new Error('Goal not found or not accessible');
-        }
+        const goalCheck = await tx('SELECT id FROM goals WHERE id = $1 AND user_id = $2', [goalId, userId]);
+        if (goalCheck.rows.length === 0) throw new Error('Goal not found or not accessible');
 
         // Check if challenge exists
-        const challengeCheck = await transactionQuery(
-          'SELECT id FROM challenges WHERE id = $1 AND is_active = true',
-          [challengeId]
-        );
-
-        if (challengeCheck.rows.length === 0) {
-          throw new Error('Challenge not found');
-        }
+        const challengeCheck = await tx('SELECT id FROM challenges WHERE id = $1 AND is_active = true', [challengeId]);
+        if (challengeCheck.rows.length === 0) throw new Error('Challenge not found');
 
         // Check if link already exists
-        const existingLink = await transactionQuery(
-          'SELECT id FROM challenge_goals WHERE challenge_id = $1 AND goal_id = $2',
-          [challengeId, goalId]
-        );
-
-        if (existingLink.rows.length > 0) {
-          throw new Error('Challenge is already linked to this goal');
-        }
+        const existingLink = await tx('SELECT id FROM challenge_goals WHERE challenge_id = $1 AND goal_id = $2', [challengeId, goalId]);
+        if (existingLink.rows.length > 0) throw new Error('Challenge is already linked to this goal');
 
         // Create the link
-        const result = await transactionQuery(
-          `
-          INSERT INTO challenge_goals (challenge_id, goal_id, created_by)
-          VALUES ($1, $2, $3)
-          RETURNING *
-        `,
+        const result = await tx(
+          `INSERT INTO challenge_goals (challenge_id, goal_id, created_by) VALUES ($1, $2, $3) RETURNING *`,
           [challengeId, goalId, userId]
         );
-
         return result.rows[0];
       });
     } catch (error) {
@@ -455,30 +409,13 @@ const challengeService = {
     }
   },
 
-  /**
-   * Unlink a challenge from a goal
-   */
   unlinkChallengeFromGoal: async (challengeId, goalId, userId) => {
     try {
-      // Check if goal belongs to user
-      const goalCheck = await query(
-        'SELECT id FROM goals WHERE id = $1 AND user_id = $2',
-        [goalId, userId]
-      );
+      const goalCheck = await query('SELECT id FROM goals WHERE id = $1 AND user_id = $2', [goalId, userId]);
+      if (goalCheck.rows.length === 0) throw new Error('Goal not found or not accessible');
 
-      if (goalCheck.rows.length === 0) {
-        throw new Error('Goal not found or not accessible');
-      }
-
-      const result = await query(
-        'DELETE FROM challenge_goals WHERE challenge_id = $1 AND goal_id = $2 RETURNING *',
-        [challengeId, goalId]
-      );
-
-      if (result.rows.length === 0) {
-        throw new Error('Challenge link not found');
-      }
-
+      const result = await query('DELETE FROM challenge_goals WHERE challenge_id = $1 AND goal_id = $2 RETURNING *', [challengeId, goalId]);
+      if (result.rows.length === 0) throw new Error('Challenge link not found');
       return result.rows[0];
     } catch (error) {
       throw new Error(`Failed to unlink challenge from goal: ${error.message}`);
@@ -490,8 +427,7 @@ const challengeService = {
    */
   getChallengeStatistics: async (challengeId) => {
     try {
-      const result = await query(
-        `
+      const result = await query(`
         SELECT 
           COUNT(s.id) as total_submissions,
           COUNT(CASE WHEN s.status = 'completed' THEN 1 END) as completed_submissions,
@@ -501,31 +437,23 @@ const challengeService = {
           MIN(CASE WHEN s.status = 'completed' THEN s.score ELSE NULL END) as min_score,
           MAX(CASE WHEN s.status = 'completed' THEN s.score ELSE NULL END) as max_score,
           COUNT(DISTINCT s.user_id) as unique_participants
-        FROM submissions s
-        WHERE s.challenge_id = $1
-      `,
-        [challengeId]
-      );
+        FROM submissions s WHERE s.challenge_id = $1
+      `, [challengeId]);
 
-      const stats = result.rows[0];
+      const s = result.rows[0];
+      const total = parseInt(s.total_submissions) || 0;
+      const completed = parseInt(s.completed_submissions) || 0;
 
       return {
-        total_submissions: parseInt(stats.total_submissions) || 0,
-        completed_submissions: parseInt(stats.completed_submissions) || 0,
-        pending_submissions: parseInt(stats.pending_submissions) || 0,
-        failed_submissions: parseInt(stats.failed_submissions) || 0,
-        completion_rate:
-          stats.total_submissions > 0
-            ? Math.round(
-                (stats.completed_submissions / stats.total_submissions) * 100
-              )
-            : 0,
-        average_score: stats.average_score
-          ? parseFloat(stats.average_score).toFixed(1)
-          : null,
-        min_score: stats.min_score || null,
-        max_score: stats.max_score || null,
-        unique_participants: parseInt(stats.unique_participants) || 0,
+        total_submissions: total,
+        completed_submissions: completed,
+        pending_submissions: parseInt(s.pending_submissions) || 0,
+        failed_submissions: parseInt(s.failed_submissions) || 0,
+        completion_rate: total > 0 ? Math.round((completed / total) * 100) : 0,
+        average_score: s.average_score ? parseFloat(s.average_score).toFixed(1) : null,
+        min_score: s.min_score || null,
+        max_score: s.max_score || null,
+        unique_participants: parseInt(s.unique_participants) || 0,
       };
     } catch (error) {
       throw new Error(`Failed to get challenge statistics: ${error.message}`);
@@ -610,23 +538,16 @@ const challengeService = {
   /**
    * Submit a challenge solution
    */
-  submitChallenge: async (
-    challengeId,
-    userId,
-    code,
-    requestPeerReview = false
-  ) => {
+  submitChallenge: async (challengeId, userId, code, requestPeerReview = false) => {
     try {
       // Check if challenge exists
       const challengeResult = await query(
-        'SELECT id, max_attempts, points_reward, category, title, description, instructions FROM challenges WHERE id = $1 AND is_active = true',
-        [challengeId]
+        `SELECT id, max_attempts, points_reward, category, title, description, instructions 
+         FROM challenges WHERE id = $1 AND is_active = true`, [challengeId]
       );
-
       if (challengeResult.rows.length === 0) {
         throw new AppError('Challenge not found', 404, 'CHALLENGE_NOT_FOUND');
       }
-
       const challenge = challengeResult.rows[0];
 
       // Check user's previous attempts
@@ -634,125 +555,72 @@ const challengeService = {
         'SELECT COUNT(*) as attempt_count FROM submissions WHERE challenge_id = $1 AND user_id = $2',
         [challengeId, userId]
       );
-
       const attemptCount = parseInt(attemptsResult.rows[0].attempt_count, 10);
-
       if (attemptCount >= challenge.max_attempts) {
-        throw new AppError(
-          `Maximum attempts (${challenge.max_attempts}) reached for this challenge`,
-          400,
-          'MAX_ATTEMPTS_REACHED'
+        throw new AppError(`Maximum attempts (${challenge.max_attempts}) reached`, 400, 'MAX_ATTEMPTS_REACHED');
+      }
+
+      // Create submission within transaction
+      return await withTransaction(async (tx) => {
+        const status = requestPeerReview ? 'pending_review' : 'completed';
+        const submissionRes = await tx(
+          `INSERT INTO submissions (challenge_id, user_id, submission_text, status, submitted_at, attempt_number)
+           VALUES ($1, $2, $3, $4, NOW(), $5) RETURNING *`,
+          [challengeId, userId, code, status, attemptCount + 1]
         );
-      }
+        const submission = submissionRes.rows[0];
+        const points = Math.min(challenge.points_reward || 10, 5);
 
-      // Create submission and mark as completed immediately
-      const submissionResult = await withTransaction(
-        async (transactionQuery) => {
-          // Determine status based on peer review request
-          const status = requestPeerReview ? 'pending_review' : 'completed';
+        // Update user statistics (upsert)
+        await tx(
+          `INSERT INTO user_statistics (user_id, total_points, total_challenges_completed, last_activity_date)
+           VALUES ($1, $2, 1, CURRENT_DATE)
+           ON CONFLICT (user_id) DO UPDATE SET 
+             total_points = user_statistics.total_points + $2,
+             total_challenges_completed = user_statistics.total_challenges_completed + 1,
+             last_activity_date = CURRENT_DATE, updated_at = CURRENT_TIMESTAMP`,
+          [userId, points]
+        );
 
-          const submissionRes = await transactionQuery(
-            `
-          INSERT INTO submissions (
-            challenge_id, user_id, submission_text, status, submitted_at, attempt_number
-          ) VALUES ($1, $2, $3, $4, NOW(), $5)
-          RETURNING *
-        `,
-            [challengeId, userId, code, status, attemptCount + 1]
-          );
+        // Log progress event
+        await tx(
+          `INSERT INTO progress_events (user_id, event_type, event_data, related_challenge_id, related_submission_id, points_earned)
+           VALUES ($1, $2, $3, $4, $5, $6)`,
+          [userId, 'challenge_completed', JSON.stringify({
+            challenge_title: challenge.title, attempt_number: attemptCount + 1,
+            challenge_category: challenge.category, requested_peer_review: requestPeerReview
+          }), challengeId, submission.id, points]
+        );
 
-          const submission = submissionRes.rows[0];
+        // Update linked goal progress
+        const goalUpdateResult = await tx(
+          `UPDATE goals g
+           SET progress_percentage = LEAST(100, COALESCE(progress_percentage, 0) + COALESCE(cg.progress_contribution, 10)),
+               challenges_completed = COALESCE(challenges_completed, 0) + 1,
+               is_completed = CASE WHEN COALESCE(progress_percentage, 0) + COALESCE(cg.progress_contribution, 10) >= 100 THEN true ELSE is_completed END,
+               completion_date = CASE WHEN COALESCE(progress_percentage, 0) + COALESCE(cg.progress_contribution, 10) >= 100 THEN CURRENT_TIMESTAMP ELSE completion_date END,
+               updated_at = CURRENT_TIMESTAMP
+           FROM challenge_goals cg
+           WHERE cg.goal_id = g.id AND cg.challenge_id = $1 AND g.user_id = $2
+           RETURNING g.id, g.title, g.progress_percentage, g.is_completed, cg.progress_contribution`,
+          [challengeId, userId]
+        );
 
-          // Award points immediately since challenge is complete
-          const points = Math.min(challenge.points_reward || 10, 5); // Cap at 5 points
-
-          // Update user statistics
-          await transactionQuery(
-            `INSERT INTO user_statistics (user_id, total_points, total_challenges_completed, last_activity_date)
-             VALUES ($1, $2, 1, CURRENT_DATE)
-             ON CONFLICT (user_id) DO UPDATE SET 
-               total_points = user_statistics.total_points + $2,
-               total_challenges_completed = user_statistics.total_challenges_completed + 1,
-               last_activity_date = CURRENT_DATE,
-               updated_at = CURRENT_TIMESTAMP`,
-            [userId, points]
-          );
-
-          // Log progress event
-          await transactionQuery(
-            `INSERT INTO progress_events (
-              user_id, event_type, event_data, related_challenge_id, related_submission_id, points_earned
-            ) VALUES ($1, $2, $3, $4, $5, $6)`,
-            [
-              userId,
-              'challenge_completed',
-              JSON.stringify({
-                challenge_title: challenge.title,
-                attempt_number: attemptCount + 1,
-                challenge_category: challenge.category,
-                requested_peer_review: requestPeerReview,
-              }),
-              challengeId,
-              submission.id,
-              points,
-            ]
-          );
-
-          // Update goal progress using progress_contribution from challenge_goals table
-          // This adds the user-specified percentage contribution to the goal's progress
-          const goalUpdateResult = await transactionQuery(
-            `UPDATE goals g
-             SET progress_percentage = LEAST(100, COALESCE(progress_percentage, 0) + COALESCE(cg.progress_contribution, 10)),
-                 challenges_completed = COALESCE(challenges_completed, 0) + 1,
-                 is_completed = CASE 
-                   WHEN COALESCE(progress_percentage, 0) + COALESCE(cg.progress_contribution, 10) >= 100 THEN true 
-                   ELSE is_completed 
-                 END,
-                 completion_date = CASE 
-                   WHEN COALESCE(progress_percentage, 0) + COALESCE(cg.progress_contribution, 10) >= 100 THEN CURRENT_TIMESTAMP 
-                   ELSE completion_date 
-                 END,
-                 updated_at = CURRENT_TIMESTAMP
-             FROM challenge_goals cg
-             WHERE cg.goal_id = g.id 
-             AND cg.challenge_id = $1 
-             AND g.user_id = $2
-             RETURNING g.id, g.title, g.progress_percentage, g.is_completed, cg.progress_contribution`,
-            [challengeId, userId]
-          );
-
-          // Include goal update info in the return value
-          const updatedGoal =
-            goalUpdateResult.rows.length > 0 ? goalUpdateResult.rows[0] : null;
-
-          return {
-            ...submission,
-            points_earned: points,
-            goal_updated: updatedGoal
-              ? {
-                  id: updatedGoal.id,
-                  title: updatedGoal.title,
-                  new_progress: updatedGoal.progress_percentage,
-                  is_completed: updatedGoal.is_completed,
-                  contribution: updatedGoal.progress_contribution,
-                }
-              : null,
-          };
-        }
-      );
-
-      return submissionResult;
+        const updatedGoal = goalUpdateResult.rows[0];
+        return {
+          ...submission,
+          points_earned: points,
+          goal_updated: updatedGoal ? {
+            id: updatedGoal.id, title: updatedGoal.title,
+            new_progress: updatedGoal.progress_percentage,
+            is_completed: updatedGoal.is_completed,
+            contribution: updatedGoal.progress_contribution
+          } : null,
+        };
+      });
     } catch (error) {
-      // Re-throw AppErrors as-is to preserve status codes
-      if (error instanceof AppError) {
-        throw error;
-      }
-      // Wrap other errors
-      throw new AppError(
-        `Failed to submit challenge: ${error.message}`,
-        500,
-        'SUBMISSION_ERROR'
-      );
+      if (error instanceof AppError) throw error;
+      throw new AppError(`Failed to submit challenge: ${error.message}`, 500, 'SUBMISSION_ERROR');
     }
   },
 
@@ -761,52 +629,21 @@ const challengeService = {
    */
   markSubmissionComplete: async (submissionId, userId, challengeId) => {
     try {
-      return await withTransaction(async (transactionQuery) => {
-        // Verify submission belongs to user
-        const submissionCheck = await transactionQuery(
-          'SELECT * FROM submissions WHERE id = $1 AND user_id = $2',
-          [submissionId, userId]
-        );
-
-        if (submissionCheck.rows.length === 0) {
-          throw new Error('Submission not found or not authorized');
-        }
+      return await withTransaction(async (tx) => {
+        const submissionCheck = await tx('SELECT * FROM submissions WHERE id = $1 AND user_id = $2', [submissionId, userId]);
+        if (submissionCheck.rows.length === 0) throw new Error('Submission not found or not authorized');
 
         const submission = submissionCheck.rows[0];
+        if (submission.status === 'completed') throw new Error('Submission is already marked as complete');
 
-        // Check if already completed
-        if (submission.status === 'completed') {
-          throw new Error('Submission is already marked as complete');
-        }
+        const challengeCheck = await tx('SELECT points_reward FROM challenges WHERE id = $1', [challengeId]);
+        if (challengeCheck.rows.length === 0) throw new Error('Challenge not found');
 
-        // Get challenge points
-        const challengeCheck = await transactionQuery(
-          'SELECT points_reward FROM challenges WHERE id = $1',
-          [challengeId]
-        );
+        const points = Math.min(challengeCheck.rows[0].points_reward || 10, 5);
+        const updateResult = await tx("UPDATE submissions SET status = 'completed', score = 75 WHERE id = $1 RETURNING *", [submissionId]);
 
-        if (challengeCheck.rows.length === 0) {
-          throw new Error('Challenge not found');
-        }
-
-        const points = Math.min(challengeCheck.rows[0].points_reward || 10, 5); // Cap at 5 points
-
-        // Update submission to completed
-        const updateResult = await transactionQuery(
-          "UPDATE submissions SET status = 'completed', score = 75 WHERE id = $1 RETURNING *",
-          [submissionId]
-        );
-
-        // Award points and update statistics
         const submissionService = require('./submissionService');
-        await submissionService.awardPointsForCompletion(
-          transactionQuery,
-          userId,
-          challengeId,
-          points,
-          submissionId
-        );
-
+        await submissionService.awardPointsForCompletion(tx, userId, challengeId, points, submissionId);
         return updateResult.rows[0];
       });
     } catch (error) {
@@ -814,25 +651,15 @@ const challengeService = {
     }
   },
 
-  /**
-   * Get submissions for a challenge by user
-   */
   getChallengeSubmissions: async (challengeId, userId) => {
     try {
-      const result = await query(
-        `
-        SELECT 
-          s.*,
-          c.title as challenge_title,
-          c.max_attempts
+      const result = await query(`
+        SELECT s.*, c.title as challenge_title, c.max_attempts
         FROM submissions s
         JOIN challenges c ON s.challenge_id = c.id
         WHERE s.challenge_id = $1 AND s.user_id = $2
         ORDER BY s.submitted_at DESC
-      `,
-        [challengeId, userId]
-      );
-
+      `, [challengeId, userId]);
       return result.rows;
     } catch (error) {
       throw new Error(`Failed to get challenge submissions: ${error.message}`);

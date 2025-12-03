@@ -181,6 +181,7 @@
 .auth-page .feature-item {
   display: flex;
   align-items: center;
+  gap: 1rem;
 }
 
 .auth-page .feature-icon {
@@ -201,8 +202,13 @@
 }
 
 .auth-page .feature-text {
-  margin-left: 0.75rem;
+  flex: 1;
+  margin: 0;
   color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.4;
+  display: flex;
+  align-items: center;
 }
 
 /* Right panel - Form */

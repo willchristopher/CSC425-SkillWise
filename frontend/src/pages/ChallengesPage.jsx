@@ -8,6 +8,24 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 import AppLayout from '../components/layout/AppLayout';
 import '../styles/challenges-v2.css';
 
+// SVG Icon renderer
+const SVGIcon = ({ paths, size = 24, fill = 'none', viewBox = '0 0 24 24' }) => (
+  <svg width={size} height={size} viewBox={viewBox} fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    {paths.map((path, i) => typeof path === 'string' ? <path key={i} d={path} /> : <circle key={i} {...path} />)}
+  </svg>
+);
+
+const CHALLENGE_ICONS = {
+  grid: [{ cx: 5, cy: 5, r: 1 }, { cx: 12, cy: 5, r: 1 }, { cx: 19, cy: 5, r: 1 }, { cx: 5, cy: 12, r: 1 }, { cx: 12, cy: 12, r: 1 }, { cx: 19, cy: 12, r: 1 }, { cx: 5, cy: 19, r: 1 }, { cx: 12, cy: 19, r: 1 }, { cx: 19, cy: 19, r: 1 }],
+  checkCircle: ['M22 11.08V12a10 10 0 1 1-5.93-9.14', 'M22 4 12 14.01 9 11.01'],
+  clock: ['M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z', 'M12 6v6l4 2.5'],
+  star: ['M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-5.18 3.25L8 14.14 3 9.27l6.91-1.01L12 2z'],
+  zap: ['M13 2l-2 4h-2l4 5h-9l4 6 2-4h2l-4-5h9l-4-6z'],
+  plus: ['M12 5v14M5 12h14'],
+  play: ['M5 3l14 9-14 9V3'],
+  search: ['M11 8a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm-7 11v-1a4 4 0 0 1 8 0v1', 'M11 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 8v1', 'M21 21l-4.35-4.35'],
+};
+
 const ChallengesPage = () => {
   const { user } = useAuth();
   const [challenges, setChallenges] = useState([]);
@@ -416,59 +434,22 @@ const ChallengesPage = () => {
         {/* Stats Bar */}
         <div className="challenges-stats-bar">
           <div className="challenge-stat-pill total">
-            <svg
-              className="stat-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <rect x="3" y="3" width="7" height="7" rx="1" />
-              <rect x="14" y="3" width="7" height="7" rx="1" />
-              <rect x="3" y="14" width="7" height="7" rx="1" />
-              <rect x="14" y="14" width="7" height="7" rx="1" />
-            </svg>
+            <SVGIcon paths={CHALLENGE_ICONS.grid} size={20} className="stat-icon" />
             <span className="stat-value">{stats.total}</span>
             <span className="stat-label">Total</span>
           </div>
           <div className="challenge-stat-pill completed">
-            <svg
-              className="stat-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-              <polyline points="22 4 12 14.01 9 11.01" />
-            </svg>
+            <SVGIcon paths={CHALLENGE_ICONS.checkCircle} size={20} className="stat-icon" />
             <span className="stat-value">{stats.completed}</span>
             <span className="stat-label">Completed</span>
           </div>
           <div className="challenge-stat-pill in-progress">
-            <svg
-              className="stat-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="12 6 12 12 16 14" />
-            </svg>
+            <SVGIcon paths={CHALLENGE_ICONS.clock} size={20} className="stat-icon" />
             <span className="stat-value">{stats.inProgress}</span>
             <span className="stat-label">In Progress</span>
           </div>
           <div className="challenge-stat-pill points">
-            <svg
-              className="stat-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-            </svg>
+            <SVGIcon paths={CHALLENGE_ICONS.star} size={20} className="stat-icon" />
             <span className="stat-value">{stats.totalPoints}</span>
             <span className="stat-label">Total Points</span>
           </div>
@@ -484,17 +465,7 @@ const ChallengesPage = () => {
             className="btn-create-challenge"
             onClick={handleCreateChallenge}
           >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-            >
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
+            <SVGIcon paths={CHALLENGE_ICONS.plus} size={18} />
             Create Challenge
           </button>
         </div>
@@ -667,14 +638,7 @@ const ChallengesPage = () => {
                           className="btn-card-action primary"
                           onClick={() => handleStartChallenge(challenge)}
                         >
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                          >
-                            <polygon points="5 3 19 12 5 21 5 3" />
-                          </svg>
+                          <SVGIcon paths={CHALLENGE_ICONS.play} size={16} fill="currentColor" />
                           Start Challenge
                         </button>
                       ) : (
@@ -708,15 +672,7 @@ const ChallengesPage = () => {
             </div>
           ) : challenges.length === 0 ? (
             <div className="challenges-empty-state">
-              <svg
-                className="empty-state-icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-              </svg>
+              <SVGIcon paths={CHALLENGE_ICONS.zap} size={48} className="empty-state-icon" />
               <h3 className="empty-state-title">No challenges available</h3>
               <p className="empty-state-text">
                 {filters.tab === 'completed'
@@ -734,16 +690,7 @@ const ChallengesPage = () => {
             </div>
           ) : (
             <div className="challenges-empty-state">
-              <svg
-                className="empty-state-icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.35-4.35" />
-              </svg>
+              <SVGIcon paths={CHALLENGE_ICONS.search} size={48} className="empty-state-icon" />
               <h3 className="empty-state-title">
                 No challenges match your filters
               </h3>
