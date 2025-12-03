@@ -333,6 +333,129 @@ const aiController = {
       next(error);
     }
   },
+
+  /**
+   * Analyze a topic from user input
+   * POST /api/ai/analyze-topic
+   * Body: { userInput }
+   */
+  analyzeTopic: async (req, res, next) => {
+    try {
+      const { userInput } = req.body;
+      const userId = req.user?.id;
+
+      if (!userInput || !userInput.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: 'userInput is required',
+        });
+      }
+
+      const analysis = await aiService.analyzeTopic(userInput, userId);
+
+      res.json({
+        success: true,
+        data: analysis,
+      });
+    } catch (error) {
+      console.error('Error analyzing topic:', error);
+      next(error);
+    }
+  },
+
+  /**
+   * Generate a comprehensive study guide
+   * POST /api/ai/study-guide
+   * Body: { topic, questionTypes, questionCount, gradingMode, difficultyLevel, additionalContext }
+   */
+  generateStudyGuide: async (req, res, next) => {
+    try {
+      const {
+        topic,
+        questionTypes,
+        questionCount,
+        gradingMode,
+        difficultyLevel,
+        additionalContext,
+      } = req.body;
+      const userId = req.user?.id;
+
+      // Validate required fields
+      if (
+        !topic ||
+        !questionTypes ||
+        !questionCount ||
+        !gradingMode ||
+        !difficultyLevel
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            'Missing required fields: topic, questionTypes, questionCount, gradingMode, difficultyLevel',
+        });
+      }
+
+      if (!Array.isArray(questionTypes) || questionTypes.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'questionTypes must be a non-empty array',
+        });
+      }
+
+      const studyGuide = await aiService.generateStudyGuide(
+        {
+          topic,
+          questionTypes,
+          questionCount,
+          gradingMode,
+          difficultyLevel,
+          additionalContext,
+        },
+        userId
+      );
+
+      res.json({
+        success: true,
+        data: studyGuide,
+      });
+    } catch (error) {
+      console.error('Error generating study guide:', error);
+      next(error);
+    }
+  },
+
+  /**
+   * Grade a student's answer using AI
+   * POST /api/ai/grade-answer
+   * Body: { question, correctAnswer, studentAnswer, questionType }
+   */
+  gradeAnswer: async (req, res, next) => {
+    try {
+      const { question, correctAnswer, studentAnswer, questionType } = req.body;
+      const userId = req.user?.id;
+
+      if (!question || !correctAnswer || !studentAnswer || !questionType) {
+        return res.status(400).json({
+          success: false,
+          message:
+            'Missing required fields: question, correctAnswer, studentAnswer, questionType',
+        });
+      }
+
+      const gradeResult = await aiService.gradeAnswer(
+        { question, correctAnswer, studentAnswer, questionType },
+        userId
+      );
+
+      res.json({
+        success: true,
+        data: gradeResult,
+      });
+    } catch (error) {
+      console.error('Error grading answer:', error);
+      next(error);
+    }
+  },
 };
 
 module.exports = aiController;

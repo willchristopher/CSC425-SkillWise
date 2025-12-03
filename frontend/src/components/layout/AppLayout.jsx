@@ -24,7 +24,6 @@ const AppLayout = ({ children, title, subtitle }) => {
     { path: '/dashboard', label: 'Dashboard', icon: 'grid' },
     { path: '/goals', label: 'Goals', icon: 'target' },
     { path: '/challenges', label: 'Challenges', icon: 'zap' },
-    { path: '/progress', label: 'Progress', icon: 'trending-up' },
     { path: '/ai-tutor', label: 'AI Tutor', icon: 'cpu' },
     { path: '/peer-review', label: 'Reviews', icon: 'users' },
     { path: '/leaderboard', label: 'Leaderboard', icon: 'award' },

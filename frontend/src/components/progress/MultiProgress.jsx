@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import '../../styles/progress.css';
+import '../../styles/progress-v2.css';
 
 const MultiProgress = ({
   items = [],

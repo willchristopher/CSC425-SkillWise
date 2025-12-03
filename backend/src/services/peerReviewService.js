@@ -23,11 +23,12 @@ const peerReviewService = {
         JOIN users u ON s.user_id = u.id
         WHERE s.user_id != $1
           AND c.requires_peer_review = true
-          AND s.status = 'submitted'
+          AND s.status IN ('pending', 'in_review', 'submitted')
           AND NOT EXISTS (
             SELECT 1 FROM peer_reviews pr 
             WHERE pr.submission_id = s.id AND pr.reviewer_id = $1
           )
+          AND (SELECT COUNT(*) FROM peer_reviews pr WHERE pr.submission_id = s.id AND pr.is_completed = true) < 3
       `;
 
       const params = [userId];

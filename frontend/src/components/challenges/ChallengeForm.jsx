@@ -16,7 +16,8 @@ const challengeSchema = z.object({
     .optional(),
   points_reward: z.literal(5).default(5), // Capped at 5 points
   max_attempts: z.number().min(1, 'Must allow at least 1 attempt').default(3),
-  tags: z.array(z.string()).default([]),
+  goal_id: z.number().int().positive().optional(),
+  progress_contribution: z.number().min(1).max(100).default(10),
   learning_objectives: z.array(z.string()).default([]),
 });
 
@@ -25,6 +26,7 @@ const ChallengeForm = ({
   onSubmit,
   onCancel,
   isLoading = false,
+  goals = [],
 }) => {
   const {
     register,
@@ -43,27 +45,13 @@ const ChallengeForm = ({
       estimated_time_minutes: 30,
       points_reward: 5, // Fixed at 5 points
       max_attempts: 3,
-      tags: [],
+      goal_id: '',
+      progress_contribution: 10,
       learning_objectives: [],
     },
   });
 
-  const watchedTags = watch('tags');
   const watchedObjectives = watch('learning_objectives');
-
-  const handleAddTag = () => {
-    const newTag = prompt('Enter a new tag:');
-    if (newTag && newTag.trim()) {
-      setValue('tags', [...watchedTags, newTag.trim()]);
-    }
-  };
-
-  const handleRemoveTag = (index) => {
-    setValue(
-      'tags',
-      watchedTags.filter((_, i) => i !== index)
-    );
-  };
 
   const handleAddObjective = () => {
     const newObjective = prompt('Enter a learning objective:');
@@ -265,87 +253,60 @@ const ChallengeForm = ({
         <h3>Additional Information</h3>
 
         <div className="form-group">
-          <label className="form-label">Tags</label>
+          <label htmlFor="goal_id" className="form-label">
+            Assign to Goal (Optional)
+          </label>
           <p className="form-hint" style={{ marginBottom: '0.75rem' }}>
-            💡 Add your goal's category as a tag to link this challenge to your
-            goals!
+            🎯 Select a goal to link this challenge to. When you complete the
+            challenge, it will count towards your goal progress.
           </p>
-          <div className="tag-manager">
-            {/* Suggested goal category tags */}
-            <div className="suggested-tags" style={{ marginBottom: '0.75rem' }}>
-              <span
-                style={{
-                  fontSize: '0.85rem',
-                  color: '#64748b',
-                  marginRight: '0.5rem',
-                }}
-              >
-                Goal categories:
-              </span>
-              {[
-                'programming',
-                'web development',
-                'data science',
-                'design',
-                'business',
-                'personal development',
-              ].map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => {
-                    if (!watchedTags.includes(cat)) {
-                      setValue('tags', [...watchedTags, cat]);
-                    }
-                  }}
-                  className={`suggested-tag ${
-                    watchedTags.includes(cat) ? 'added' : ''
-                  }`}
-                  disabled={watchedTags.includes(cat)}
-                  style={{
-                    padding: '0.25rem 0.5rem',
-                    fontSize: '0.75rem',
-                    background: watchedTags.includes(cat)
-                      ? '#d1fae5'
-                      : '#f1f5f9',
-                    border: `1px solid ${
-                      watchedTags.includes(cat) ? '#10b981' : '#e2e8f0'
-                    }`,
-                    borderRadius: '4px',
-                    cursor: watchedTags.includes(cat) ? 'default' : 'pointer',
-                    color: watchedTags.includes(cat) ? '#047857' : '#475569',
-                    marginRight: '0.25rem',
-                    marginBottom: '0.25rem',
-                  }}
-                >
-                  {watchedTags.includes(cat) ? '✓ ' : '+ '}
-                  {cat}
-                </button>
-              ))}
-            </div>
-            <div className="tag-list">
-              {watchedTags.map((tag, index) => (
-                <div key={index} className="tag-item">
-                  <span className="tag">{tag}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveTag(index)}
-                    className="tag-remove"
-                    aria-label={`Remove ${tag} tag`}
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={handleAddTag}
-                className="btn btn-outline btn-sm"
-              >
-                + Add Tag
-              </button>
-            </div>
+          <select
+            id="goal_id"
+            {...register('goal_id', { valueAsNumber: true })}
+            className={`form-input ${errors.goal_id ? 'error' : ''}`}
+          >
+            <option value="">-- No Goal Selected --</option>
+            {goals && goals.length > 0 ? (
+              goals.map((goal) => (
+                <option key={goal.id} value={goal.id}>
+                  {goal.title}
+                </option>
+              ))
+            ) : (
+              <option disabled>No goals available</option>
+            )}
+          </select>
+          {errors.goal_id && (
+            <span className="form-error">{errors.goal_id.message}</span>
+          )}
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="progress_contribution" className="form-label">
+            Goal Progress Contribution (%)
+          </label>
+          <p className="form-hint" style={{ marginBottom: '0.75rem' }}>
+            📈 How much should completing this challenge add to your goal's
+            progress? (1-100%)
+          </p>
+          <div className="progress-contribution-container">
+            <input
+              id="progress_contribution"
+              type="range"
+              min="1"
+              max="100"
+              {...register('progress_contribution', { valueAsNumber: true })}
+              className="progress-contribution-slider"
+            />
+            <span className="progress-contribution-value">
+              {watch('progress_contribution') || 10}%
+            </span>
           </div>
+          {errors.progress_contribution && (
+            <span className="form-error">
+              {errors.progress_contribution.message}
+            </span>
+          )}
         </div>
 
         <div className="form-group">

@@ -43,7 +43,7 @@ Make sure the challenge is educational, engaging, appropriate for {{difficulty}}
 Return ONLY the JSON object, no other text.`,
 
     config: {
-      maxOutputTokens: 4000,
+      maxOutputTokens: 8192, // Increased for Gemini 2.5 which uses thinking tokens
       temperature: 0.9,
     },
 
@@ -199,6 +199,177 @@ Please analyze this learning pattern and provide:
       type: 'text',
       minLength: 300,
       maxLength: 2500,
+    },
+  },
+
+  /**
+   * Study Guide Generation Template
+   * Placeholders: {{topic}}, {{questionTypes}}, {{questionCount}}, {{gradingMode}}, {{difficultyLevel}}, {{additionalContext}}
+   */
+  generateStudyGuide: {
+    systemPrompt: `You are an expert educator and study guide creator. You can create comprehensive study materials for ANY subject area including but not limited to:
+- Programming and Computer Science
+- Mathematics (Algebra, Calculus, Statistics, etc.)
+- Sciences (Physics, Chemistry, Biology, etc.)
+- History and Social Studies
+- Languages and Literature
+- Arts and Music
+- Business and Economics
+- Health and Medicine
+- And any other academic or professional topic
+
+Your study guides are engaging, well-organized, and tailored to the student's learning needs.
+IMPORTANT: Return ONLY valid JSON without any markdown formatting, code blocks, or explanatory text.`,
+
+    userPrompt: `Create a comprehensive study guide for the following topic:
+
+TOPIC: {{topic}}
+
+REQUIREMENTS:
+- Question Types Requested: {{questionTypes}}
+- Number of Questions: {{questionCount}}
+- Grading Mode: {{gradingMode}}
+- Difficulty Level: {{difficultyLevel}}
+{{#if additionalContext}}- Additional Context: {{additionalContext}}{{/if}}
+
+Generate a complete study guide as a JSON object with this EXACT structure:
+{
+  "title": "Study Guide: [Topic Name]",
+  "topic_summary": "A comprehensive 2-3 paragraph overview of the topic covering key concepts, importance, and what the student will learn",
+  "key_concepts": [
+    {
+      "term": "Important term or concept",
+      "definition": "Clear, educational definition",
+      "example": "A practical example to illustrate the concept"
+    }
+  ],
+  "sections": [
+    {
+      "section_title": "Section Name",
+      "content": "Educational content for this section (2-3 paragraphs)",
+      "key_points": ["Key point 1", "Key point 2", "Key point 3"]
+    }
+  ],
+  "questions": [
+    {
+      "id": 1,
+      "type": "mcq|fill_blank|short_answer|long_response|true_false",
+      "question": "The question text",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correct_answer": "The correct answer",
+      "explanation": "Why this is the correct answer and educational context"
+    }
+  ],
+  "study_tips": ["Tip 1", "Tip 2", "Tip 3"],
+  "additional_resources": ["Resource or topic suggestion 1", "Resource or topic suggestion 2"]
+}
+
+IMPORTANT NOTES:
+- For MCQ questions: Include 4 options (A, B, C, D)
+- For fill_blank questions: Use _____ to indicate the blank in the question
+- For true_false questions: Options should be ["True", "False"]
+- For short_answer and long_response: No options needed
+- Include the correct_answer for ALL question types
+- If gradingMode is "reveal", the student will reveal answers themselves
+- If gradingMode is "ai_grade", the AI will grade their responses
+- Generate exactly {{questionCount}} questions using the requested types: {{questionTypes}}
+- Make questions progressively challenging based on {{difficultyLevel}} level
+
+Return ONLY the JSON object, no other text or markdown.`,
+
+    config: {
+      maxOutputTokens: 8192,
+      temperature: 0.8,
+    },
+
+    expectedResponseFormat: {
+      type: 'json',
+      requiredFields: [
+        'title',
+        'topic_summary',
+        'key_concepts',
+        'sections',
+        'questions',
+        'study_tips',
+      ],
+    },
+  },
+
+  /**
+   * Topic Analysis Template - For analyzing what topic the user wants to study
+   * Placeholders: {{userInput}}
+   */
+  analyzeTopic: {
+    systemPrompt: `You are an educational assistant that analyzes user input to understand what topic they want to study.
+Extract the main topic, subject area, and any specific focus areas mentioned.
+IMPORTANT: Return ONLY valid JSON without any markdown formatting or code blocks.`,
+
+    userPrompt: `Analyze the following user input and identify the study topic:
+
+User Input: "{{userInput}}"
+
+Return a JSON object with:
+{
+  "topic": "The main topic they want to study",
+  "subject_area": "The broader subject area (e.g., Mathematics, History, Programming, Science, etc.)",
+  "specific_focus": ["Any specific subtopics or focus areas mentioned"],
+  "suggested_difficulty": "beginner|intermediate|advanced",
+  "is_valid_topic": true/false,
+  "clarification_needed": "If the topic is unclear, what question would you ask to clarify?"
+}
+
+Return ONLY the JSON object.`,
+
+    config: {
+      maxOutputTokens: 500,
+      temperature: 0.5,
+    },
+
+    expectedResponseFormat: {
+      type: 'json',
+      requiredFields: ['topic', 'subject_area', 'is_valid_topic'],
+    },
+  },
+
+  /**
+   * Grade Response Template - For AI grading of student answers
+   * Placeholders: {{question}}, {{correctAnswer}}, {{studentAnswer}}, {{questionType}}
+   */
+  gradeResponse: {
+    systemPrompt: `You are a fair and encouraging educator grading student responses.
+Provide constructive feedback that helps the student learn, even when they make mistakes.
+Be specific about what was correct, what needs improvement, and why.
+IMPORTANT: Return ONLY valid JSON without any markdown formatting or code blocks.`,
+
+    userPrompt: `Grade the following student response:
+
+Question: {{question}}
+Question Type: {{questionType}}
+Correct Answer: {{correctAnswer}}
+Student's Answer: {{studentAnswer}}
+
+Return a JSON object with:
+{
+  "is_correct": true/false,
+  "score": 0-100,
+  "feedback": "Detailed, constructive feedback on the answer",
+  "correct_answer_explanation": "Explanation of the correct answer",
+  "improvement_tips": ["Specific tip 1", "Specific tip 2"]
+}
+
+For partial credit on long_response questions, give a score between 0-100 based on accuracy and completeness.
+For MCQ, fill_blank, and true_false, score is either 0 or 100.
+
+Return ONLY the JSON object.`,
+
+    config: {
+      maxOutputTokens: 800,
+      temperature: 0.5,
+    },
+
+    expectedResponseFormat: {
+      type: 'json',
+      requiredFields: ['is_correct', 'score', 'feedback'],
     },
   },
 };

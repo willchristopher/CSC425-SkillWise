@@ -35,6 +35,13 @@ const challengeCreateSchema = z.object({
   }, z.number().int().min(1).default(3)),
   requires_peer_review: z.boolean().default(false),
   goal_id: z.number().int().positive().optional(),
+  progress_contribution: z.preprocess((val) => {
+    if (typeof val === 'string') {
+      const parsed = parseInt(val, 10);
+      return isNaN(parsed) ? 10 : parsed;
+    }
+    return val;
+  }, z.number().int().min(1).max(100).default(10)),
   tags: z.array(z.string()).default([]),
   prerequisites: z.array(z.string()).default([]),
   learning_objectives: z.array(z.string()).default([]),
@@ -274,10 +281,15 @@ const challengeService = {
         if (validatedData.goal_id) {
           await transactionQuery(
             `
-            INSERT INTO challenge_goals (challenge_id, goal_id, created_by)
-            VALUES ($1, $2, $3)
+            INSERT INTO challenge_goals (challenge_id, goal_id, progress_contribution, created_by)
+            VALUES ($1, $2, $3, $4)
           `,
-            [challenge.id, validatedData.goal_id, creatorId]
+            [
+              challenge.id,
+              validatedData.goal_id,
+              validatedData.progress_contribution || 10,
+              creatorId,
+            ]
           );
         }
 
@@ -686,7 +698,46 @@ const challengeService = {
             ]
           );
 
-          return { ...submission, points_earned: points };
+          // Update goal progress using progress_contribution from challenge_goals table
+          // This adds the user-specified percentage contribution to the goal's progress
+          const goalUpdateResult = await transactionQuery(
+            `UPDATE goals g
+             SET progress_percentage = LEAST(100, COALESCE(progress_percentage, 0) + COALESCE(cg.progress_contribution, 10)),
+                 challenges_completed = COALESCE(challenges_completed, 0) + 1,
+                 is_completed = CASE 
+                   WHEN COALESCE(progress_percentage, 0) + COALESCE(cg.progress_contribution, 10) >= 100 THEN true 
+                   ELSE is_completed 
+                 END,
+                 completion_date = CASE 
+                   WHEN COALESCE(progress_percentage, 0) + COALESCE(cg.progress_contribution, 10) >= 100 THEN CURRENT_TIMESTAMP 
+                   ELSE completion_date 
+                 END,
+                 updated_at = CURRENT_TIMESTAMP
+             FROM challenge_goals cg
+             WHERE cg.goal_id = g.id 
+             AND cg.challenge_id = $1 
+             AND g.user_id = $2
+             RETURNING g.id, g.title, g.progress_percentage, g.is_completed, cg.progress_contribution`,
+            [challengeId, userId]
+          );
+
+          // Include goal update info in the return value
+          const updatedGoal =
+            goalUpdateResult.rows.length > 0 ? goalUpdateResult.rows[0] : null;
+
+          return {
+            ...submission,
+            points_earned: points,
+            goal_updated: updatedGoal
+              ? {
+                  id: updatedGoal.id,
+                  title: updatedGoal.title,
+                  new_progress: updatedGoal.progress_percentage,
+                  is_completed: updatedGoal.is_completed,
+                  contribution: updatedGoal.progress_contribution,
+                }
+              : null,
+          };
         }
       );
 

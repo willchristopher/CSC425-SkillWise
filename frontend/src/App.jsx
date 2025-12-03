@@ -14,7 +14,6 @@ import SignupPage from './pages/SignupPage';
 import DashboardPage from './pages/DashboardPage';
 import GoalsPage from './pages/GoalsPage';
 import ChallengesPage from './pages/ChallengesPage';
-import ProgressPage from './pages/ProgressPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import PeerReviewPage from './pages/PeerReviewPage';
 import ProfilePage from './pages/ProfilePage';
@@ -65,14 +64,6 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <ChallengesPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/progress"
-                  element={
-                    <ProtectedRoute>
-                      <ProgressPage />
                     </ProtectedRoute>
                   }
                 />

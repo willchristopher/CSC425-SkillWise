@@ -1,10 +1,47 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { apiService } from '../services/api';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import AppLayout from '../components/layout/AppLayout';
 import GoalDetailModal from '../components/goals/GoalDetailModal';
 import '../styles/goals-v2.css';
+
+// Debounce utility for handling rapid API calls
+const useDebounce = (callback, delay = 500) => {
+  const timeoutRef = useRef(null);
+  const callbackRef = useRef(callback);
+
+  // Update callback ref when it changes
+  useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
+
+  const debouncedFn = useCallback(
+    (...args) => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
+        callbackRef.current(...args);
+      }, delay);
+    },
+    [delay]
+  );
+
+  const cancel = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+  }, []);
+
+  return [debouncedFn, cancel];
+};
 
 // Goal color themes
 const GOAL_COLORS = [
@@ -85,6 +122,26 @@ const GoalsPage = () => {
 
   // Editing states
   const [quickEditData, setQuickEditData] = useState({});
+
+  // Create debounced version of handleUpdateProgress
+  const [debouncedUpdateProgress, cancelDebouncedUpdate] = useDebounce(
+    (goalId, newProgress) => {
+      // This will be the API call part only
+      apiService.goals
+        .updateProgress(goalId, {
+          progress_percentage: newProgress,
+        })
+        .then(() => {
+          fetchUserStats();
+        })
+        .catch((err) => {
+          setError(err.response?.data?.message || 'Failed to update progress');
+          fetchGoals();
+          fetchUserStats();
+        });
+    },
+    500
+  ); // 500ms delay
 
   useEffect(() => {
     fetchGoals();
@@ -298,13 +355,8 @@ const GoalsPage = () => {
         }));
       }
 
-      // Make the API call to persist
-      await apiService.goals.updateProgress(goalId, {
-        progress_percentage: newProgress,
-      });
-
-      // Refresh user stats in case points were awarded
-      await fetchUserStats();
+      // Call the debounced API update (only makes API call after 500ms of inactivity)
+      debouncedUpdateProgress(goalId, newProgress);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to update progress');
       // Refresh on error to sync state
@@ -1016,12 +1068,21 @@ const GoalGridCard = ({
 
       {!goal.is_completed && (
         <div className="card-actions" onClick={(e) => e.stopPropagation()}>
-          <button
-            className="action-btn progress-btn"
-            onClick={() => onUpdateProgress(Math.min(100, progress + 10))}
-          >
-            +10%
-          </button>
+          <div className="progress-slider-container">
+            <label className="slider-label">Adjust Progress</label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={progress}
+              onChange={(e) =>
+                onUpdateProgress(Math.min(100, parseInt(e.target.value, 10)))
+              }
+              className="progress-slider"
+              aria-label="Goal progress slider"
+            />
+            <div className="slider-value">{progress}%</div>
+          </div>
           {progress >= 90 && (
             <button
               className="action-btn complete-btn"
@@ -1116,12 +1177,17 @@ const GoalListItem = ({
 
       {!goal.is_completed && (
         <div className="list-actions" onClick={(e) => e.stopPropagation()}>
-          <button
-            className="action-btn"
-            onClick={() => onUpdateProgress(Math.min(100, progress + 10))}
-          >
-            +10%
-          </button>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={progress}
+            onChange={(e) =>
+              onUpdateProgress(Math.min(100, parseInt(e.target.value, 10)))
+            }
+            className="progress-slider-small"
+            aria-label="Goal progress slider"
+          />
           <button className="action-btn complete-btn" onClick={onQuickComplete}>
             ✓
           </button>

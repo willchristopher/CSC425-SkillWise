@@ -324,6 +324,12 @@ export const apiService = {
       api.post('/ai/analysis', { userId, learningData }),
     generateChallenge: (params) =>
       api.post('/ai/generateChallenge', params, { timeout: 30000 }), // 30 second timeout for AI generation
+    analyzeTopic: (userInput) =>
+      api.post('/ai/analyze-topic', { userInput }, { timeout: 30000 }),
+    generateStudyGuide: (params) =>
+      api.post('/ai/study-guide', params, { timeout: 60000 }), // 60 second timeout for study guide
+    gradeAnswer: (params) =>
+      api.post('/ai/grade-answer', params, { timeout: 30000 }),
   },
 
   // Feedback methods - for retrieving stored AI feedback

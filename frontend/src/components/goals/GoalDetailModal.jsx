@@ -466,8 +466,9 @@ const GoalDetailModal = ({
                         {watchedChallengesTarget > 1 ? 's' : ''}
                       </strong>{' '}
                       {getPeriodLabel(watchedChallengesPeriod).toLowerCase()} to
-                      make progress on this goal. Challenges tagged with your
-                      goal's category ({getCategoryIcon(watchedCategory)}{' '}
+                      make progress on this goal. Challenges assigned to this
+                      goal will automatically count toward your progress (
+                      {getCategoryIcon(watchedCategory)}{' '}
                       {watchedCategory || 'any'}) will automatically contribute!
                     </span>
                   </div>
@@ -509,13 +510,13 @@ const GoalDetailModal = ({
                 </h4>
                 <ul>
                   <li>
-                    <strong>Category Matching:</strong> Challenges with the same
-                    category as your goal will automatically count toward your
-                    progress.
+                    <strong>Challenge Assignment:</strong> When you create a
+                    challenge, assign it to this goal using the goal dropdown in
+                    the challenge form.
                   </li>
                   <li>
-                    <strong>Tags:</strong> When creating challenges, add your
-                    goal's category as a tag to link them.
+                    <strong>Automatic Tracking:</strong> Assigned challenges
+                    will automatically count toward your goal progress.
                   </li>
                   <li>
                     <strong>Points:</strong> Each challenge is worth 5 points.

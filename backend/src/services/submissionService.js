@@ -485,58 +485,25 @@ const submissionService = {
       ]
     );
 
-    // Update goal progress if challenge is linked to goals via challenge_goals table
-    // First, increment challenges_completed for goals with challenges_target > 0
+    // Update goal progress using progress_contribution from challenge_goals table
+    // This adds the user-specified percentage contribution to the goal's progress
     await transactionQuery(
       `UPDATE goals g
-       SET challenges_completed = COALESCE(challenges_completed, 0) + 1,
-           progress_percentage = CASE
-             WHEN challenges_target > 0 THEN LEAST(100, ROUND(((COALESCE(challenges_completed, 0) + 1)::numeric / challenges_target) * 100))
-             ELSE progress_percentage
-           END,
+       SET progress_percentage = LEAST(100, COALESCE(progress_percentage, 0) + COALESCE(cg.progress_contribution, 10)),
+           challenges_completed = COALESCE(challenges_completed, 0) + 1,
            is_completed = CASE 
-             WHEN challenges_target > 0 AND (COALESCE(challenges_completed, 0) + 1) >= challenges_target THEN true 
+             WHEN COALESCE(progress_percentage, 0) + COALESCE(cg.progress_contribution, 10) >= 100 THEN true 
              ELSE is_completed 
            END,
            completion_date = CASE 
-             WHEN challenges_target > 0 AND (COALESCE(challenges_completed, 0) + 1) >= challenges_target THEN CURRENT_TIMESTAMP 
+             WHEN COALESCE(progress_percentage, 0) + COALESCE(cg.progress_contribution, 10) >= 100 THEN CURRENT_TIMESTAMP 
              ELSE completion_date 
            END,
            updated_at = CURRENT_TIMESTAMP
        FROM challenge_goals cg
        WHERE cg.goal_id = g.id 
        AND cg.challenge_id = $1 
-       AND g.user_id = $2
-       AND g.challenges_target > 0`,
-      [challengeId, userId]
-    );
-
-    // For goals without challenges_target, use the old method (count of linked challenges)
-    await transactionQuery(
-      `UPDATE goals g
-       SET progress_percentage = LEAST(100, progress_percentage + 
-         (SELECT 100 / GREATEST(1, (
-           SELECT COUNT(*) FROM challenge_goals WHERE goal_id = g.id
-         )))
-       ),
-       is_completed = CASE 
-         WHEN progress_percentage + (SELECT 100 / GREATEST(1, (
-           SELECT COUNT(*) FROM challenge_goals WHERE goal_id = g.id
-         ))) >= 100 THEN true 
-         ELSE is_completed 
-       END,
-       completion_date = CASE 
-         WHEN progress_percentage + (SELECT 100 / GREATEST(1, (
-           SELECT COUNT(*) FROM challenge_goals WHERE goal_id = g.id
-         ))) >= 100 THEN CURRENT_TIMESTAMP 
-         ELSE completion_date 
-       END,
-       updated_at = CURRENT_TIMESTAMP
-       FROM challenge_goals cg
-       WHERE cg.goal_id = g.id 
-       AND cg.challenge_id = $1 
-       AND g.user_id = $2
-       AND (g.challenges_target IS NULL OR g.challenges_target = 0)`,
+       AND g.user_id = $2`,
       [challengeId, userId]
     );
 

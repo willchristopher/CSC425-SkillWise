@@ -14,12 +14,17 @@ const ChallengesPage = () => {
   const [filteredChallenges, setFilteredChallenges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [goals, setGoals] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [editingChallenge, setEditingChallenge] = useState(null);
   const [selectedChallenge, setSelectedChallenge] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [goalCompletedModal, setGoalCompletedModal] = useState({
+    show: false,
+    goal: null,
+  });
   const [stats, setStats] = useState({
     total: 0,
     completed: 0,
@@ -34,6 +39,19 @@ const ChallengesPage = () => {
     search: '',
     tab: 'all', // 'all', 'my', 'recommended'
   });
+
+  // Fetch user goals
+  const fetchGoals = useCallback(async () => {
+    try {
+      const response = await apiService.goals.getAll();
+      const goalsData = Array.isArray(response.data)
+        ? response.data
+        : response.data?.data || [];
+      setGoals(goalsData);
+    } catch (err) {
+      console.error('Failed to fetch goals:', err);
+    }
+  }, []);
 
   // Fetch user stats
   const fetchUserStats = useCallback(async () => {
@@ -113,7 +131,8 @@ const ChallengesPage = () => {
   useEffect(() => {
     fetchChallenges();
     fetchUserStats();
-  }, [fetchChallenges, fetchUserStats]);
+    fetchGoals();
+  }, [fetchChallenges, fetchUserStats, fetchGoals]);
 
   // Filter challenges when filters or challenges change
   const filterChallenges = useCallback(() => {
@@ -143,8 +162,7 @@ const ChallengesPage = () => {
         (challenge) =>
           challenge.title?.toLowerCase().includes(searchTerm) ||
           challenge.description?.toLowerCase().includes(searchTerm) ||
-          challenge.category?.toLowerCase().includes(searchTerm) ||
-          challenge.tags?.some((tag) => tag.toLowerCase().includes(searchTerm))
+          challenge.category?.toLowerCase().includes(searchTerm)
       );
     }
 
@@ -178,9 +196,7 @@ const ChallengesPage = () => {
       points_reward: 5, // Fixed at 5 points per challenge
       max_attempts: parseInt(generatedChallenge.max_attempts, 10) || 3,
       requires_peer_review: Boolean(generatedChallenge.requires_peer_review),
-      tags: Array.isArray(generatedChallenge.tags)
-        ? generatedChallenge.tags
-        : [],
+      goal_id: null,
       learning_objectives: Array.isArray(generatedChallenge.learning_objectives)
         ? generatedChallenge.learning_objectives
         : [],
@@ -257,9 +273,18 @@ const ChallengesPage = () => {
         }
       );
 
+      // Check if a goal was completed
+      if (result?.data?.goal_updated?.is_completed) {
+        setGoalCompletedModal({
+          show: true,
+          goal: result.data.goal_updated,
+        });
+      }
+
       // Refresh challenges and stats to get updated submission status and points
       await fetchChallenges();
       await fetchUserStats();
+      await fetchGoals(); // Refresh goals to update progress
 
       // Update the selected challenge with the new submission data
       if (selectedChallenge && result?.data) {
@@ -617,21 +642,6 @@ const ChallengesPage = () => {
                           </span>
                         </div>
                       </div>
-
-                      {challenge.tags && challenge.tags.length > 0 && (
-                        <div className="card-tags">
-                          {challenge.tags.slice(0, 3).map((tag, index) => (
-                            <span key={index} className="card-tag">
-                              {tag}
-                            </span>
-                          ))}
-                          {challenge.tags.length > 3 && (
-                            <span className="card-tag more">
-                              +{challenge.tags.length - 3}
-                            </span>
-                          )}
-                        </div>
-                      )}
                     </div>
 
                     <div
@@ -738,6 +748,7 @@ const ChallengesPage = () => {
           onSubmit={handleSubmitChallenge}
           challenge={editingChallenge}
           isLoading={isSubmitting}
+          goals={goals}
         />
 
         {/* Generate Challenge Modal */}
@@ -769,6 +780,32 @@ const ChallengesPage = () => {
               : null
           }
         />
+
+        {/* Goal Completed Celebration Modal */}
+        {goalCompletedModal.show && (
+          <div className="modal-overlay goal-completed-overlay">
+            <div className="goal-completed-modal">
+              <div className="goal-completed-content">
+                <div className="celebration-icon">🎉</div>
+                <h2>Congratulations!</h2>
+                <p className="goal-completed-message">
+                  You completed your goal:
+                </p>
+                <p className="goal-title">{goalCompletedModal.goal?.title}</p>
+                <p className="goal-progress">Progress: 100%</p>
+                <button
+                  className="awesome-button"
+                  onClick={() => {
+                    setGoalCompletedModal({ show: false, goal: null });
+                    fetchGoals(); // Refresh goals after closing
+                  }}
+                >
+                  Awesome! 🎊
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </AppLayout>
   );

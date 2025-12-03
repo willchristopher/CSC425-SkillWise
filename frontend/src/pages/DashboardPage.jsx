@@ -1,10 +1,142 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { apiService } from '../services/api';
 import AppLayout from '../components/layout/AppLayout';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 import '../styles/pages.css';
 import '../styles/animations.css';
+import '../styles/progress-v2.css';
+
+// Motivational quotes
+const motivationalQuotes = [
+  {
+    quote: 'The only way to do great work is to love what you do.',
+    author: 'Steve Jobs',
+  },
+  {
+    quote: "Don't watch the clock; do what it does. Keep going.",
+    author: 'Sam Levenson',
+  },
+  {
+    quote: 'Success is not final, failure is not fatal.',
+    author: 'Winston Churchill',
+  },
+  { quote: 'Learn something new every day.', author: 'Unknown' },
+  { quote: "Your limitation—it's only your imagination.", author: 'Unknown' },
+];
+
+// Icons
+const TrophyIcon = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+    <path d="M4 22h16" />
+    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+  </svg>
+);
+
+const FlameIcon = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+  </svg>
+);
+
+const TargetIcon = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="10" />
+    <circle cx="12" cy="12" r="6" />
+    <circle cx="12" cy="12" r="2" />
+  </svg>
+);
+
+const TrendUpIcon = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+    <polyline points="17 6 23 6 23 12" />
+  </svg>
+);
+
+const CalendarIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+  </svg>
+);
+
+const CheckCircleIcon = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+    <polyline points="22 4 12 14.01 9 11.01" />
+  </svg>
+);
+
+const StarIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+  </svg>
+);
+
+const ZapIcon = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+  </svg>
+);
 
 const DashboardPage = () => {
   const { user } = useAuth();
@@ -13,79 +145,196 @@ const DashboardPage = () => {
     completedChallenges: 0,
     totalPoints: 0,
     progressPercent: 0,
+    currentStreak: 0,
+    longestStreak: 0,
+    level: 1,
+    experiencePoints: 0,
+    peerReviewsGiven: 0,
+    peerReviewsReceived: 0,
   });
   const [recentActivity, setRecentActivity] = useState([]);
+  const [overview, setOverview] = useState(null);
+  const [activityData, setActivityData] = useState([]);
+  const [timeRange, setTimeRange] = useState('weekly');
   const [loading, setLoading] = useState(true);
+  const [quote] = useState(
+    () =>
+      motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]
+  );
+
+  const processActivityData = useCallback((activities, range) => {
+    if (!activities || activities.length === 0) {
+      return [];
+    }
+
+    const now = new Date();
+    let buckets = {};
+    let labels = [];
+
+    if (range === 'daily') {
+      for (let i = 23; i >= 0; i--) {
+        const hour = new Date(now);
+        hour.setHours(hour.getHours() - i);
+        const key =
+          hour.toLocaleTimeString('en-US', { hour: '2-digit', hour12: false }) +
+          ':00';
+        labels.push(key);
+        buckets[key] = { value: 0, activities: 0 };
+      }
+    } else if (range === 'weekly') {
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(now);
+        date.setDate(date.getDate() - i);
+        const key = days[date.getDay()];
+        labels.push(key);
+        if (!buckets[key]) buckets[key] = { value: 0, activities: 0 };
+      }
+    } else if (range === 'monthly') {
+      for (let i = 29; i >= 0; i--) {
+        const date = new Date(now);
+        date.setDate(date.getDate() - i);
+        const key = date.getDate().toString();
+        labels.push(key);
+        buckets[key] = { value: 0, activities: 0 };
+      }
+    } else {
+      const months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ];
+      for (let i = 11; i >= 0; i--) {
+        const date = new Date(now);
+        date.setMonth(date.getMonth() - i);
+        const key = months[date.getMonth()];
+        labels.push(key);
+        if (!buckets[key]) buckets[key] = { value: 0, activities: 0 };
+      }
+    }
+
+    activities.forEach((activity) => {
+      const actDate = new Date(
+        activity.timestamp_occurred || activity.created_at
+      );
+      let bucketKey = '';
+
+      if (range === 'daily') {
+        bucketKey =
+          actDate.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            hour12: false,
+          }) + ':00';
+      } else if (range === 'weekly') {
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        bucketKey = days[actDate.getDay()];
+      } else if (range === 'monthly') {
+        bucketKey = actDate.getDate().toString();
+      } else {
+        const months = [
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec',
+        ];
+        bucketKey = months[actDate.getMonth()];
+      }
+
+      if (buckets[bucketKey]) {
+        buckets[bucketKey].activities += 1;
+        buckets[bucketKey].value += activity.points_earned || 1;
+      }
+    });
+
+    return labels.map((label) => ({
+      label,
+      value: buckets[label]?.value || 0,
+      activities: buckets[label]?.activities || 0,
+    }));
+  }, []);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Fetch goals, challenges, user stats, and activity in parallel
-        const [goalsRes, challengesRes, statsRes, activityRes] =
+        // Fetch all necessary data in parallel
+        const [statsRes, overviewRes, activityRes, goalsRes] =
           await Promise.all([
-            apiService.goals.getAll(),
-            apiService.challenges.getAll(),
-            apiService.progress.getStats().catch(() => null),
-            apiService.progress.getActivity({ limit: 5 }).catch(() => null),
+            apiService.user.getStatistics().catch(() => ({ data: {} })),
+            apiService.progress.getOverview().catch(() => ({ data: null })),
+            apiService.progress
+              .getActivity({ limit: 500 })
+              .catch(() => ({ data: { activities: [] } })),
+            apiService.goals.getAll().catch(() => ({ data: [] })),
           ]);
 
-        const goals = goalsRes.data?.data || goalsRes.data || [];
-        const challenges = challengesRes.data?.data || challengesRes.data || [];
-        const userStats = statsRes?.data?.data || {};
-        const activity = activityRes?.data?.data || activityRes?.data || [];
+        // Extract stats data
+        const statsData = statsRes.data?.data || statsRes.data || {};
 
-        const activeGoals = goals.filter((g) => !g.is_completed).length;
-        const completedChallenges = challenges.filter(
-          (c) => c.is_completed
-        ).length;
+        // Calculate active goals from goals list
+        const goalsData = goalsRes.data?.data || goalsRes.data || [];
+        const activeGoalsCount = Array.isArray(goalsData)
+          ? goalsData.filter((g) => !g.is_completed).length
+          : 0;
 
-        setStats({
-          activeGoals,
+        const newStats = {
+          activeGoals: activeGoalsCount,
           completedChallenges:
-            userStats.challengesCompleted || completedChallenges,
-          totalPoints: userStats.totalPoints || completedChallenges * 10,
-          progressPercent:
-            goals.length > 0
-              ? Math.round(
-                  (goals.filter((g) => g.is_completed).length / goals.length) *
-                    100
-                )
-              : 0,
-        });
+            statsData.challengesCompleted ||
+            statsData.total_challenges_completed ||
+            0,
+          totalPoints: statsData.totalPoints || statsData.total_points || 0,
+          progressPercent: statsData.progressPercent || 0,
+          currentStreak:
+            statsData.currentStreak || statsData.current_streak_days || 0,
+          longestStreak:
+            statsData.longestStreak || statsData.longest_streak_days || 0,
+          level: statsData.level || 1,
+          experiencePoints:
+            statsData.experiencePoints || statsData.experience_points || 0,
+          peerReviewsGiven:
+            statsData.peerReviewsGiven ||
+            statsData.total_peer_reviews_given ||
+            0,
+          peerReviewsReceived:
+            statsData.peerReviewsReceived ||
+            statsData.total_peer_reviews_received ||
+            0,
+        };
+        setStats(newStats);
 
-        // Format recent activity from various sources
+        // Set overview data
+        const overviewData = overviewRes.data?.data || overviewRes.data || null;
+        setOverview(overviewData);
+
+        // Process activity data
+        const activities =
+          activityRes.data?.data?.activities ||
+          activityRes.data?.activities ||
+          [];
+        const processed = processActivityData(activities, timeRange);
+        setActivityData(processed);
+
+        // Format recent activity for activity list (limit to 5)
         const formattedActivity = [];
-
-        // Add goals as activity
-        goals.slice(0, 3).forEach((goal) => {
-          formattedActivity.push({
-            id: `goal-${goal.id}`,
-            type: 'goal',
-            title: goal.is_completed ? 'Goal Completed' : 'Goal Created',
-            description: goal.title,
-            timestamp: goal.updated_at || goal.created_at,
-            icon: 'target',
-          });
-        });
-
-        // Add challenge completions
-        challenges
-          .filter((c) => c.is_completed)
-          .slice(0, 2)
-          .forEach((challenge) => {
-            formattedActivity.push({
-              id: `challenge-${challenge.id}`,
-              type: 'challenge',
-              title: 'Challenge Completed',
-              description: challenge.title,
-              timestamp: challenge.completed_at || challenge.updated_at,
-              icon: 'zap',
-            });
-          });
-
-        // Add activity from API if available
-        if (Array.isArray(activity)) {
-          activity.forEach((item) => {
+        if (Array.isArray(activities)) {
+          activities.slice(0, 5).forEach((item) => {
             formattedActivity.push({
               id: `event-${item.id}`,
               type: item.event_type || 'event',
@@ -114,7 +363,7 @@ const DashboardPage = () => {
     };
 
     fetchStats();
-  }, []);
+  }, [processActivityData, timeRange]);
 
   const formatEventType = (type) => {
     const types = {
@@ -434,6 +683,29 @@ const DashboardPage = () => {
     return icons[iconName] || icons.activity;
   };
 
+  const calculateXpToNextLevel = (points) => {
+    const currentLevel = Math.max(1, stats.level || 1);
+    const pointsForCurrentLevel = Math.max(0, (currentLevel - 1) * 100);
+    const pointsForNextLevel = Math.max(100, currentLevel * 100);
+    const levelProgress = Math.max(0, (points || 0) - pointsForCurrentLevel);
+    const needed = Math.max(1, pointsForNextLevel - pointsForCurrentLevel);
+    return {
+      current: levelProgress,
+      needed: needed,
+      percentage: Math.min(100, (levelProgress / needed) * 100),
+    };
+  };
+
+  const xpProgress = calculateXpToNextLevel(stats.experiencePoints || 0);
+  const totalChallenges = Math.max(
+    1,
+    overview?.challenges?.total_attempted || stats.completedChallenges || 0
+  );
+  const totalGoals = Math.max(
+    1,
+    overview?.goals?.total || stats.activeGoals || 0
+  );
+
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good morning';
@@ -443,176 +715,341 @@ const DashboardPage = () => {
 
   return (
     <AppLayout>
-      {/* Welcome Section */}
-      <div className="dashboard-welcome animate-fade-in-up">
-        <h1 className="dashboard-greeting">
-          {getGreeting()}, {getUserName()}!
-        </h1>
-        <p className="dashboard-subtitle">
-          Continue your learning journey and track your progress.
-        </p>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="dashboard-stats-grid animate-stagger-container">
-        {statCards.map((stat, index) => (
-          <Link
-            key={index}
-            to={stat.link}
-            className={`dashboard-stat-card hover-lift animate-fade-in-up`}
-            style={{ animationDelay: `${index * 0.1}s` }}
-          >
-            <div className={`dashboard-stat-icon ${stat.iconClass}`}>
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                {stat.icon}
-              </svg>
+      <div className="progress-page-v2">
+        {/* Motivational Banner */}
+        <div className="motivation-banner">
+          <div className="motivation-content">
+            <div className="greeting">
+              <h1>
+                {getGreeting()}, {getUserName()}! 🚀
+              </h1>
+              <p className="quote">"{quote.quote}"</p>
+              <p className="author">— {quote.author}</p>
             </div>
-            <div className="dashboard-stat-value">
-              {loading ? (
-                <span
-                  className="skeleton"
-                  style={{
-                    width: '40px',
-                    height: '28px',
-                    display: 'inline-block',
-                  }}
-                ></span>
-              ) : (
-                stat.value
-              )}
-            </div>
-            <div className="dashboard-stat-label">{stat.label}</div>
-          </Link>
-        ))}
-      </div>
-
-      {/* Quick Actions */}
-      <div
-        className="dashboard-activity-section animate-fade-in-up"
-        style={{ animationDelay: '0.4s' }}
-      >
-        <h2 className="dashboard-section-title">Quick Actions</h2>
-        <div className="dashboard-actions-grid animate-stagger-container">
-          {quickActions.map((action, index) => (
-            <Link
-              key={index}
-              to={action.link}
-              className="dashboard-action-card hover-lift"
-            >
-              <div
-                className={`dashboard-action-icon icon-animated ${action.iconClass}`}
-              >
-                {action.icon}
+            <div className="streak-highlight">
+              <div className="streak-icon">
+                <FlameIcon />
               </div>
-              <h3 className="dashboard-action-title">{action.title}</h3>
-              <p className="dashboard-action-description">
-                {action.description}
-              </p>
-            </Link>
-          ))}
+              <div className="streak-info">
+                <span className="streak-count">{stats.currentStreak}</span>
+                <span className="streak-label">Day Streak</span>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Recent Activity */}
-      <div className="animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
-        <h2 className="dashboard-section-title">Recent Activity</h2>
-        {loading ? (
-          <div className="dashboard-activity-list">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="dashboard-activity-item">
+        {/* Level & XP Progress */}
+        <div className="level-section">
+          <div className="level-card">
+            <div className="level-badge">
+              <StarIcon />
+              <span className="level-number">Level {stats.level}</span>
+            </div>
+            <div className="xp-progress">
+              <div className="xp-bar">
                 <div
-                  className="skeleton"
-                  style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '10px',
-                  }}
+                  className="xp-fill"
+                  style={{ width: `${xpProgress.percentage}%` }}
                 ></div>
-                <div style={{ flex: 1 }}>
+              </div>
+              <div className="xp-text">
+                <span>
+                  {xpProgress.current} / {xpProgress.needed} XP to next level
+                </span>
+                <span className="total-points">
+                  {stats.totalPoints} total points
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Grid with Insights */}
+        <div className="stats-grid">
+          <div className="stat-card challenges">
+            <div className="stat-icon">
+              <TargetIcon />
+            </div>
+            <div className="stat-content">
+              <span className="stat-value">
+                {Math.max(0, stats.completedChallenges || 0)}
+              </span>
+              <span className="stat-label">Challenges Completed</span>
+              <span className="stat-sub">
+                {totalChallenges > 0
+                  ? Math.round(
+                      (Math.max(0, stats.completedChallenges || 0) /
+                        totalChallenges) *
+                        100
+                    )
+                  : 0}
+                % completion rate
+              </span>
+            </div>
+          </div>
+
+          <div className="stat-card goals">
+            <div className="stat-icon">
+              <CheckCircleIcon />
+            </div>
+            <div className="stat-content">
+              <span className="stat-value">
+                {Math.max(0, stats.activeGoals || 0)}
+              </span>
+              <span className="stat-label">Active Goals</span>
+              <span className="stat-sub">
+                Longest streak: {Math.max(0, stats.longestStreak || 0)} days
+              </span>
+            </div>
+          </div>
+
+          <div className="stat-card points">
+            <div className="stat-icon">
+              <TrophyIcon />
+            </div>
+            <div className="stat-content">
+              <span className="stat-value">
+                {Math.max(0, stats.totalPoints || 0)}
+              </span>
+              <span className="stat-label">Total Points</span>
+              <span className="stat-sub">
+                Avg:{' '}
+                {Math.max(0, stats.completedChallenges || 0) > 0
+                  ? Math.round(
+                      Math.max(0, stats.totalPoints || 0) /
+                        Math.max(1, stats.completedChallenges || 0)
+                    )
+                  : 0}
+                pts per challenge
+              </span>
+            </div>
+          </div>
+
+          <div className="stat-card streak">
+            <div className="stat-icon">
+              <FlameIcon />
+            </div>
+            <div className="stat-content">
+              <span className="stat-value">
+                {Math.max(0, stats.currentStreak || 0)}
+              </span>
+              <span className="stat-label">Current Streak</span>
+              <span className="stat-sub">
+                Record: {Math.max(0, stats.longestStreak || 0)} days
+              </span>
+            </div>
+          </div>
+
+          <div className="stat-card reviews">
+            <div className="stat-icon">
+              <ZapIcon />
+            </div>
+            <div className="stat-content">
+              <span className="stat-value">
+                {Math.max(
+                  0,
+                  (stats.peerReviewsGiven || 0) +
+                    (stats.peerReviewsReceived || 0)
+                )}
+              </span>
+              <span className="stat-label">Community Engagements</span>
+              <span className="stat-sub">
+                {Math.max(0, stats.peerReviewsGiven || 0)} given,{' '}
+                {Math.max(0, stats.peerReviewsReceived || 0)} received
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Activity Chart */}
+        <div className="activity-section">
+          <div className="section-header">
+            <div className="section-title">
+              <CalendarIcon />
+              <h2>Activity Overview</h2>
+            </div>
+            <div className="time-range-selector">
+              {['daily', 'weekly', 'monthly', 'yearly'].map((range) => (
+                <button
+                  key={range}
+                  className={`range-btn ${timeRange === range ? 'active' : ''}`}
+                  onClick={() => setTimeRange(range)}
+                >
+                  {range.charAt(0).toUpperCase() + range.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="activity-chart">
+            <div className="chart-bars">
+              {activityData.map((data, idx) => (
+                <div key={idx} className="chart-bar-container">
+                  <div
+                    className="chart-bar"
+                    style={{
+                      height: `${Math.max(
+                        (data.value /
+                          Math.max(...activityData.map((d) => d.value), 1)) *
+                          100,
+                        5
+                      )}%`,
+                    }}
+                  >
+                    <span className="bar-value">{data.value}</span>
+                  </div>
+                  <span className="bar-label">{data.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="activity-summary">
+            <div className="summary-item">
+              <span className="summary-value">
+                {activityData.reduce((sum, d) => sum + d.value, 0)}
+              </span>
+              <span className="summary-label">Total Points</span>
+            </div>
+            <div className="summary-item">
+              <span className="summary-value">
+                {activityData.reduce((sum, d) => sum + d.activities, 0)}
+              </span>
+              <span className="summary-label">Activities</span>
+            </div>
+            <div className="summary-item">
+              <span className="summary-value">
+                {activityData.length > 0
+                  ? Math.round(
+                      activityData.reduce((sum, d) => sum + d.value, 0) /
+                        activityData.length
+                    )
+                  : 0}
+              </span>
+              <span className="summary-label">Average</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div
+          className="dashboard-activity-section animate-fade-in-up"
+          style={{ animationDelay: '0.4s' }}
+        >
+          <h2 className="dashboard-section-title">Quick Actions</h2>
+          <div className="dashboard-actions-grid animate-stagger-container">
+            {quickActions.map((action, index) => (
+              <Link
+                key={index}
+                to={action.link}
+                className="dashboard-action-card hover-lift"
+              >
+                <div
+                  className={`dashboard-action-icon icon-animated ${action.iconClass}`}
+                >
+                  {action.icon}
+                </div>
+                <h3 className="dashboard-action-title">{action.title}</h3>
+                <p className="dashboard-action-description">
+                  {action.description}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+          <h2 className="dashboard-section-title">Recent Activity</h2>
+          {loading ? (
+            <div className="dashboard-activity-list">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="dashboard-activity-item">
                   <div
                     className="skeleton"
                     style={{
-                      width: '60%',
-                      height: '16px',
-                      marginBottom: '8px',
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '10px',
                     }}
                   ></div>
-                  <div
-                    className="skeleton"
-                    style={{ width: '40%', height: '14px' }}
-                  ></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : recentActivity.length > 0 ? (
-          <div className="dashboard-activity-list">
-            {recentActivity.map((activity, index) => (
-              <div
-                key={activity.id}
-                className="dashboard-activity-item animate-fade-in-left"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div
-                  className={`dashboard-activity-item-icon ${
-                    activity.type === 'challenge'
-                      ? 'icon-bg-purple'
-                      : activity.type === 'goal'
-                      ? 'icon-bg-blue'
-                      : 'icon-bg-green'
-                  }`}
-                >
-                  {getActivityIcon(activity.icon)}
-                </div>
-                <div className="dashboard-activity-item-content">
-                  <div className="dashboard-activity-item-title">
-                    {activity.title}
-                  </div>
-                  <div className="dashboard-activity-item-description">
-                    {activity.description}
+                  <div style={{ flex: 1 }}>
+                    <div
+                      className="skeleton"
+                      style={{
+                        width: '60%',
+                        height: '16px',
+                        marginBottom: '8px',
+                      }}
+                    ></div>
+                    <div
+                      className="skeleton"
+                      style={{ width: '40%', height: '14px' }}
+                    ></div>
                   </div>
                 </div>
-                <div className="dashboard-activity-item-time">
-                  {formatTimeAgo(activity.timestamp)}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="dashboard-activity-empty">
-            <div className="dashboard-activity-icon">
-              <svg
-                width="28"
-                height="28"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10 9 9 9 8 9"></polyline>
-              </svg>
+              ))}
             </div>
-            <h3 className="dashboard-activity-title">No recent activity</h3>
-            <p className="dashboard-activity-text">
-              Complete challenges and set goals to see your activity here.
-            </p>
-          </div>
-        )}
+          ) : recentActivity.length > 0 ? (
+            <div className="dashboard-activity-list">
+              {recentActivity.map((activity, index) => (
+                <div
+                  key={activity.id}
+                  className="dashboard-activity-item animate-fade-in-left"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <div
+                    className={`dashboard-activity-item-icon ${
+                      activity.type === 'challenge'
+                        ? 'icon-bg-purple'
+                        : activity.type === 'goal'
+                        ? 'icon-bg-blue'
+                        : 'icon-bg-green'
+                    }`}
+                  >
+                    {getActivityIcon(activity.icon)}
+                  </div>
+                  <div className="dashboard-activity-item-content">
+                    <div className="dashboard-activity-item-title">
+                      {activity.title}
+                    </div>
+                    <div className="dashboard-activity-item-description">
+                      {activity.description}
+                    </div>
+                  </div>
+                  <div className="dashboard-activity-item-time">
+                    {formatTimeAgo(activity.timestamp)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="dashboard-activity-empty">
+              <div className="dashboard-activity-icon">
+                <svg
+                  width="28"
+                  height="28"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+              </div>
+              <h3 className="dashboard-activity-title">No recent activity</h3>
+              <p className="dashboard-activity-text">
+                Complete challenges and set goals to see your activity here.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </AppLayout>
   );

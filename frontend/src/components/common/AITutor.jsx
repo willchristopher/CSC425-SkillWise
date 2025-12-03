@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { apiService } from '../../services/api';
-import '../../styles/ai-tutor.css';
+import '../../styles/ai-tutor-v2.css';
 
 const AITutor = ({ challengeId, challengeTitle, challengeDescription }) => {
   const [content, setContent] = useState('');

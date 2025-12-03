@@ -243,11 +243,10 @@ const peerReviewController = {
     try {
       const userId = req.user.id;
       console.log('[getMySubmissions] Fetching for user:', userId);
-      const submissionService = require('../services/submissionService');
 
-      const submissions = await submissionService.getUserSubmissions(
-        userId,
-        {}
+      // Only get submissions from challenges that require peer review
+      const submissions = await peerReviewService.getUserSubmissionsForReview(
+        userId
       );
       console.log(
         '[getMySubmissions] Found submissions:',
