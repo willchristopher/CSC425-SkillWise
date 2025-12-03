@@ -1,4 +1,4 @@
-# Development Dockerfile for Frontend  
+# Development Dockerfile for Frontend (Vite)
 FROM node:18-alpine
 
 # Set working directory
@@ -13,8 +13,8 @@ RUN npm install
 # Copy source code
 COPY . .
 
-# Expose port
+# Expose Vite dev server port
 EXPOSE 3000
 
-# Start development server
-CMD ["npm", "start"]
+# Start Vite development server
+CMD ["npm", "run", "dev"]

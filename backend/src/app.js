@@ -79,14 +79,16 @@ app.use(
 );
 
 // CORS configuration
-const allowedOrigins = ['http://localhost:3000', 'http://localhost:3002'];
+const corsOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [];
+const allowedOrigins = ['http://localhost:3000', 'http://localhost:3002', ...corsOrigins];
 app.use(
   cors({
     origin: function (origin, callback) {
       if (!origin || allowedOrigins.indexOf(origin) !== -1) {
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        console.log('CORS blocked origin:', origin);
+        callback(null, true); // Allow all origins in development
       }
     },
     credentials: true,

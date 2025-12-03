@@ -24,10 +24,8 @@ const userController = {
         lastName: profile.last_name,
         name: `${profile.first_name} ${profile.last_name}`,
         email: profile.email,
-        avatarUrl: profile.profile_image,
+        profileIcon: profile.profile_image,
         bio: profile.bio,
-        location: profile.location,
-        website: profile.website,
         createdAt: profile.created_at,
         updatedAt: profile.updated_at,
         stats: {
@@ -59,12 +57,13 @@ const userController = {
   updateProfile: async (req, res, next) => {
     try {
       const userId = req.user.id;
-      const { firstName, lastName, avatarUrl } = req.body;
+      const { firstName, lastName, bio, profileIcon } = req.body;
 
       const updated = await userService.updateProfile(userId, {
         first_name: firstName,
         last_name: lastName,
-        avatar_url: avatarUrl,
+        bio: bio,
+        profile_icon: profileIcon,
       });
 
       res.json({
@@ -75,7 +74,8 @@ const userController = {
           lastName: updated.last_name,
           name: `${updated.first_name} ${updated.last_name}`,
           email: updated.email,
-          avatarUrl: updated.avatar_url,
+          bio: updated.bio,
+          profileIcon: updated.profile_image,
           updatedAt: updated.updated_at,
         },
         message: 'Profile updated successfully',

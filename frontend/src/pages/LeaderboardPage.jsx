@@ -3,89 +3,77 @@ import AppLayout from '../components/layout/AppLayout';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { useAuth } from '../hooks/useAuth';
 import { apiService } from '../services/api';
-import '../styles/pages.css';
+import { ProfileIcons, PROFILE_ICON_OPTIONS } from './ProfilePage';
+import '../styles/leaderboard.css';
 
 // SVG Icons
-const TrophyIcon = () => (
+const TrophyIcon = ({ size = 24 }) => (
   <svg
-    width="20"
-    height="20"
+    width={size}
+    height={size}
     viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
+    fill="currentColor"
   >
-    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-    <path d="M4 22h16" />
-    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
-    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
-    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+    <path d="M12 2C13.1 2 14 2.9 14 4V5H17C18.1 5 19 5.9 19 7V8C19 10.21 17.21 12 15 12C14.39 12 13.81 11.85 13.3 11.59C12.85 12.7 11.96 13.56 10.85 13.85L11 20H13V22H7V20H9L9.15 13.85C7.8 13.5 6.71 12.4 6.35 11H6C3.79 11 2 9.21 2 7V6C2 4.9 2.9 4 4 4H6V3C6 2.45 6.45 2 7 2H12ZM4 6V7C4 8.1 4.9 9 6 9H6.09C6.03 8.67 6 8.34 6 8V6H4ZM18 7V6H16V8C16 8.34 15.97 8.67 15.91 9H16C17.1 9 18 8.1 18 7Z"/>
   </svg>
 );
 
-const UserIcon = () => (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-  >
-    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-    <circle cx="12" cy="7" r="4" />
+const CrownIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5ZM19 19C19 19.55 18.55 20 18 20H6C5.45 20 5 19.55 5 19V18H19V19Z"/>
+  </svg>
+);
+
+const MedalIcon = ({ place }) => {
+  const colors = {
+    1: { primary: '#FFD700', secondary: '#FFA000', accent: '#FFEB3B' },
+    2: { primary: '#C0C0C0', secondary: '#9E9E9E', accent: '#E0E0E0' },
+    3: { primary: '#CD7F32', secondary: '#A0522D', accent: '#DEB887' }
+  };
+  const c = colors[place] || colors[3];
+  
+  return (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="14" r="7" fill={c.primary} stroke={c.secondary} strokeWidth="1.5"/>
+      <circle cx="12" cy="14" r="4" fill={c.accent} opacity="0.5"/>
+      <path d="M8 2L12 8L16 2" stroke={c.secondary} strokeWidth="2" fill={c.primary}/>
+      <text x="12" y="17" textAnchor="middle" fill={c.secondary} fontSize="8" fontWeight="bold">{place}</text>
+    </svg>
+  );
+};
+
+const FireIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
   </svg>
 );
 
 const RocketIcon = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-  >
-    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
-    <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
-    <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
-    <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
-  </svg>
-);
-
-const FlameIcon = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-  >
-    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+    <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+    <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
+    <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
   </svg>
 );
 
 const TargetIcon = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-  >
-    <circle cx="12" cy="12" r="10" />
-    <circle cx="12" cy="12" r="6" />
-    <circle cx="12" cy="12" r="2" />
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="12" cy="12" r="10"/>
+    <circle cx="12" cy="12" r="6"/>
+    <circle cx="12" cy="12" r="2"/>
+  </svg>
+);
+
+const StarIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
   </svg>
 );
 
 const LeaderboardPage = () => {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [userRanking, setUserRanking] = useState(null);
-  const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [timeframe, setTimeframe] = useState('all-time');
@@ -142,8 +130,8 @@ const LeaderboardPage = () => {
             initials: getInitials(
               entry.name || `${entry.first_name || ''} ${entry.last_name || ''}`
             ),
+            profileIcon: entry.profile_image || entry.profileIcon || 'astronaut',
             points: parseInt(entry.total_points) || parseInt(entry.points) || 0,
-            level: parseInt(entry.level) || 1,
             completedChallenges:
               parseInt(entry.total_challenges_completed) ||
               parseInt(entry.challenges_completed) ||
@@ -179,57 +167,60 @@ const LeaderboardPage = () => {
     return (name[0] || '?').toUpperCase();
   };
 
-  const getRankDisplay = (rank) => {
-    switch (rank) {
-      case 1:
-        return <span className="rank-gold">1st</span>;
-      case 2:
-        return <span className="rank-silver">2nd</span>;
-      case 3:
-        return <span className="rank-bronze">3rd</span>;
-      default:
-        return `#${rank}`;
-    }
+  // Get the icon component for a given icon ID
+  const getProfileIcon = (iconId) => {
+    const IconComponent = ProfileIcons[iconId];
+    return IconComponent ? <IconComponent /> : null;
   };
 
-  // Extract user's rank from ranking response or from leaderboard data
+  // Get icon color for a given icon ID
+  const getIconColor = (iconId) => {
+    const option = PROFILE_ICON_OPTIONS.find(opt => opt.id === iconId);
+    return option?.color || '#6366f1';
+  };
+
+  // Top 3 for podium (arranged as 2nd, 1st, 3rd)
+  const topThree = leaderboardData.slice(0, 3);
+  const podiumOrder = topThree.length >= 3 
+    ? [topThree[1], topThree[0], topThree[2]] 
+    : topThree;
+
+  // Rest of leaderboard (4th onwards)
+  const restOfLeaderboard = leaderboardData.slice(3);
+
+  // Extract user's rank
   const currentUserRank =
     userRanking?.rank_position ||
     userRanking?.rank ||
     leaderboardData.find((u) => u.isCurrentUser)?.rank ||
     0;
 
+  const currentUserData = leaderboardData.find((u) => u.isCurrentUser);
+
   // Function to retry loading
   const handleRetry = () => {
     setError(null);
     setLoading(true);
-    setTimeframe('all-time'); // Trigger re-fetch via useEffect
+    setTimeframe('all-time');
   };
 
   return (
-    <AppLayout
-      title="Leaderboard"
-      subtitle="See how you compare with other learners"
-    >
+    <AppLayout title="Leaderboard" subtitle="See how you compare with other learners">
       {loading ? (
         <LoadingSpinner message="Loading leaderboard..." />
       ) : error ? (
-        <div className="error-message">
+        <div className="lb-error">
           <p>{error}</p>
-          <button onClick={handleRetry} className="btn btn-primary">
-            Retry
-          </button>
+          <button onClick={handleRetry} className="btn btn-primary">Retry</button>
         </div>
       ) : (
-        <>
-          <div className="leaderboard-filters">
-            <div className="filter-group">
-              <label className="filter-label" htmlFor="timeframe">
-                Timeframe
-              </label>
+        <div className="lb-container">
+          {/* Filters Section */}
+          <div className="lb-filters">
+            <div className="lb-filter-group">
+              <label htmlFor="timeframe">Timeframe</label>
               <select
                 id="timeframe"
-                className="filter-select"
                 value={timeframe}
                 onChange={(e) => setTimeframe(e.target.value)}
               >
@@ -239,145 +230,188 @@ const LeaderboardPage = () => {
                 <option value="today">Today</option>
               </select>
             </div>
-
-            <div className="filter-group">
-              <label className="filter-label" htmlFor="category">
-                Category
-              </label>
+            <div className="lb-filter-group">
+              <label htmlFor="category">Category</label>
               <select
                 id="category"
-                className="filter-select"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
               >
                 <option value="overall">Overall Points</option>
-                <option value="challenges">Challenges Completed</option>
-                <option value="goals">Goals Achieved</option>
-                <option value="streak">Learning Streak</option>
+                <option value="challenges">Challenges</option>
+                <option value="goals">Goals</option>
+                <option value="streak">Streak</option>
               </select>
             </div>
           </div>
 
-          {currentUserRank > 0 && (
-            <div className="rank-summary">
-              <h3>Your Ranking</h3>
-              <div className="rank-info">
-                <span className="rank-number">#{currentUserRank}</span>
-                <div>
-                  <p>
-                    You're in the top{' '}
-                    {Math.round(
-                      (currentUserRank / leaderboardData.length) * 100
-                    )}
-                    % of learners!
-                  </p>
-                  <small>Keep learning to climb higher!</small>
+          {/* Your Rank Card */}
+          {currentUserRank > 0 && currentUserData && (
+            <div className="lb-your-rank">
+              <div className="lb-your-rank-left">
+                <div 
+                  className="lb-your-rank-avatar"
+                  style={{ 
+                    '--icon-color': getIconColor(currentUserData.profileIcon),
+                    backgroundColor: `${getIconColor(currentUserData.profileIcon)}20`
+                  }}
+                >
+                  {getProfileIcon(currentUserData.profileIcon)}
+                </div>
+                <div className="lb-your-rank-info">
+                  <span className="lb-your-rank-label">Your Ranking</span>
+                  <span className="lb-your-rank-name">{currentUserData.name}</span>
+                </div>
+              </div>
+              <div className="lb-your-rank-right">
+                <div className="lb-your-rank-position">#{currentUserRank}</div>
+                <div className="lb-your-rank-stats">
+                  <span>{currentUserData.points.toLocaleString()} pts</span>
+                  <span className="lb-your-rank-divider">•</span>
+                  <span>Top {Math.max(1, Math.round((currentUserRank / leaderboardData.length) * 100))}%</span>
                 </div>
               </div>
             </div>
           )}
 
-          <div className="podium-section">
-            <h2 className="profile-section-title">Top Performers</h2>
-            <div className="podium">
-              {leaderboardData.slice(0, 3).map((u) => (
-                <div key={u.id} className="podium-position">
-                  <div className="avatar">{u.initials}</div>
-                  <h4 className="podium-name">{u.name}</h4>
-                  <p className="podium-points">{u.points} points</p>
-                  <span className="level-badge">Level {u.level}</span>
-                  <div style={{ marginTop: '0.75rem' }}>
-                    {getRankDisplay(u.rank)}
+          {/* Podium Section */}
+          <div className="lb-podium-section">
+            <div className="lb-section-header">
+              <TrophyIcon size={24} />
+              <h2>Top Performers</h2>
+            </div>
+            
+            <div className="lb-podium">
+              {podiumOrder.map((u, idx) => {
+                const actualRank = u.rank;
+                const podiumHeight = actualRank === 1 ? 'first' : actualRank === 2 ? 'second' : 'third';
+                
+                return (
+                  <div 
+                    key={u.id} 
+                    className={`lb-podium-card lb-podium-${podiumHeight}`}
+                  >
+                    {actualRank === 1 && (
+                      <div className="lb-crown">
+                        <CrownIcon size={28} />
+                      </div>
+                    )}
+                    <div className="lb-podium-medal">
+                      <MedalIcon place={actualRank} />
+                    </div>
+                    <div 
+                      className="lb-podium-avatar"
+                      style={{ 
+                        '--icon-color': getIconColor(u.profileIcon),
+                        backgroundColor: `${getIconColor(u.profileIcon)}15`,
+                        borderColor: getIconColor(u.profileIcon)
+                      }}
+                    >
+                      {getProfileIcon(u.profileIcon)}
+                    </div>
+                    <h3 className="lb-podium-name">{u.name}</h3>
+                    <div className="lb-podium-points">
+                      <StarIcon />
+                      <span>{u.points.toLocaleString()}</span>
+                    </div>
+                    <div className="lb-podium-challenges">
+                      {u.completedChallenges} challenges
+                    </div>
+                    <div className={`lb-podium-base lb-base-${podiumHeight}`}>
+                      <span className="lb-base-rank">{actualRank}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
-          <div>
-            <h2 className="profile-section-title">Complete Rankings</h2>
-            <div className="leaderboard-table">
-              <div className="table-header">
-                <div>Rank</div>
-                <div>User</div>
-                <div>Points</div>
-                <div>Level</div>
-                <div>Challenges</div>
+          {/* Rankings Table */}
+          {restOfLeaderboard.length > 0 && (
+            <div className="lb-rankings-section">
+              <div className="lb-section-header">
+                <h2>Complete Rankings</h2>
               </div>
-
-              {leaderboardData.map((u) => (
-                <div
-                  key={u.id}
-                  className={`table-row ${
-                    u.isCurrentUser ? 'current-user' : ''
-                  }`}
-                >
-                  <div>{getRankDisplay(u.rank)}</div>
-                  <div className="user-info">
-                    <span className="avatar avatar-sm">{u.initials}</span>
-                    <span>
-                      {u.name}
-                      {u.isCurrentUser && <small> (You)</small>}
-                    </span>
+              
+              <div className="lb-rankings-grid">
+                {restOfLeaderboard.map((u) => (
+                  <div 
+                    key={u.id} 
+                    className={`lb-rank-card ${u.isCurrentUser ? 'lb-rank-you' : ''}`}
+                  >
+                    <div className="lb-rank-position">
+                      <span className="lb-rank-number">#{u.rank}</span>
+                    </div>
+                    <div 
+                      className="lb-rank-avatar"
+                      style={{ 
+                        '--icon-color': getIconColor(u.profileIcon),
+                        backgroundColor: `${getIconColor(u.profileIcon)}15`
+                      }}
+                    >
+                      {getProfileIcon(u.profileIcon)}
+                    </div>
+                    <div className="lb-rank-info">
+                      <span className="lb-rank-name">
+                        {u.name}
+                        {u.isCurrentUser && <span className="lb-you-badge">You</span>}
+                      </span>
+                      <span className="lb-rank-meta">
+                        {u.completedChallenges} challenges completed
+                      </span>
+                    </div>
+                    <div className="lb-rank-points">
+                      <span className="lb-points-value">{u.points.toLocaleString()}</span>
+                      <span className="lb-points-label">points</span>
+                    </div>
                   </div>
-                  <div>
-                    <strong>{u.points.toLocaleString()}</strong>
-                  </div>
-                  <div>
-                    <span className="level-badge">Level {u.level}</span>
-                  </div>
-                  <div>{u.completedChallenges}</div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          <div>
-            <h2 className="profile-section-title">
-              Top Achievements This Week
-            </h2>
-            <div className="achievements-grid">
-              <div className="achievement-card">
-                <div className="achievement-icon">
+          {/* Weekly Achievements */}
+          <div className="lb-achievements-section">
+            <div className="lb-section-header">
+              <h2>Weekly Achievements</h2>
+            </div>
+            
+            <div className="lb-achievements-grid">
+              <div className="lb-achievement-card">
+                <div className="lb-achievement-icon lb-achievement-rocket">
                   <RocketIcon />
                 </div>
-                <h4 className="achievement-title">Challenge Master</h4>
-                <p className="achievement-description">
-                  Completed 5 challenges in one day
-                </p>
-                <small className="achievement-earned">
-                  Earned by Alex Johnson
-                </small>
-              </div>
-
-              <div className="achievement-card">
-                <div className="achievement-icon">
-                  <FlameIcon />
+                <div className="lb-achievement-content">
+                  <h4>Challenge Master</h4>
+                  <p>Completed 5 challenges in one day</p>
+                  <span className="lb-achievement-earner">Alex Johnson</span>
                 </div>
-                <h4 className="achievement-title">Streak Legend</h4>
-                <p className="achievement-description">
-                  30-day learning streak
-                </p>
-                <small className="achievement-earned">
-                  Earned by Sarah Kim
-                </small>
               </div>
-
-              <div className="achievement-card">
-                <div className="achievement-icon">
+              
+              <div className="lb-achievement-card">
+                <div className="lb-achievement-icon lb-achievement-fire">
+                  <FireIcon />
+                </div>
+                <div className="lb-achievement-content">
+                  <h4>Streak Legend</h4>
+                  <p>30-day learning streak</p>
+                  <span className="lb-achievement-earner">Sarah Kim</span>
+                </div>
+              </div>
+              
+              <div className="lb-achievement-card">
+                <div className="lb-achievement-icon lb-achievement-target">
                   <TargetIcon />
                 </div>
-                <h4 className="achievement-title">Goal Crusher</h4>
-                <p className="achievement-description">
-                  Completed 3 learning goals
-                </p>
-                <small className="achievement-earned">
-                  Earned by Mike Chen
-                </small>
+                <div className="lb-achievement-content">
+                  <h4>Goal Crusher</h4>
+                  <p>Completed 3 learning goals</p>
+                  <span className="lb-achievement-earner">Mike Chen</span>
+                </div>
               </div>
             </div>
           </div>
-        </>
+        </div>
       )}
     </AppLayout>
   );

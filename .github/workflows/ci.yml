@@ -161,7 +161,7 @@ jobs:
           PORT: 3001
           JWT_SECRET: test_jwt_secret_key_for_ci
           JWT_REFRESH_SECRET: test_jwt_refresh_secret_key_for_ci
-          CORS_ORIGIN: http://localhost:3002
+          CORS_ORIGIN: http://localhost:3000
         run: |
           npm start &
           echo $! > backend.pid
@@ -178,13 +178,13 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           working-directory: ./frontend
-          start: npm start
-          wait-on: 'http://localhost:3002'
+          start: npm run dev
+          wait-on: 'http://localhost:3000'
           wait-on-timeout: 120
           browser: chrome
           config-file: cypress.config.js
         env:
-          REACT_APP_API_URL: http://localhost:3001/api
+          VITE_API_URL: http://localhost:3001/api
 
       - name: Upload Cypress screenshots
         uses: actions/upload-artifact@v3

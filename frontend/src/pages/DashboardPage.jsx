@@ -117,12 +117,6 @@ const CheckCircleIcon = () => (
   </svg>
 );
 
-const StarIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-  </svg>
-);
-
 const ZapIcon = () => (
   <svg
     width="24"
@@ -147,8 +141,6 @@ const DashboardPage = () => {
     progressPercent: 0,
     currentStreak: 0,
     longestStreak: 0,
-    level: 1,
-    experiencePoints: 0,
     peerReviewsGiven: 0,
     peerReviewsReceived: 0,
   });
@@ -305,9 +297,6 @@ const DashboardPage = () => {
             statsData.currentStreak || statsData.current_streak_days || 0,
           longestStreak:
             statsData.longestStreak || statsData.longest_streak_days || 0,
-          level: statsData.level || 1,
-          experiencePoints:
-            statsData.experiencePoints || statsData.experience_points || 0,
           peerReviewsGiven:
             statsData.peerReviewsGiven ||
             statsData.total_peer_reviews_given ||
@@ -683,20 +672,6 @@ const DashboardPage = () => {
     return icons[iconName] || icons.activity;
   };
 
-  const calculateXpToNextLevel = (points) => {
-    const currentLevel = Math.max(1, stats.level || 1);
-    const pointsForCurrentLevel = Math.max(0, (currentLevel - 1) * 100);
-    const pointsForNextLevel = Math.max(100, currentLevel * 100);
-    const levelProgress = Math.max(0, (points || 0) - pointsForCurrentLevel);
-    const needed = Math.max(1, pointsForNextLevel - pointsForCurrentLevel);
-    return {
-      current: levelProgress,
-      needed: needed,
-      percentage: Math.min(100, (levelProgress / needed) * 100),
-    };
-  };
-
-  const xpProgress = calculateXpToNextLevel(stats.experiencePoints || 0);
   const totalChallenges = Math.max(
     1,
     overview?.challenges?.total_attempted || stats.completedChallenges || 0
@@ -733,32 +708,6 @@ const DashboardPage = () => {
               <div className="streak-info">
                 <span className="streak-count">{stats.currentStreak}</span>
                 <span className="streak-label">Day Streak</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Level & XP Progress */}
-        <div className="level-section">
-          <div className="level-card">
-            <div className="level-badge">
-              <StarIcon />
-              <span className="level-number">Level {stats.level}</span>
-            </div>
-            <div className="xp-progress">
-              <div className="xp-bar">
-                <div
-                  className="xp-fill"
-                  style={{ width: `${xpProgress.percentage}%` }}
-                ></div>
-              </div>
-              <div className="xp-text">
-                <span>
-                  {xpProgress.current} / {xpProgress.needed} XP to next level
-                </span>
-                <span className="total-points">
-                  {stats.totalPoints} total points
-                </span>
               </div>
             </div>
           </div>
@@ -881,52 +830,199 @@ const DashboardPage = () => {
             </div>
           </div>
 
-          <div className="activity-chart">
-            <div className="chart-bars">
-              {activityData.map((data, idx) => (
-                <div key={idx} className="chart-bar-container">
-                  <div
-                    className="chart-bar"
-                    style={{
-                      height: `${Math.max(
-                        (data.value /
-                          Math.max(...activityData.map((d) => d.value), 1)) *
-                          100,
-                        5
-                      )}%`,
-                    }}
-                  >
-                    <span className="bar-value">{data.value}</span>
-                  </div>
-                  <span className="bar-label">{data.label}</span>
-                </div>
+          <div className="enhanced-chart">
+            <svg className="chart-svg" viewBox="0 0 800 250" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="var(--color-brand-primary)" stopOpacity="0.3" />
+                  <stop offset="100%" stopColor="var(--color-brand-primary)" stopOpacity="0.02" />
+                </linearGradient>
+                <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#6366f1" />
+                  <stop offset="50%" stopColor="#8b5cf6" />
+                  <stop offset="100%" stopColor="#a855f7" />
+                </linearGradient>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                  <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+              
+              {/* Grid lines */}
+              {[0, 1, 2, 3, 4].map((i) => (
+                <line
+                  key={`grid-${i}`}
+                  x1="0"
+                  y1={50 + i * 45}
+                  x2="800"
+                  y2={50 + i * 45}
+                  stroke="var(--color-border-primary)"
+                  strokeWidth="1"
+                  strokeDasharray="4,4"
+                  opacity="0.5"
+                />
+              ))}
+              
+              {/* Area fill */}
+              <path
+                className="chart-area"
+                d={(() => {
+                  if (activityData.length === 0) return '';
+                  const maxValue = Math.max(...activityData.map(d => d.value), 1);
+                  const width = 800;
+                  const height = 200;
+                  const padding = 40;
+                  const stepX = (width - padding * 2) / Math.max(activityData.length - 1, 1);
+                  
+                  let path = `M ${padding} ${height}`;
+                  activityData.forEach((d, i) => {
+                    const x = padding + i * stepX;
+                    const y = height - ((d.value / maxValue) * (height - 50)) - 10;
+                    if (i === 0) {
+                      path += ` L ${x} ${y}`;
+                    } else {
+                      const prevX = padding + (i - 1) * stepX;
+                      const prevY = height - ((activityData[i-1].value / maxValue) * (height - 50)) - 10;
+                      const cpX1 = prevX + stepX / 3;
+                      const cpX2 = x - stepX / 3;
+                      path += ` C ${cpX1} ${prevY}, ${cpX2} ${y}, ${x} ${y}`;
+                    }
+                  });
+                  path += ` L ${padding + (activityData.length - 1) * stepX} ${height} Z`;
+                  return path;
+                })()}
+                fill="url(#chartGradient)"
+              />
+              
+              {/* Line */}
+              <path
+                className="chart-line"
+                d={(() => {
+                  if (activityData.length === 0) return '';
+                  const maxValue = Math.max(...activityData.map(d => d.value), 1);
+                  const width = 800;
+                  const height = 200;
+                  const padding = 40;
+                  const stepX = (width - padding * 2) / Math.max(activityData.length - 1, 1);
+                  
+                  let path = '';
+                  activityData.forEach((d, i) => {
+                    const x = padding + i * stepX;
+                    const y = height - ((d.value / maxValue) * (height - 50)) - 10;
+                    if (i === 0) {
+                      path = `M ${x} ${y}`;
+                    } else {
+                      const prevX = padding + (i - 1) * stepX;
+                      const prevY = height - ((activityData[i-1].value / maxValue) * (height - 50)) - 10;
+                      const cpX1 = prevX + stepX / 3;
+                      const cpX2 = x - stepX / 3;
+                      path += ` C ${cpX1} ${prevY}, ${cpX2} ${y}, ${x} ${y}`;
+                    }
+                  });
+                  return path;
+                })()}
+                fill="none"
+                stroke="url(#lineGradient)"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                filter="url(#glow)"
+              />
+              
+              {/* Data points */}
+              {activityData.map((d, i) => {
+                const maxValue = Math.max(...activityData.map(d => d.value), 1);
+                const width = 800;
+                const height = 200;
+                const padding = 40;
+                const stepX = (width - padding * 2) / Math.max(activityData.length - 1, 1);
+                const x = padding + i * stepX;
+                const y = height - ((d.value / maxValue) * (height - 50)) - 10;
+                
+                return (
+                  <g key={i} className="data-point-group">
+                    <circle
+                      className="data-point-glow"
+                      cx={x}
+                      cy={y}
+                      r="12"
+                      fill="var(--color-brand-primary)"
+                      opacity="0.15"
+                    />
+                    <circle
+                      className="data-point"
+                      cx={x}
+                      cy={y}
+                      r="6"
+                      fill="var(--color-bg-secondary)"
+                      stroke="url(#lineGradient)"
+                      strokeWidth="3"
+                    />
+                    <text
+                      className="data-label"
+                      x={x}
+                      y={y - 18}
+                      textAnchor="middle"
+                      fill="var(--color-text-primary)"
+                      fontSize="12"
+                      fontWeight="600"
+                    >
+                      {d.value}
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
+            
+            {/* X-axis labels */}
+            <div className="chart-x-labels">
+              {activityData.map((d, i) => (
+                <span key={i} className="x-label">{d.label}</span>
               ))}
             </div>
           </div>
 
-          <div className="activity-summary">
-            <div className="summary-item">
-              <span className="summary-value">
-                {activityData.reduce((sum, d) => sum + d.value, 0)}
-              </span>
-              <span className="summary-label">Total Points</span>
+          <div className="activity-summary-enhanced">
+            <div className="summary-card">
+              <div className="summary-icon blue">
+                <TrophyIcon />
+              </div>
+              <div className="summary-content">
+                <span className="summary-value">
+                  {activityData.reduce((sum, d) => sum + d.value, 0)}
+                </span>
+                <span className="summary-label">Total Points</span>
+              </div>
             </div>
-            <div className="summary-item">
-              <span className="summary-value">
-                {activityData.reduce((sum, d) => sum + d.activities, 0)}
-              </span>
-              <span className="summary-label">Activities</span>
+            <div className="summary-card">
+              <div className="summary-icon purple">
+                <ZapIcon />
+              </div>
+              <div className="summary-content">
+                <span className="summary-value">
+                  {activityData.reduce((sum, d) => sum + d.activities, 0)}
+                </span>
+                <span className="summary-label">Activities</span>
+              </div>
             </div>
-            <div className="summary-item">
-              <span className="summary-value">
-                {activityData.length > 0
-                  ? Math.round(
-                      activityData.reduce((sum, d) => sum + d.value, 0) /
-                        activityData.length
-                    )
-                  : 0}
-              </span>
-              <span className="summary-label">Average</span>
+            <div className="summary-card">
+              <div className="summary-icon green">
+                <TrendUpIcon />
+              </div>
+              <div className="summary-content">
+                <span className="summary-value">
+                  {activityData.length > 0
+                    ? Math.round(
+                        activityData.reduce((sum, d) => sum + d.value, 0) /
+                          activityData.length
+                      )
+                    : 0}
+                </span>
+                <span className="summary-label">Daily Average</span>
+              </div>
             </div>
           </div>
         </div>

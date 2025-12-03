@@ -34,8 +34,8 @@ cd skillwise
 #### Frontend Environment
 Create `frontend/.env` file:
 ```env
-REACT_APP_API_URL=http://localhost:3001/api
-REACT_APP_ENVIRONMENT=development
+VITE_API_URL=http://localhost:3001/api
+VITE_ENVIRONMENT=development
 ```
 
 #### Backend Environment
@@ -126,7 +126,7 @@ services:
         condition: service_healthy
     command: npm run dev
 
-  # Frontend React App
+  # Frontend React App (Vite)
   frontend:
     build:
       context: ./frontend
@@ -134,13 +134,13 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - REACT_APP_API_URL=http://localhost:3001/api
+      - VITE_API_URL=http://localhost:3001/api
     volumes:
       - ./frontend:/app
       - /app/node_modules
     depends_on:
       - backend
-    command: npm start
+    command: npm run dev
 
   # Redis (for caching and sessions)
   redis:

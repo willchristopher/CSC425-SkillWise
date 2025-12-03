@@ -429,6 +429,227 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
+/* ============================================
+   ENHANCED ACTIVITY CHART
+   ============================================ */
+.enhanced-chart {
+  position: relative;
+  padding: 1rem 0;
+  margin-bottom: 1.5rem;
+}
+
+.chart-svg {
+  width: 100%;
+  height: 250px;
+  overflow: visible;
+}
+
+.chart-area {
+  animation: chartAreaFadeIn 1s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes chartAreaFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.chart-line {
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 2000;
+  animation: chartLineDraw 1.5s ease-out forwards;
+}
+
+@keyframes chartLineDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.data-point-group {
+  opacity: 0;
+  animation: dataPointFadeIn 0.4s ease-out forwards;
+}
+
+.data-point-group:nth-child(1) { animation-delay: 0.3s; }
+.data-point-group:nth-child(2) { animation-delay: 0.4s; }
+.data-point-group:nth-child(3) { animation-delay: 0.5s; }
+.data-point-group:nth-child(4) { animation-delay: 0.6s; }
+.data-point-group:nth-child(5) { animation-delay: 0.7s; }
+.data-point-group:nth-child(6) { animation-delay: 0.8s; }
+.data-point-group:nth-child(7) { animation-delay: 0.9s; }
+.data-point-group:nth-child(8) { animation-delay: 1.0s; }
+.data-point-group:nth-child(9) { animation-delay: 1.1s; }
+.data-point-group:nth-child(10) { animation-delay: 1.2s; }
+.data-point-group:nth-child(11) { animation-delay: 1.3s; }
+.data-point-group:nth-child(12) { animation-delay: 1.4s; }
+
+@keyframes dataPointFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.data-point {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.data-point-group:hover .data-point {
+  r: 8;
+  filter: drop-shadow(0 0 8px var(--color-brand-primary));
+}
+
+.data-point-group:hover .data-point-glow {
+  r: 18;
+  opacity: 0.25;
+}
+
+.data-point-glow {
+  transition: all 0.3s ease;
+}
+
+.data-label {
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.data-point-group:hover .data-label {
+  opacity: 1;
+  transform: translateY(-5px);
+}
+
+.chart-x-labels {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 40px 0;
+  border-top: 1px solid var(--color-border-primary);
+}
+
+.x-label {
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+/* Enhanced Summary Cards */
+.activity-summary-enhanced {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  padding-top: 1rem;
+}
+
+.summary-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--color-bg-tertiary);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.summary-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.summary-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.summary-icon.blue {
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  color: white;
+}
+
+.summary-icon.purple {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+  color: white;
+}
+
+.summary-icon.green {
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  color: white;
+}
+
+.summary-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.summary-card .summary-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+.summary-card .summary-label {
+  font-size: 0.8rem;
+  color: var(--color-text-tertiary);
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .activity-summary-enhanced {
+    grid-template-columns: 1fr;
+  }
+  
+  .chart-x-labels {
+    padding: 0.75rem 20px 0;
+    overflow-x: auto;
+  }
+  
+  .x-label {
+    font-size: 0.65rem;
+    min-width: 30px;
+    text-align: center;
+  }
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .enhanced-chart,
+.dark .enhanced-chart {
+  --chart-grid-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='dark'] .summary-card,
+.dark .summary-card {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme='dark'] .summary-card:hover,
+.dark .summary-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .activity-chart {
   padding: 1rem 0;
 }

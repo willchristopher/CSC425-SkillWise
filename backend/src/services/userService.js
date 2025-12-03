@@ -54,33 +54,49 @@ const userService = {
     const values = [];
     let paramCount = 1;
 
-    if (profileData.first_name) {
+    // Check for first_name (allow empty string check with !== undefined)
+    if (profileData.first_name !== undefined && profileData.first_name !== null) {
       fields.push(`first_name = $${paramCount}`);
       values.push(profileData.first_name);
       paramCount++;
     }
 
-    if (profileData.last_name) {
+    // Check for last_name
+    if (profileData.last_name !== undefined && profileData.last_name !== null) {
       fields.push(`last_name = $${paramCount}`);
       values.push(profileData.last_name);
       paramCount++;
     }
 
-    if (profileData.avatar_url) {
-      fields.push(`avatar_url = $${paramCount}`);
-      values.push(profileData.avatar_url);
+    // Bio can be empty string, so check for undefined/null only
+    if (profileData.bio !== undefined && profileData.bio !== null) {
+      fields.push(`bio = $${paramCount}`);
+      values.push(profileData.bio);
+      paramCount++;
+    }
+
+    // Profile icon (stored in profile_image column)
+    if (profileData.profile_icon !== undefined && profileData.profile_icon !== null) {
+      fields.push(`profile_image = $${paramCount}`);
+      values.push(profileData.profile_icon);
       paramCount++;
     }
 
     if (fields.length === 0) {
-      throw new Error('No valid fields to update');
+      // If no fields to update, just return the current user data
+      const { rows } = await db.query(
+        `SELECT id, first_name, last_name, email, bio, profile_image, created_at, updated_at 
+         FROM users WHERE id = $1`,
+        [userId]
+      );
+      return rows[0];
     }
 
     values.push(userId);
     const { rows } = await db.query(
       `UPDATE users SET ${fields.join(', ')}, updated_at = CURRENT_TIMESTAMP 
        WHERE id = $${paramCount} 
-       RETURNING id, first_name, last_name, email, avatar_url, created_at, updated_at`,
+       RETURNING id, first_name, last_name, email, bio, profile_image, created_at, updated_at`,
       values
     );
 

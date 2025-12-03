@@ -5,8 +5,8 @@ import * as Sentry from '@sentry/react';
  * Initialize Sentry error tracking
  */
 export function initSentry() {
-  const dsn = process.env.REACT_APP_SENTRY_DSN;
-  const environment = process.env.NODE_ENV || 'development';
+  const dsn = import.meta.env.VITE_SENTRY_DSN;
+  const environment = import.meta.env.MODE || 'development';
 
   // Only initialize Sentry if DSN is provided and not the placeholder
   if (!dsn || dsn === 'your-sentry-dsn-url') {
@@ -59,7 +59,7 @@ export function initSentry() {
       initialScope: {
         tags: {
           service: 'skillwise-frontend',
-          version: process.env.REACT_APP_VERSION || '1.0.0',
+          version: import.meta.env.VITE_VERSION || '1.0.0',
         },
       },
     });

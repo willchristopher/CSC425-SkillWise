@@ -82,7 +82,7 @@ services:
 
       # Security
       - BCRYPT_ROUNDS=12
-      - CORS_ORIGIN=http://localhost:3000
+      - CORS_ORIGIN=http://localhost:3000,http://172.26.61.204:3000
 
       # Rate Limiting
       - RATE_LIMIT_WINDOW_MS=900000
@@ -107,7 +107,7 @@ services:
       - skillwise_network
     restart: unless-stopped
 
-  # Frontend React App
+  # Frontend React App (Vite)
   frontend:
     build:
       context: ./frontend
@@ -116,19 +116,17 @@ services:
     ports:
       - '3000:3000'
     environment:
-      - REACT_APP_API_URL=http://localhost:3001/api
-      - REACT_APP_ENVIRONMENT=development
-      - REACT_APP_SENTRY_DSN=${SENTRY_DSN:-your-sentry-dsn-url}
-      - REACT_APP_VERSION=1.0.0
-      - WATCHPACK_POLLING=true
-      - FAST_REFRESH=true
+      - VITE_API_URL=http://localhost:3001/api
+      - VITE_ENVIRONMENT=development
+      - VITE_SENTRY_DSN=${SENTRY_DSN:-your-sentry-dsn-url}
+      - VITE_VERSION=1.0.0
     volumes:
       - ./frontend:/app
       - /app/node_modules
       - /app/build
     depends_on:
       - backend
-    command: npm start
+    command: npm run dev
     networks:
       - skillwise_network
     restart: unless-stopped

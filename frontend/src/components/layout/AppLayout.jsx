@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -9,6 +9,35 @@ const AppLayout = ({ children, title, subtitle }) => {
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
+  const [navExpanded, setNavExpanded] = useState(false);
+  const [mouseNearTop, setMouseNearTop] = useState(false);
+
+  // Track mouse position to expand nav when near top
+  const handleMouseMove = useCallback((e) => {
+    const threshold = 80; // pixels from top to trigger expansion
+    const isNearTop = e.clientY <= threshold;
+    setMouseNearTop(isNearTop);
+  }, []);
+
+  // Handle mouse leaving the window
+  const handleMouseLeave = useCallback(() => {
+    setMouseNearTop(false);
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseleave', handleMouseLeave);
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, [handleMouseMove, handleMouseLeave]);
+
+  // Expand nav when mouse is near top or hovering over nav
+  useEffect(() => {
+    setNavExpanded(mouseNearTop);
+  }, [mouseNearTop]);
 
   const handleLogout = async () => {
     try {
@@ -234,21 +263,28 @@ const AppLayout = ({ children, title, subtitle }) => {
   return (
     <div className="app-layout">
       {/* Top Navigation */}
-      <nav className="top-nav">
+      <nav 
+        className={`top-nav ${navExpanded ? 'nav-expanded' : 'nav-collapsed'}`}
+        onMouseEnter={() => setNavExpanded(true)}
+        onMouseLeave={() => setNavExpanded(false)}
+      >
         <div className="nav-container">
-          <Link to="/dashboard" className="nav-logo">
+          <Link to="/dashboard" className={`nav-logo ${navExpanded ? '' : 'logo-centered'}`}>
             <span className="logo-icon">S</span>
             <span className="logo-text">SkillWise</span>
           </Link>
 
-          <div className="nav-links">
-            {navigationItems.map((item) => (
+          <div className={`nav-links ${navExpanded ? '' : 'links-hidden'}`}>
+            {navigationItems.map((item, index) => (
               <Link
                 key={item.path}
                 to={item.path}
                 className={`nav-link ${
                   location.pathname === item.path ? 'active' : ''
                 }`}
+                style={{ 
+                  transitionDelay: navExpanded ? `${index * 30}ms` : `${(navigationItems.length - index) * 20}ms`
+                }}
               >
                 {getIcon(item.icon)}
                 <span>{item.label}</span>
@@ -256,7 +292,7 @@ const AppLayout = ({ children, title, subtitle }) => {
             ))}
           </div>
 
-          <div className="nav-user">
+          <div className={`nav-user ${navExpanded ? '' : 'user-hidden'}`}>
             <span className="user-name">
               {user?.firstName ||
                 user?.first_name ||

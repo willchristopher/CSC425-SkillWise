@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3001/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
   withCredentials: true, // Include cookies for httpOnly refresh token
   timeout: 10000, // 10 second timeout
   headers: {
@@ -56,7 +56,7 @@ api.interceptors.request.use(
     }
 
     // Log request in development
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.log(
         `🔄 API Request: ${config.method?.toUpperCase()} ${config.url}`
       );
@@ -74,7 +74,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => {
     // Log successful response in development
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.log(
         `✅ API Response: ${response.config.method?.toUpperCase()} ${
           response.config.url
@@ -88,7 +88,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // Log error in development
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.log(
         `❌ API Error: ${originalRequest?.method?.toUpperCase()} ${
           originalRequest?.url
@@ -119,7 +119,7 @@ api.interceptors.response.use(
         // Attempt to refresh the token using httpOnly refresh cookie
         const refreshResponse = await axios.post(
           `${
-            process.env.REACT_APP_API_URL || 'http://localhost:3001/api'
+            import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
           }/auth/refresh`,
           {},
           {

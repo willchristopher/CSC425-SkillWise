@@ -5,7 +5,179 @@ import { useAuth } from '../hooks/useAuth';
 import { apiService } from '../services/api';
 import '../styles/pages.css';
 
-// SVG Icons
+// Profile Icon Components - Cool SVG icons for profile pictures
+const ProfileIcons = {
+  astronaut: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="5"/>
+      <path d="M3 21v-2a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v2"/>
+      <circle cx="12" cy="8" r="2"/>
+      <path d="M9 4.5c0-1 .5-2 2-2.5"/>
+      <path d="M15 4.5c0-1-.5-2-2-2.5"/>
+    </svg>
+  ),
+  ninja: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="10" r="7"/>
+      <path d="M5 10h14"/>
+      <circle cx="9" cy="9" r="1" fill="currentColor"/>
+      <circle cx="15" cy="9" r="1" fill="currentColor"/>
+      <path d="M12 17v4"/>
+      <path d="M8 21h8"/>
+    </svg>
+  ),
+  robot: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="5" y="7" width="14" height="12" rx="2"/>
+      <path d="M12 2v5"/>
+      <circle cx="12" cy="2" r="1"/>
+      <circle cx="9" cy="12" r="1.5" fill="currentColor"/>
+      <circle cx="15" cy="12" r="1.5" fill="currentColor"/>
+      <path d="M9 16h6"/>
+      <path d="M3 12h2"/>
+      <path d="M19 12h2"/>
+    </svg>
+  ),
+  wizard: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2l2 7h-4l2-7z"/>
+      <circle cx="12" cy="13" r="5"/>
+      <circle cx="10" cy="12" r="1" fill="currentColor"/>
+      <circle cx="14" cy="12" r="1" fill="currentColor"/>
+      <path d="M10 15c.5.5 1.5 1 2 1s1.5-.5 2-1"/>
+      <path d="M6 21c1-2 3-3 6-3s5 1 6 3"/>
+    </svg>
+  ),
+  phoenix: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3c-2 2-4 5-4 8 0 3 2 5 4 5s4-2 4-5c0-3-2-6-4-8z"/>
+      <path d="M8 12c-2-1-4 0-5 2"/>
+      <path d="M16 12c2-1 4 0 5 2"/>
+      <path d="M12 16v5"/>
+      <path d="M10 19l2 2 2-2"/>
+    </svg>
+  ),
+  wolf: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 8l4-4 4 3 4-3 4 4v6c0 4-4 7-8 7s-8-3-8-7V8z"/>
+      <circle cx="9" cy="10" r="1.5" fill="currentColor"/>
+      <circle cx="15" cy="10" r="1.5" fill="currentColor"/>
+      <path d="M12 13v2"/>
+      <path d="M10 17c.5.5 1.2.8 2 .8s1.5-.3 2-.8"/>
+    </svg>
+  ),
+  dragon: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 6l3-3c1 0 2 1 3 1s2-1 3-1l3 3"/>
+      <path d="M4 12c0 5 4 9 8 9s8-4 8-9c0-3-2-6-4-6h-8c-2 0-4 3-4 6z"/>
+      <circle cx="9" cy="11" r="1.5" fill="currentColor"/>
+      <circle cx="15" cy="11" r="1.5" fill="currentColor"/>
+      <path d="M10 16l2 1 2-1"/>
+    </svg>
+  ),
+  owl: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="8"/>
+      <circle cx="9" cy="10" r="2"/>
+      <circle cx="15" cy="10" r="2"/>
+      <circle cx="9" cy="10" r="1" fill="currentColor"/>
+      <circle cx="15" cy="10" r="1" fill="currentColor"/>
+      <path d="M12 14l-1 2h2l-1-2z" fill="currentColor"/>
+      <path d="M6 6l2 2"/>
+      <path d="M18 6l-2 2"/>
+    </svg>
+  ),
+  fox: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 8l4-5 4 4 4-4 4 5v5c0 5-4 8-8 8s-8-3-8-8V8z"/>
+      <circle cx="9" cy="10" r="1" fill="currentColor"/>
+      <circle cx="15" cy="10" r="1" fill="currentColor"/>
+      <path d="M12 12v2"/>
+      <path d="M10 16c1 1 3 1 4 0"/>
+    </svg>
+  ),
+  bear: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="6" cy="6" r="2"/>
+      <circle cx="18" cy="6" r="2"/>
+      <circle cx="12" cy="13" r="7"/>
+      <circle cx="9" cy="11" r="1.5" fill="currentColor"/>
+      <circle cx="15" cy="11" r="1.5" fill="currentColor"/>
+      <ellipse cx="12" cy="15" rx="2" ry="1.5"/>
+    </svg>
+  ),
+  cat: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 6l4 3v3c0 4 2 7 4 7s4-3 4-7v-3l4-3v-2l-4 2h-8l-4-2v2z"/>
+      <circle cx="9" cy="10" r="1" fill="currentColor"/>
+      <circle cx="15" cy="10" r="1" fill="currentColor"/>
+      <path d="M10 14l2 1 2-1"/>
+      <path d="M8 15c-2 0-3 1-4 2"/>
+      <path d="M16 15c2 0 3 1 4 2"/>
+    </svg>
+  ),
+  alien: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <ellipse cx="12" cy="12" rx="8" ry="10"/>
+      <ellipse cx="9" cy="10" rx="2" ry="3"/>
+      <ellipse cx="15" cy="10" rx="2" ry="3"/>
+      <circle cx="9" cy="10" r="1" fill="currentColor"/>
+      <circle cx="15" cy="10" r="1" fill="currentColor"/>
+      <path d="M10 16c1 1 3 1 4 0"/>
+    </svg>
+  ),
+  crown: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 8l4 12h12l4-12-5 4-5-6-5 6-5-4z"/>
+      <circle cx="12" cy="4" r="1" fill="currentColor"/>
+      <circle cx="4" cy="7" r="1" fill="currentColor"/>
+      <circle cx="20" cy="7" r="1" fill="currentColor"/>
+    </svg>
+  ),
+  lightning: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+    </svg>
+  ),
+  shield: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2l8 4v6c0 5-3 8-8 10-5-2-8-5-8-10V6l8-4z"/>
+      <path d="M9 12l2 2 4-4"/>
+    </svg>
+  ),
+  diamond: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 8l7-5 7 5-7 13-7-13z"/>
+      <path d="M5 8h14"/>
+      <path d="M8 8l4 13 4-13"/>
+    </svg>
+  ),
+};
+
+// Available icons list
+const PROFILE_ICON_OPTIONS = [
+  { id: 'astronaut', name: 'Astronaut', color: '#6366f1' },
+  { id: 'ninja', name: 'Ninja', color: '#1f2937' },
+  { id: 'robot', name: 'Robot', color: '#0ea5e9' },
+  { id: 'wizard', name: 'Wizard', color: '#8b5cf6' },
+  { id: 'phoenix', name: 'Phoenix', color: '#f97316' },
+  { id: 'wolf', name: 'Wolf', color: '#64748b' },
+  { id: 'dragon', name: 'Dragon', color: '#10b981' },
+  { id: 'owl', name: 'Owl', color: '#6b7280' },
+  { id: 'fox', name: 'Fox', color: '#f59e0b' },
+  { id: 'bear', name: 'Bear', color: '#78350f' },
+  { id: 'cat', name: 'Cat', color: '#ec4899' },
+  { id: 'alien', name: 'Alien', color: '#22c55e' },
+  { id: 'crown', name: 'Crown', color: '#eab308' },
+  { id: 'lightning', name: 'Lightning', color: '#3b82f6' },
+  { id: 'shield', name: 'Shield', color: '#14b8a6' },
+  { id: 'diamond', name: 'Diamond', color: '#a855f7' },
+];
+
+// Export for use in other components
+export { ProfileIcons, PROFILE_ICON_OPTIONS };
+
+// SVG Icons for UI
 const TrophyIcon = () => (
   <svg
     width="18"
@@ -84,20 +256,6 @@ const FileIcon = () => (
   </svg>
 );
 
-const MapPinIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-  >
-    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-    <circle cx="12" cy="10" r="3" />
-  </svg>
-);
-
 const CalendarIcon = () => (
   <svg
     width="16"
@@ -111,20 +269,6 @@ const CalendarIcon = () => (
     <line x1="16" y1="2" x2="16" y2="6" />
     <line x1="8" y1="2" x2="8" y2="6" />
     <line x1="3" y1="10" x2="21" y2="10" />
-  </svg>
-);
-
-const LinkIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-  >
-    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
   </svg>
 );
 
@@ -199,11 +343,26 @@ const AwardIcon = () => (
 const ProfilePage = () => {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [isEditing, setIsEditing] = useState(false);
+  const [showIconPicker, setShowIconPicker] = useState(false);
   const [formData, setFormData] = useState({});
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
   const { user, updateProfile } = useAuth();
+
+  // Get the icon component for a given icon ID
+  const getProfileIcon = (iconId) => {
+    const IconComponent = ProfileIcons[iconId];
+    return IconComponent ? <IconComponent /> : null;
+  };
+
+  // Get icon color for a given icon ID
+  const getIconColor = (iconId) => {
+    const option = PROFILE_ICON_OPTIONS.find(opt => opt.id === iconId);
+    return option?.color || '#6366f1';
+  };
 
   // Fetch real profile data from API
   const fetchProfileData = useCallback(async () => {
@@ -247,12 +406,9 @@ const ProfilePage = () => {
         firstName: profile.firstName || user?.firstName || '',
         lastName: profile.lastName || user?.lastName || '',
         email: profile.email || user?.email || '',
-        avatar: profile.avatarUrl || '👤',
-        bio: profile.bio || 'No bio yet. Tell us about yourself!',
-        location: profile.location || '',
-        website: profile.website || '',
+        profileIcon: profile.profileIcon || 'astronaut',
+        bio: profile.bio || '',
         joinedDate: profile.createdAt || new Date().toISOString(),
-        level: profile.stats?.level || 1,
         totalPoints: profile.stats?.totalPoints || 0,
         completedChallenges: profile.stats?.challengesCompleted || 0,
         goalsAchieved: profile.stats?.goalsCompleted || 0,
@@ -347,12 +503,9 @@ const ProfilePage = () => {
           firstName: user.firstName || '',
           lastName: user.lastName || '',
           email: user.email || '',
-          avatar: '👤',
+          profileIcon: 'astronaut',
           bio: '',
-          location: '',
-          website: '',
           joinedDate: new Date().toISOString(),
-          level: 1,
           totalPoints: 0,
           completedChallenges: 0,
           goalsAchieved: 0,
@@ -393,15 +546,26 @@ const ProfilePage = () => {
     }));
   };
 
+  const handleIconSelect = (iconId) => {
+    setFormData((prev) => ({
+      ...prev,
+      profileIcon: iconId,
+    }));
+    setShowIconPicker(false);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setSaving(true);
+    setError(null);
+    setSuccessMessage('');
 
     try {
       const response = await apiService.user.updateProfile({
         firstName: formData.firstName,
         lastName: formData.lastName,
-        avatarUrl: formData.avatar,
+        bio: formData.bio,
+        profileIcon: formData.profileIcon,
       });
 
       if (response.data.success) {
@@ -409,16 +573,31 @@ const ProfilePage = () => {
           ...prev,
           firstName: formData.firstName,
           lastName: formData.lastName,
+          bio: formData.bio,
+          profileIcon: formData.profileIcon,
         }));
         setIsEditing(false);
-        // Refresh profile data
-        fetchProfileData();
+        setSuccessMessage('Profile updated successfully!');
+        
+        // Update auth context if available
+        if (updateProfile) {
+          await updateProfile({
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            bio: formData.bio,
+            profileIcon: formData.profileIcon,
+          });
+        }
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => setSuccessMessage(''), 3000);
       }
     } catch (error) {
       console.error('Failed to update profile:', error);
-      setError('Failed to update profile. Please try again.');
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || 'Failed to update profile. Please try again.';
+      setError(errorMessage);
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
@@ -478,41 +657,42 @@ const ProfilePage = () => {
 
   return (
     <AppLayout title="Profile" subtitle="Manage your account and preferences">
+      {/* Success/Error Messages */}
+      {successMessage && (
+        <div className="profile-success-message">
+          <CheckIcon /> {successMessage}
+        </div>
+      )}
+      {error && (
+        <div className="profile-error-message">
+          {error}
+        </div>
+      )}
+
       {/* Profile Header */}
       <div className="profile-page-header">
         <div className="profile-page-info">
-          <div className="profile-page-avatar">
-            {profileData?.firstName?.[0]}
-            {profileData?.lastName?.[0]}
-            <span className="profile-level-badge">
-              Level {profileData?.level}
-            </span>
+          <div 
+            className="profile-page-avatar profile-icon-display"
+            style={{ 
+              '--icon-color': getIconColor(profileData?.profileIcon || 'astronaut'),
+              backgroundColor: `${getIconColor(profileData?.profileIcon || 'astronaut')}15`
+            }}
+          >
+            {getProfileIcon(profileData?.profileIcon || 'astronaut')}
           </div>
 
           <div className="profile-page-details">
             <h1 className="profile-page-name">
               {profileData?.firstName} {profileData?.lastName}
             </h1>
-            <p className="profile-page-bio">{profileData?.bio}</p>
+            <p className="profile-page-bio">
+              {profileData?.bio || 'No bio yet. Click Edit Profile to add one!'}
+            </p>
             <div className="profile-page-meta">
-              <span className="profile-meta-item">
-                <MapPinIcon /> {profileData?.location}
-              </span>
               <span className="profile-meta-item">
                 <CalendarIcon /> Joined {formatDate(profileData?.joinedDate)}
               </span>
-              {profileData?.website && (
-                <span className="profile-meta-item">
-                  <LinkIcon />
-                  <a
-                    href={profileData.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {profileData.website}
-                  </a>
-                </span>
-              )}
             </div>
           </div>
 
@@ -578,6 +758,43 @@ const ProfilePage = () => {
       {isEditing && (
         <form onSubmit={handleSubmit} className="profile-card">
           <div className="form-section">
+            <h3 className="profile-section-title">Profile Icon</h3>
+            <div className="profile-icon-selector">
+              <div 
+                className="current-icon-preview"
+                style={{ 
+                  '--icon-color': getIconColor(formData.profileIcon || 'astronaut'),
+                  backgroundColor: `${getIconColor(formData.profileIcon || 'astronaut')}15`
+                }}
+                onClick={() => setShowIconPicker(!showIconPicker)}
+              >
+                {getProfileIcon(formData.profileIcon || 'astronaut')}
+                <span className="change-icon-label">Click to change</span>
+              </div>
+              
+              {showIconPicker && (
+                <div className="icon-picker-grid">
+                  {PROFILE_ICON_OPTIONS.map((option) => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      className={`icon-picker-item ${formData.profileIcon === option.id ? 'selected' : ''}`}
+                      style={{ 
+                        '--icon-color': option.color,
+                        backgroundColor: `${option.color}15`
+                      }}
+                      onClick={() => handleIconSelect(option.id)}
+                      title={option.name}
+                    >
+                      {getProfileIcon(option.id)}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="form-section">
             <h3 className="profile-section-title">Personal Information</h3>
             <div className="form-row">
               <div className="form-group">
@@ -624,49 +841,24 @@ const ProfilePage = () => {
                 placeholder="Tell us about yourself..."
               />
             </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label className="form-label" htmlFor="location">
-                  Location
-                </label>
-                <input
-                  className="form-input"
-                  type="text"
-                  id="location"
-                  name="location"
-                  value={formData.location || ''}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label" htmlFor="website">
-                  Website
-                </label>
-                <input
-                  className="form-input"
-                  type="url"
-                  id="website"
-                  name="website"
-                  value={formData.website || ''}
-                  onChange={handleInputChange}
-                />
-              </div>
-            </div>
           </div>
 
           <div className="btn-group">
             <button
               type="submit"
               className="btn btn-primary"
-              disabled={loading}
+              disabled={saving}
             >
-              {loading ? 'Saving...' : 'Save Changes'}
+              {saving ? 'Saving...' : 'Save Changes'}
             </button>
             <button
               type="button"
               className="btn btn-secondary"
-              onClick={() => setIsEditing(false)}
+              onClick={() => {
+                setIsEditing(false);
+                setShowIconPicker(false);
+                setFormData(profileData);
+              }}
             >
               Cancel
             </button>
