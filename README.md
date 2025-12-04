@@ -1,396 +1,248 @@
-# SkillWise AI Tutor 🎓
+# SkillWise
 
-An intelligent AI-powered tutoring platform built with React, Node.js, and PostgreSQL.
+An AI-powered tutoring and learning platform that helps students track progress, complete challenges, and receive personalized feedback.
 
-## 🚀 Quick Start
+## Team Members
+
+- Will Christopher
+- Zach Walters
+- Emma Rowe
+- Jackson Bradley
+
+## Tech Stack
+
+### Database
+- **PostgreSQL** - Relational database for storing user data, goals, challenges, submissions, and feedback
+
+### Backend
+- **Node.js** - JavaScript runtime
+- **Express.js** - Web application framework
+- **Middleware**
+  - CORS - Cross-Origin Resource Sharing
+  - Body Parser - Request body parsing
+  - JWT Middleware - Authentication and authorization
+  - Helmet - Security headers
+  - Morgan - HTTP request logging
+
+### Frontend
+- **React** - UI library
+- **React Router** - Client-side routing
+- **Vite** - Build tool and development server
+- **Tailwind CSS** - Utility-first CSS framework
+- **Axios** - HTTP client
+
+### AI & LLM
+- **Google Gemini API** - AI model for generating challenges, feedback, and tutoring support
+
+### Authentication
+- **JWT (JSON Web Tokens)** - Token-based authentication
+- **Refresh Tokens** - Secure session management
+
+### Testing
+- **Jest** - Unit and integration testing framework
+- **Cypress** - End-to-end (E2E) testing framework
+
+### Additional Tools
+- **Sentry** - Error tracking and monitoring
+- **Docker** - Containerization for development and deployment
+
+## Project Structure
+
+```
+SkillWise/
+├── backend/                    # Express server
+│   ├── src/
+│   │   ├── controllers/       # Route handlers
+│   │   ├── services/          # Business logic
+│   │   ├── models/            # Data models
+│   │   ├── middleware/        # Custom middleware
+│   │   ├── utils/             # Utility functions and prompt templates
+│   │   ├── config/            # Configuration files
+│   │   └── database/          # Database connections
+│   ├── database/
+│   │   └── migrations/        # SQL migrations
+│   ├── tests/                 # Test files (Jest)
+│   ├── server.js              # Entry point
+│   └── package.json
+├── frontend/                   # React application
+│   ├── src/
+│   │   ├── components/        # React components
+│   │   ├── pages/             # Page components
+│   │   ├── services/          # API service layer
+│   │   ├── hooks/             # Custom React hooks
+│   │   ├── contexts/          # React contexts (auth, theme)
+│   │   └── styles/            # CSS files
+│   ├── cypress/               # E2E tests
+│   ├── index.html
+│   ├── vite.config.js
+│   └── package.json
+├── docker-compose.yml         # Docker Compose configuration
+├── launch.sh                  # Project launch script
+└── package.json
+```
+
+## Getting Started
 
 ### Prerequisites
 
-Before cloning and running this project, you need to install the following software:
+- Node.js (v16 or higher)
+- npm or yarn
+- PostgreSQL (or use Docker)
+- Google Gemini API key
 
-#### Required Software
+### Installation
 
-- **Docker Desktop** (v4.0+) - [Download here](https://www.docker.com/products/docker-desktop/)
-  - Includes Docker and Docker Compose
-- **Node.js** (v18+) - [Download here](https://nodejs.org/)
-- **Git** - [Download here](https://git-scm.com/)
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/willchristopher/CSC425-SkillWise.git
+   cd CSC425-SkillWise
+   ```
 
-#### Optional (for local development without Docker)
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-- **PostgreSQL** (v15+) - [Download here](https://www.postgresql.org/download/)
-- **Redis** (v7+) - [Download here](https://redis.io/download)
+3. **Set up environment variables**
 
-### Development Tools (Recommended)
+   Create a `.env` file in the `backend` directory:
+   ```
+   DATABASE_URL=postgresql://user:password@localhost:5432/skillwise
+   JWT_SECRET=your_jwt_secret_key
+   GEMINI_API_KEY=your_gemini_api_key
+   NODE_ENV=development
+   PORT=3001
+   ```
 
-- **VS Code** with extensions:
-  - ES7+ React/Redux/React-Native snippets
-  - Prettier - Code formatter
-  - ESLint
-  - Thunder Client (for API testing)
-  - Docker extension
-- **Postman** or **Insomnia** (for API testing)
+   Create a `.env` file in the `frontend` directory:
+   ```
+   VITE_API_URL=http://localhost:3001
+   ```
 
-## 📦 Installation & Setup
+4. **Set up the database**
+   ```bash
+   npm run migrate
+   ```
 
-### 1. Clone the Repository
+### Running the Project
 
+#### Using the Launch Script
 ```bash
-git clone https://github.com/DrOwen101/SkillWise_AITutor_Initial-Setup-Push.git
-cd SkillWise_AITutor_Initial-Setup-Push
+./launch.sh
 ```
 
-### 2. Environment Setup (Optional)
+#### Manual Startup
 
-Create environment files if you need to customize settings:
-
-#### Root `.env` (optional)
-
-```env
-# OpenAI Configuration (for AI features)
-OPENAI_API_KEY=your-openai-api-key-here
-
-# Email Configuration (for notifications)
-SMTP_USER=your-email@gmail.com
-SMTP_PASS=your-app-password
-
-# Monitoring (optional)
-SENTRY_DSN=your-sentry-dsn-url
-```
-
-### 3. Start Development Environment
-
+**Start the backend:**
 ```bash
-# Install root dependencies (for linting and git hooks)
+cd backend
 npm install
-
-# Start the entire application with Docker
-npm run dev:all
+npm start
 ```
 
-This single command will:
-
-- Build and start PostgreSQL database (with all migrations)
-- Build and start Redis cache
-- Build and start Node.js backend API
-- Build and start React frontend
-- Set up all networking between services
-
-### 4. Access the Applications
-
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:3001/api
-- **Health Check**: http://localhost:3001/healthz
-
-## 🛠 Development Workflow
-
-### Available Scripts
-
+**Start the frontend (in a new terminal):**
 ```bash
-# Start everything (recommended)
-npm run dev:all
-
-# View logs from all services
-npm run logs
-
-# View logs from specific service
-npm run logs:backend
-npm run logs:frontend
-npm run logs:db
-
-# Stop everything and clean up
-npm run down
-
-# Rebuild containers (when dependencies change)
-npm run rebuild
-
-# Reset everything (clean slate)
-npm run reset
-```
-
-### Working with the Code
-
-#### Backend Development (Node.js/Express)
-
-```bash
-# Backend files are in ./backend/
-cd backend/
-
-# Dependencies are automatically installed via Docker
-# But you can install locally for IDE support:
+cd frontend
 npm install
-
-# Key directories:
-- src/routes/      # API endpoints
-- src/controllers/ # Business logic
-- src/models/      # Database models
-- src/services/    # Service layer
-- src/middleware/  # Express middleware
-- database/migrations/ # Database schema
+npm run dev
 ```
 
-#### Frontend Development (React)
+The application will be available at `http://localhost:5173` (frontend) and the API at `http://localhost:3001` (backend).
 
+#### Using Docker Compose
 ```bash
-# Frontend files are in ./frontend/
-cd frontend/
-
-# Dependencies are automatically installed via Docker
-# But you can install locally for IDE support:
-npm install
-
-# Key directories:
-- src/components/  # Reusable components
-- src/pages/      # Page components
-- src/utils/      # Utilities and API client
-- src/styles/     # CSS and styling
-- public/         # Static assets
+docker-compose up
 ```
 
-### Database Management
+## Running Tests
 
-The PostgreSQL database is automatically set up with all migrations when you start the application.
-
-#### Database Access
-
-- **Host**: localhost
-- **Port**: 5433 (mapped from container's 5432)
-- **Database**: skillwise_db
-- **Username**: skillwise_user
-- **Password**: skillwise_pass
-
-#### Database Tools
-
+### Backend Tests (Jest)
 ```bash
-# Connect via psql
-psql -h localhost -p 5433 -U skillwise_user -d skillwise_db
-
-# Or use GUI tools like pgAdmin, DBeaver, etc.
+cd backend
+npm test
 ```
 
-## 🏗 Project Structure
-
-```
-SkillWise_AITutor/
-├── 📁 frontend/                 # React frontend application
-│   ├── 📁 public/              # Static assets
-│   ├── 📁 src/
-│   │   ├── 📁 components/      # Reusable React components
-│   │   ├── 📁 pages/           # Page components
-│   │   ├── 📁 utils/           # Utilities & API client
-│   │   └── 📁 styles/          # CSS and styling
-│   ├── 📄 package.json         # Frontend dependencies
-│   └── 📄 Dockerfile.dev       # Frontend container config
-│
-├── 📁 backend/                  # Node.js backend API
-│   ├── 📁 src/
-│   │   ├── 📁 routes/          # API route handlers
-│   │   ├── 📁 controllers/     # Business logic controllers
-│   │   ├── 📁 models/          # Database models
-│   │   ├── 📁 services/        # Service layer
-│   │   ├── 📁 middleware/      # Express middleware
-│   │   └── 📁 utils/           # Backend utilities
-│   ├── 📁 database/
-│   │   └── 📁 migrations/      # SQL migration files
-│   ├── 📄 package.json         # Backend dependencies
-│   └── 📄 Dockerfile.dev       # Backend container config
-│
-├── 📁 docs/                     # Documentation
-├── 📄 docker-compose.yml       # Multi-service Docker setup
-├── 📄 package.json            # Root package with scripts
-└── 📄 README.md               # This file
-```
-
-## 🔧 Technology Stack
-
-### Frontend
-
-- **React 18** - UI library
-- **React Router** - Client-side routing
-- **React Hook Form** - Form handling
-- **Tailwind CSS** - Styling framework
-- **Axios** - HTTP client
-- **Recharts** - Data visualization
-- **Headless UI** - Accessible components
-
-### Backend
-
-- **Node.js 18+** - Runtime environment
-- **Express.js** - Web framework
-- **PostgreSQL 15** - Primary database
-- **Redis 7** - Caching and sessions
-- **JWT** - Authentication
-- **Zod** - Schema validation
-- **Pino** - Structured logging
-- **OpenAI API** - AI capabilities
-
-### Development
-
-- **Docker & Docker Compose** - Containerization
-- **ESLint** - Code linting
-- **Prettier** - Code formatting
-- **Husky** - Git hooks
-- **Jest** - Backend testing
-- **React Testing Library** - Frontend testing
-- **Cypress** - E2E testing
-
-## 🧪 Testing
-
-### Run Tests
-
+### Frontend Tests (Cypress)
 ```bash
-# Backend tests
-docker-compose exec backend npm test
-
-# Frontend tests
-docker-compose exec frontend npm test
-
-# Run with coverage
-docker-compose exec backend npm run test:coverage
-docker-compose exec frontend npm run test:coverage
+cd frontend
+npm run cypress:open    # Interactive testing
+npm run cypress:run     # Headless testing
 ```
 
-### E2E Testing
-
+### Run All Tests
 ```bash
-# Open Cypress (requires frontend to be running)
-cd frontend && npx cypress open
+npm run test
 ```
 
-## 📝 API Documentation
+## API Authentication
 
-Once the backend is running, you can access:
+The API uses JWT-based authentication:
 
-- **API Overview**: http://localhost:3001/api
-- **Health Check**: http://localhost:3001/healthz
+1. **Login** - Get access and refresh tokens
+2. **Access Token** - Short-lived token (15 minutes) for API requests
+3. **Refresh Token** - Long-lived token stored in the database for obtaining new access tokens
 
-### Key API Endpoints
-
-- `POST /api/auth/login` - User login
-- `POST /api/auth/register` - User registration
-- `GET /api/users/profile` - Get user profile
-- `GET /api/challenges` - List challenges
-- `POST /api/progress` - Track progress
-- `GET /api/leaderboard` - View leaderboard
-
-## 🚨 Troubleshooting
-
-### Common Issues
-
-#### Port Already in Use
-
-```bash
-# Check what's using the ports
-lsof -ti:3000  # Frontend
-lsof -ti:3001  # Backend
-lsof -ti:5433  # Database
-
-# Kill processes if needed
-kill -9 <PID>
+Include the access token in the Authorization header:
+```
+Authorization: Bearer <access_token>
 ```
 
-#### Docker Issues
+## Key Features
 
-```bash
-# Clean up and restart
-npm run down
-docker system prune -f
-npm run dev:all
-```
+- **User Authentication** - Secure JWT-based auth with refresh tokens
+- **Goal Management** - Create and track learning goals
+- **Challenge System** - AI-generated challenges across all subjects
+- **AI Feedback** - Personalized feedback on submissions using Google Gemini
+- **Peer Reviews** - Review and feedback from fellow students
+- **Progress Tracking** - Detailed analytics and progress visualization
+- **Leaderboard** - Compete and see rankings
+- **Dark Mode** - Theme toggle for better accessibility
 
-#### Database Connection Issues
+## Development
 
-```bash
-# Check database logs
-npm run logs:db
+### Code Structure Best Practices
 
-# Reset database
-npm run down
-docker volume rm skillwise_aitutor_postgres_data
-npm run dev:all
-```
+- **Controllers** - Handle HTTP requests and responses
+- **Services** - Contain business logic and database operations
+- **Models** - Define data structures and relationships
+- **Middleware** - Handle authentication, logging, error handling
+- **Utils** - Reusable helper functions and AI prompt templates
 
-#### Frontend Won't Load
+### Adding New Features
 
-```bash
-# Check frontend logs
-npm run logs:frontend
+1. Create API endpoint in `backend/src/routes`
+2. Implement service logic in `backend/src/services`
+3. Add controller in `backend/src/controllers`
+4. Create React component in `frontend/src/components`
+5. Add tests (Jest for backend, Cypress for E2E)
+6. Update API service in `frontend/src/services`
 
-# Rebuild frontend container
-docker-compose build --no-cache frontend
-npm run dev:all
-```
+## Troubleshooting
 
-#### Backend API Errors
+### Database Connection Issues
+- Ensure PostgreSQL is running
+- Check DATABASE_URL in `.env`
+- Run migrations: `npm run migrate`
 
-```bash
-# Check backend logs
-npm run logs:backend
+### API Key Issues
+- Verify GEMINI_API_KEY is set in `.env`
+- Check API key permissions in Google Cloud Console
 
-# Rebuild backend container
-docker-compose build --no-cache backend
-npm run dev:all
-```
+### Port Already in Use
+- Change PORT in `.env` (backend)
+- Change port in `vite.config.js` (frontend)
 
-### Development Tips
+## Contributing
 
-1. **Hot Reloading**: Both frontend and backend support hot reloading
-2. **Database Changes**: Add new migration files to `backend/database/migrations/`
-3. **API Testing**: Use the Thunder Client VS Code extension or Postman
-4. **Debugging**: Use browser DevTools and VS Code debugger
-5. **Code Formatting**: Install Prettier extension in VS Code for auto-formatting
+1. Create a feature branch
+2. Make your changes
+3. Write tests
+4. Submit a pull request
 
-### Getting Help
+## License
 
-If you encounter issues:
+This project is part of CSC 425 coursework.
 
-1. Check the logs: `npm run logs`
-2. Try resetting: `npm run reset`
-3. Check this README's troubleshooting section
-4. Search existing GitHub issues
-5. Create a new issue with logs and steps to reproduce
+## Support
 
-## 📋 Development Checklist
-
-When setting up for the first time:
-
-- [ ] Install Docker Desktop
-- [ ] Install Node.js (v18+)
-- [ ] Install Git
-- [ ] Clone the repository
-- [ ] Run `npm install` in root directory
-- [ ] Run `npm run dev:all`
-- [ ] Verify frontend loads at http://localhost:3000
-- [ ] Verify backend API at http://localhost:3001/api
-- [ ] Install recommended VS Code extensions
-- [ ] Set up environment variables (if using AI/email features)
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Make your changes
-4. Run tests: `npm test`
-5. Commit your changes: `git commit -m 'Add amazing feature'`
-6. Push to the branch: `git push origin feature/amazing-feature`
-7. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🎯 What You Get Out of the Box
-
-This repository provides a complete, production-ready development environment with:
-
-✅ **Full-stack application** running in Docker containers  
-✅ **Database** with complete schema and migrations  
-✅ **API** with authentication, validation, and error handling  
-✅ **Frontend** with routing, forms, and responsive design  
-✅ **Development tools** with hot reloading and debugging  
-✅ **Code quality** with linting, formatting, and git hooks  
-✅ **Testing setup** for unit, integration, and E2E tests  
-✅ **Documentation** and development guidelines
-
-Just run `npm run dev:all` and start coding! 🚀
+For issues or questions, please open an issue on GitHub or contact the development team.

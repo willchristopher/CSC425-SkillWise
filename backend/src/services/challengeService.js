@@ -6,13 +6,10 @@ const aiFeedbackService = require('./aiFeedbackService');
 const { AppError } = require('../middleware/errorHandler');
 
 // Validation schemas - with preprocessor for string-to-number conversion
-const parseIntPreprocess = (defaultVal, isPositive = true) => {
-  const schema = z.preprocess(
-    (val) => typeof val === 'string' ? (parseInt(val, 10) || defaultVal) : val,
-    z.number().int().min(1).default(defaultVal)
-  );
-  return isPositive ? schema : schema.optional();
-};
+const parseIntPreprocess = (defaultVal) => z.preprocess(
+  (val) => typeof val === 'string' ? (parseInt(val, 10) || defaultVal) : val,
+  z.number().int().min(1).default(defaultVal)
+);
 
 const challengeCreateSchema = z.object({
   title: z.string().min(1).max(255),
@@ -20,18 +17,12 @@ const challengeCreateSchema = z.object({
   instructions: z.string().min(1),
   category: z.string().min(1).max(100),
   difficulty_level: z.enum(['easy', 'medium', 'hard']).default('medium'),
-  estimated_time_minutes: z.preprocess(
-    (val) => typeof val === 'string' ? parseInt(val, 10) : val,
-    z.number().int().positive().optional()
-  ),
+  estimated_time_minutes: parseIntPreprocess(undefined).positive().optional(),
   points_reward: parseIntPreprocess(10),
   max_attempts: parseIntPreprocess(3),
   requires_peer_review: z.boolean().default(false),
   goal_id: z.number().int().positive().optional(),
-  progress_contribution: z.preprocess(
-    (val) => typeof val === 'string' ? parseInt(val, 10) : val,
-    z.number().int().min(1).max(100).default(10)
-  ),
+  progress_contribution: parseIntPreprocess(10).max(100),
   tags: z.array(z.string()).default([]),
   prerequisites: z.array(z.string()).default([]),
   learning_objectives: z.array(z.string()).default([]),

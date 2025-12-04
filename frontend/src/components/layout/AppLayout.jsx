@@ -11,6 +11,7 @@ const AppLayout = ({ children, title, subtitle }) => {
   const navigate = useNavigate();
   const [navExpanded, setNavExpanded] = useState(false);
   const [mouseNearTop, setMouseNearTop] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Track mouse position to expand nav when near top
   const handleMouseMove = useCallback((e) => {
@@ -292,6 +293,17 @@ const AppLayout = ({ children, title, subtitle }) => {
             ))}
           </div>
 
+          {/* Hamburger Menu for Mobile */}
+          <button
+            className={`mobile-menu-btn ${mobileMenuOpen ? 'open' : ''}`}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            title="Toggle menu"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
           <div className={`nav-user ${navExpanded ? '' : 'user-hidden'}`}>
             <span className="user-name">
               {user?.firstName ||
@@ -315,6 +327,25 @@ const AppLayout = ({ children, title, subtitle }) => {
             </button>
           </div>
         </div>
+
+        {/* Mobile Menu Drawer */}
+        {mobileMenuOpen && (
+          <div className="mobile-menu">
+            {navigationItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`mobile-menu-item ${
+                  location.pathname === item.path ? 'active' : ''
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {getIcon(item.icon)}
+                <span>{item.label}</span>
+              </Link>
+            ))}
+          </div>
+        )}
       </nav>
 
       {/* Main Content */}
