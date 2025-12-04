@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import '../../styles/progress.css';
+import '../../styles/progress-v2.css';
 
-const LinearProgress = ({ 
+const LinearProgress = ({
   percentage = 0,
   title = '',
   showStripes = false,
@@ -11,18 +11,18 @@ const LinearProgress = ({
   height = 8,
   animated = true,
   details = null,
-  className = ''
+  className = '',
 }) => {
   const progressStyle = {
     width: animated ? `${Math.min(100, Math.max(0, percentage))}%` : '0%',
     height: `${height}px`,
     backgroundColor: color,
-    transition: animated ? 'width 1s ease-out' : 'none'
+    transition: animated ? 'width 1s ease-out' : 'none',
   };
 
   const trackStyle = {
     backgroundColor: backgroundColor,
-    height: `${height}px`
+    height: `${height}px`,
   };
 
   return (
@@ -35,14 +35,14 @@ const LinearProgress = ({
           </span>
         </div>
       )}
-      
+
       <div className="linear-progress-bar" style={trackStyle}>
-        <div 
+        <div
           className={`linear-progress-fill ${showStripes ? 'striped' : ''}`}
           style={progressStyle}
         />
       </div>
-      
+
       {details && (
         <div className="linear-progress-details">
           {typeof details === 'string' ? (
@@ -78,10 +78,10 @@ LinearProgress.propTypes = {
     PropTypes.shape({
       completed: PropTypes.number,
       total: PropTypes.number,
-      timeRemaining: PropTypes.string
-    })
+      timeRemaining: PropTypes.string,
+    }),
   ]),
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default LinearProgress;

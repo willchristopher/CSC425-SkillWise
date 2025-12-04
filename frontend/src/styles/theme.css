@@ -1,0 +1,263 @@
+/* ===================================
+   Global Theme Variables
+   =================================== */
+
+:root {
+  /* Light Mode Colors (Default) */
+  --color-bg-primary: #f8fafc;
+  --color-bg-secondary: #ffffff;
+  --color-bg-tertiary: #f1f5f9;
+  --color-bg-hover: #eff6ff;
+  --color-bg-active: #dbeafe;
+
+  /* Text Colors */
+  --color-text-primary: #1e293b;
+  --color-text-secondary: #475569;
+  --color-text-tertiary: #64748b;
+  --color-text-muted: #94a3b8;
+  --color-text-inverse: #ffffff;
+
+  /* Border Colors */
+  --color-border-primary: #e2e8f0;
+  --color-border-secondary: #cbd5e1;
+  --color-border-focus: #3b82f6;
+
+  /* Brand Colors */
+  --color-brand-primary: #3b82f6;
+  --color-brand-primary-hover: #2563eb;
+  --color-brand-primary-light: #dbeafe;
+  --color-brand-secondary: #1d4ed8;
+  --color-brand-gradient: linear-gradient(135deg, #3b82f6, #1d4ed8);
+
+  /* Status Colors */
+  --color-success: #10b981;
+  --color-success-bg: #d1fae5;
+  --color-success-border: #a7f3d0;
+
+  --color-warning: #f59e0b;
+  --color-warning-bg: #fef3c7;
+  --color-warning-border: #fcd34d;
+
+  --color-error: #ef4444;
+  --color-error-bg: #fee2e2;
+  --color-error-border: #fecaca;
+
+  --color-info: #3b82f6;
+  --color-info-bg: #dbeafe;
+  --color-info-border: #93c5fd;
+
+  /* Shadow */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  /* Nav specific */
+  --color-nav-bg: #ffffff;
+  --color-nav-border: #e2e8f0;
+  --color-nav-link: #64748b;
+  --color-nav-link-hover: #3b82f6;
+  --color-nav-link-active-bg: #eff6ff;
+
+  /* Input/Form specific */
+  --color-input-bg: #ffffff;
+  --color-input-border: #d1d5db;
+  --color-input-text: #1e293b;
+  --color-input-placeholder: #9ca3af;
+
+  /* Code/Syntax */
+  --color-code-bg: #1e293b;
+  --color-code-text: #e2e8f0;
+
+  /* Logout button */
+  --color-logout-hover-bg: #fef2f2;
+  --color-logout-hover-text: #ef4444;
+  --color-logout-hover-border: #fecaca;
+
+  /* Badge colors */
+  --color-badge-blue-bg: #dbeafe;
+  --color-badge-blue-text: #1d4ed8;
+  --color-badge-green-bg: #dcfce7;
+  --color-badge-green-text: #16a34a;
+  --color-badge-yellow-bg: #fef3c7;
+  --color-badge-yellow-text: #d97706;
+  --color-badge-red-bg: #fee2e2;
+  --color-badge-red-text: #dc2626;
+  --color-badge-gray-bg: #f1f5f9;
+  --color-badge-gray-text: #475569;
+
+  /* Progress bar */
+  --color-progress-bg: #e2e8f0;
+  --color-progress-fill: #3b82f6;
+
+  /* Avatar */
+  --color-avatar-bg: #e2e8f0;
+  --color-avatar-text: #475569;
+
+  /* Spinner */
+  --color-spinner-track: #e2e8f0;
+  --color-spinner-fill: #3b82f6;
+
+  /* Success button gradient */
+  --color-btn-success-gradient: linear-gradient(135deg, #22c55e, #16a34a);
+  --color-btn-success-gradient-hover: linear-gradient(135deg, #16a34a, #15803d);
+}
+
+/* ===================================
+   Dark Mode Colors
+   =================================== */
+
+[data-theme='dark'] {
+  /* Background Colors - Dark blue from landing page footer */
+  --color-bg-primary: #0f172a;
+  --color-bg-secondary: #1e293b;
+  --color-bg-tertiary: #334155;
+  --color-bg-hover: #1e3a5f;
+  --color-bg-active: #1e40af;
+
+  /* Text Colors */
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #cbd5e1;
+  --color-text-tertiary: #94a3b8;
+  --color-text-muted: #64748b;
+  --color-text-inverse: #0f172a;
+
+  /* Border Colors */
+  --color-border-primary: #334155;
+  --color-border-secondary: #475569;
+  --color-border-focus: #60a5fa;
+
+  /* Brand Colors */
+  --color-brand-primary: #60a5fa;
+  --color-brand-primary-hover: #3b82f6;
+  --color-brand-primary-light: #1e3a5f;
+  --color-brand-secondary: #3b82f6;
+  --color-brand-gradient: linear-gradient(135deg, #60a5fa, #3b82f6);
+
+  /* Status Colors */
+  --color-success: #34d399;
+  --color-success-bg: #064e3b;
+  --color-success-border: #065f46;
+
+  --color-warning: #fbbf24;
+  --color-warning-bg: #78350f;
+  --color-warning-border: #92400e;
+
+  --color-error: #f87171;
+  --color-error-bg: #7f1d1d;
+  --color-error-border: #991b1b;
+
+  --color-info: #60a5fa;
+  --color-info-bg: #1e3a5f;
+  --color-info-border: #1d4ed8;
+
+  /* Shadow */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 2px 4px rgba(0, 0, 0, 0.3);
+
+  /* Nav specific */
+  --color-nav-bg: #1e293b;
+  --color-nav-border: #334155;
+  --color-nav-link: #94a3b8;
+  --color-nav-link-hover: #60a5fa;
+  --color-nav-link-active-bg: #1e3a5f;
+
+  /* Input/Form specific */
+  --color-input-bg: #1e293b;
+  --color-input-border: #475569;
+  --color-input-text: #f1f5f9;
+  --color-input-placeholder: #64748b;
+
+  /* Code/Syntax */
+  --color-code-bg: #0f172a;
+  --color-code-text: #e2e8f0;
+
+  /* Logout button */
+  --color-logout-hover-bg: #7f1d1d;
+  --color-logout-hover-text: #fca5a5;
+  --color-logout-hover-border: #991b1b;
+
+  /* Badge colors - Dark mode variants */
+  --color-badge-blue-bg: #1e3a5f;
+  --color-badge-blue-text: #93c5fd;
+  --color-badge-green-bg: #064e3b;
+  --color-badge-green-text: #6ee7b7;
+  --color-badge-yellow-bg: #78350f;
+  --color-badge-yellow-text: #fcd34d;
+  --color-badge-red-bg: #7f1d1d;
+  --color-badge-red-text: #fca5a5;
+  --color-badge-gray-bg: #334155;
+  --color-badge-gray-text: #cbd5e1;
+
+  /* Progress bar */
+  --color-progress-bg: #334155;
+  --color-progress-fill: #60a5fa;
+
+  /* Avatar */
+  --color-avatar-bg: #334155;
+  --color-avatar-text: #cbd5e1;
+
+  /* Spinner */
+  --color-spinner-track: #334155;
+  --color-spinner-fill: #60a5fa;
+
+  /* Success button gradient */
+  --color-btn-success-gradient: linear-gradient(135deg, #34d399, #10b981);
+  --color-btn-success-gradient-hover: linear-gradient(135deg, #10b981, #059669);
+}
+
+/* ===================================
+   Global Base Styles
+   =================================== */
+
+* {
+  box-sizing: border-box;
+  transition: background-color 0.2s ease, border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+a {
+  color: var(--color-brand-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-brand-primary-hover);
+}
+
+/* Selection */
+::selection {
+  background-color: var(--color-brand-primary);
+  color: var(--color-text-inverse);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-tertiary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-secondary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-tertiary);
+}

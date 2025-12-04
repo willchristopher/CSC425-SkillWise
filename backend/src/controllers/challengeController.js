@@ -1,6 +1,25 @@
 // Challenge CRUD operations controller
 const challengeService = require('../services/challengeService');
 
+/**
+ * Helper function for standardized error responses
+ */
+const sendError = (res, statusCode, message, code = null) => {
+  const response = { success: false, message };
+  if (code) response.code = code;
+  return res.status(statusCode).json(response);
+};
+
+/**
+ * Helper function for standardized success responses
+ */
+const sendSuccess = (res, data = null, message = 'Success', statusCode = 200) => {
+  const response = { success: true };
+  if (data !== null) response.data = data;
+  response.message = message;
+  return res.status(statusCode).json(response);
+};
+
 const challengeController = {
   /**
    * Get all challenges with optional filtering
@@ -16,6 +35,7 @@ const challengeController = {
         tags,
         limit,
       } = req.query;
+      const userId = req.user?.id || null;
 
       const filters = {};
       if (category) filters.category = category;
@@ -28,13 +48,12 @@ const challengeController = {
       if (tags) filters.tags = Array.isArray(tags) ? tags : [tags];
       if (limit) filters.limit = parseInt(limit, 10);
 
-      const challenges = await challengeService.getAllChallenges(filters);
+      const challenges = await challengeService.getAllChallenges(
+        filters,
+        userId
+      );
 
-      res.json({
-        success: true,
-        data: challenges,
-        message: `Retrieved ${challenges.length} challenges`,
-      });
+      sendSuccess(res, challenges, `Retrieved ${challenges.length} challenges`);
     } catch (error) {
       next(error);
     }
@@ -48,11 +67,7 @@ const challengeController = {
       const userId = req.user.id;
       const challenges = await challengeService.getUserChallenges(userId);
 
-      res.json({
-        success: true,
-        data: challenges,
-        message: `Retrieved ${challenges.length} user challenges`,
-      });
+      sendSuccess(res, challenges, `Retrieved ${challenges.length} user challenges`);
     } catch (error) {
       next(error);
     }
@@ -71,11 +86,7 @@ const challengeController = {
         userId
       );
 
-      res.json({
-        success: true,
-        data: challenges,
-        message: `Retrieved ${challenges.length} challenges for goal ${goalId}`,
-      });
+      sendSuccess(res, challenges, `Retrieved ${challenges.length} challenges for goal ${goalId}`);
     } catch (error) {
       next(error);
     }
@@ -94,17 +105,10 @@ const challengeController = {
         userId
       );
 
-      res.json({
-        success: true,
-        data: challenge,
-        message: 'Challenge retrieved successfully',
-      });
+      sendSuccess(res, challenge, 'Challenge retrieved successfully');
     } catch (error) {
       if (error.message === 'Challenge not found') {
-        return res.status(404).json({
-          success: false,
-          message: error.message,
-        });
+        return sendError(res, 404, error.message);
       }
       next(error);
     }
@@ -123,17 +127,10 @@ const challengeController = {
         creatorId
       );
 
-      res.status(201).json({
-        success: true,
-        data: challenge,
-        message: 'Challenge created successfully',
-      });
+      sendSuccess(res, challenge, 'Challenge created successfully', 201);
     } catch (error) {
       if (error.message.includes('Validation error')) {
-        return res.status(400).json({
-          success: false,
-          message: error.message,
-        });
+        return sendError(res, 400, error.message);
       }
       next(error);
     }
@@ -154,29 +151,16 @@ const challengeController = {
         userId
       );
 
-      res.json({
-        success: true,
-        data: challenge,
-        message: 'Challenge updated successfully',
-      });
+      sendSuccess(res, challenge, 'Challenge updated successfully');
     } catch (error) {
       if (error.message === 'Challenge not found') {
-        return res.status(404).json({
-          success: false,
-          message: error.message,
-        });
+        return sendError(res, 404, error.message);
       }
       if (error.message === 'Not authorized to update this challenge') {
-        return res.status(403).json({
-          success: false,
-          message: error.message,
-        });
+        return sendError(res, 403, error.message);
       }
       if (error.message.includes('Validation error')) {
-        return res.status(400).json({
-          success: false,
-          message: error.message,
-        });
+        return sendError(res, 400, error.message);
       }
       next(error);
     }
@@ -192,22 +176,11 @@ const challengeController = {
 
       await challengeService.deleteChallenge(parseInt(id, 10), userId);
 
-      res.json({
-        success: true,
-        message: 'Challenge deleted successfully',
-      });
+      sendSuccess(res, null, 'Challenge deleted successfully');
     } catch (error) {
-      if (error.message === 'Challenge not found') {
-        return res.status(404).json({
-          success: false,
-          message: error.message,
-        });
-      }
-      if (error.message === 'Not authorized to delete this challenge') {
-        return res.status(403).json({
-          success: false,
-          message: error.message,
-        });
+      // Handle AppError instances
+      if (error.statusCode) {
+        return sendError(res, error.statusCode, error.message, error.code);
       }
       next(error);
     }
@@ -228,26 +201,16 @@ const challengeController = {
         userId
       );
 
-      res.status(201).json({
-        success: true,
-        data: link,
-        message: 'Challenge linked to goal successfully',
-      });
+      sendSuccess(res, link, 'Challenge linked to goal successfully', 201);
     } catch (error) {
       if (
         error.message.includes('not found') ||
         error.message.includes('not accessible')
       ) {
-        return res.status(404).json({
-          success: false,
-          message: error.message,
-        });
+        return sendError(res, 404, error.message);
       }
       if (error.message.includes('already linked')) {
-        return res.status(409).json({
-          success: false,
-          message: error.message,
-        });
+        return sendError(res, 409, error.message);
       }
       next(error);
     }
@@ -268,19 +231,13 @@ const challengeController = {
         userId
       );
 
-      res.json({
-        success: true,
-        message: 'Challenge unlinked from goal successfully',
-      });
+      sendSuccess(res, null, 'Challenge unlinked from goal successfully');
     } catch (error) {
       if (
         error.message.includes('not found') ||
         error.message.includes('not accessible')
       ) {
-        return res.status(404).json({
-          success: false,
-          message: error.message,
-        });
+        return sendError(res, 404, error.message);
       }
       next(error);
     }
@@ -297,11 +254,7 @@ const challengeController = {
         parseInt(id, 10)
       );
 
-      res.json({
-        success: true,
-        data: statistics,
-        message: 'Challenge statistics retrieved successfully',
-      });
+      sendSuccess(res, statistics, 'Challenge statistics retrieved successfully');
     } catch (error) {
       next(error);
     }
@@ -320,11 +273,7 @@ const challengeController = {
         limit ? parseInt(limit, 10) : 10
       );
 
-      res.json({
-        success: true,
-        data: recommendations,
-        message: `Retrieved ${recommendations.length} recommended challenges`,
-      });
+      sendSuccess(res, recommendations, `Retrieved ${recommendations.length} recommended challenges`);
     } catch (error) {
       next(error);
     }
@@ -337,11 +286,7 @@ const challengeController = {
     try {
       const categories = await challengeService.getPopularCategories();
 
-      res.json({
-        success: true,
-        data: categories,
-        message: 'Popular categories retrieved successfully',
-      });
+      sendSuccess(res, categories, 'Popular categories retrieved successfully');
     } catch (error) {
       next(error);
     }
@@ -354,38 +299,53 @@ const challengeController = {
     try {
       const challengeId = parseInt(req.params.id, 10);
       const userId = req.user.id;
-      const { code } = req.body;
+      const { code, requestPeerReview } = req.body;
 
       if (!code || !code.trim()) {
-        return res.status(400).json({
-          success: false,
-          message: 'Code submission is required',
-        });
+        return sendError(res, 400, 'Code submission is required');
       }
 
       const submission = await challengeService.submitChallenge(
         challengeId,
         userId,
-        code
+        code,
+        requestPeerReview || false
       );
 
-      res.status(201).json({
-        success: true,
-        data: submission,
-        message: 'Challenge submitted successfully',
-      });
+      const message =
+        submission.status === 'pending_review'
+          ? 'Challenge submitted for peer review!'
+          : 'Challenge completed successfully!';
+      sendSuccess(res, submission, message, 201);
     } catch (error) {
-      if (error.message.includes('not found')) {
-        return res.status(404).json({
-          success: false,
-          message: error.message,
-        });
+      // Handle AppError instances with proper status codes
+      if (error.statusCode) {
+        return sendError(res, error.statusCode, error.message, error.code);
       }
-      if (error.message.includes('maximum attempts')) {
-        return res.status(400).json({
-          success: false,
-          message: error.message,
-        });
+
+      // Fallback: Use case-insensitive matching for error messages
+      const errorMessage = error.message.toLowerCase();
+
+      if (errorMessage.includes('not found')) {
+        return sendError(res, 404, error.message);
+      }
+      if (errorMessage.includes('maximum attempts')) {
+        return sendError(res, 400, error.message);
+      }
+      if (errorMessage.includes('failed to submit')) {
+        // Extract the actual error from the wrapped message
+        const actualError = error.message.replace(
+          /^Failed to submit challenge: /i,
+          ''
+        );
+        const actualErrorLower = actualError.toLowerCase();
+
+        if (actualErrorLower.includes('maximum attempts')) {
+          return sendError(res, 400, actualError);
+        }
+        if (actualErrorLower.includes('not found')) {
+          return sendError(res, 404, actualError);
+        }
       }
       next(error);
     }
@@ -404,12 +364,42 @@ const challengeController = {
         userId
       );
 
-      res.json({
-        success: true,
-        data: submissions,
-        message: 'Submissions retrieved successfully',
-      });
+      sendSuccess(res, submissions, 'Submissions retrieved successfully');
     } catch (error) {
+      next(error);
+    }
+  },
+
+  /**
+   * Mark a submission as complete and award points
+   */
+  markSubmissionComplete: async (req, res, next) => {
+    try {
+      const submissionId = parseInt(req.body.submission_id, 10);
+      const challengeId = parseInt(req.body.challenge_id, 10);
+      const userId = req.user.id;
+
+      if (!submissionId || !challengeId) {
+        return sendError(res, 400, 'Submission ID and Challenge ID are required');
+      }
+
+      const submission = await challengeService.markSubmissionComplete(
+        submissionId,
+        userId,
+        challengeId
+      );
+
+      sendSuccess(res, submission, 'Challenge marked as complete and points awarded', 200);
+    } catch (error) {
+      if (
+        error.message.includes('not found') ||
+        error.message.includes('not authorized')
+      ) {
+        return sendError(res, 404, error.message);
+      }
+      if (error.message.includes('already marked')) {
+        return sendError(res, 400, error.message);
+      }
       next(error);
     }
   },

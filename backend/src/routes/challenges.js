@@ -3,9 +3,10 @@ const express = require('express');
 const router = express.Router();
 const challengeController = require('../controllers/challengeController');
 const auth = require('../middleware/auth');
+const { optionalAuth } = require('../middleware/auth');
 
-// GET / route for all challenges with filtering
-router.get('/', challengeController.getChallenges);
+// GET / route for all challenges with filtering (optionalAuth to get user submission status)
+router.get('/', optionalAuth, challengeController.getChallenges);
 
 // GET /categories route for popular categories (public)
 router.get('/categories', challengeController.getPopularCategories);
@@ -19,8 +20,8 @@ router.get('/recommended', auth, challengeController.getRecommendedChallenges);
 // GET /by-goal/:goalId route for challenges linked to a specific goal
 router.get('/by-goal/:goalId', auth, challengeController.getChallengesByGoal);
 
-// GET /:id route for single challenge
-router.get('/:id', challengeController.getChallengeById);
+// GET /:id route for single challenge (optionalAuth for user status)
+router.get('/:id', optionalAuth, challengeController.getChallengeById);
 
 // GET /:id/statistics route for challenge statistics
 router.get('/:id/statistics', challengeController.getChallengeStatistics);
@@ -30,6 +31,13 @@ router.post('/', auth, challengeController.createChallenge);
 
 // POST /:id/link-goal route for linking challenge to goal
 router.post('/:id/link-goal', auth, challengeController.linkChallengeToGoal);
+
+// POST /submit/complete route for marking submission as complete (must come before /:id/submit)
+router.post(
+  '/submit/complete',
+  auth,
+  challengeController.markSubmissionComplete
+);
 
 // POST /:id/submit route for submitting a challenge solution
 router.post('/:id/submit', auth, challengeController.submitChallenge);

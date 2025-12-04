@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import LoginForm from '../components/auth/LoginForm';
 import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../contexts/ThemeContext';
+import './AuthPages.css';
 
 const LoginPage = () => {
   const [error, setError] = useState('');
@@ -10,6 +12,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   // Redirect to intended page after login
   const from = location.state?.from?.pathname || '/dashboard';
@@ -17,14 +20,14 @@ const LoginPage = () => {
   const handleLogin = async (formData) => {
     setIsLoading(true);
     setError('');
-    
+
     const result = await login({
       email: formData.email,
-      password: formData.password
+      password: formData.password,
     });
-    
+
     setIsLoading(false);
-    
+
     if (result.success) {
       // Redirect to dashboard or intended page
       navigate(from, { replace: true });
@@ -34,120 +37,121 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header with Back Button */}
-      <div className="absolute top-0 left-0 right-0 z-10">
-        <div className="flex justify-between items-center p-6">
-          <Link 
-            to="/" 
-            className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
-          >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+    <div className="auth-page">
+      <div className="auth-background" style={{ minHeight: '100vh' }}>
+        {/* Header with Back Button */}
+        <div className="auth-header">
+          <Link to="/" className="back-link">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              />
             </svg>
             Back to Home
           </Link>
-          <Link to="/" className="text-2xl font-bold text-blue-600">
+          <Link to="/" className="logo-link">
             SkillWise
           </Link>
-        </div>
-      </div>
-
-      <div className="min-h-screen flex">
-        {/* Left Side - Welcome Content */}
-        <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-center lg:px-12 xl:px-20">
-          <div className="max-w-md">
-            <h1 className="text-4xl font-bold text-gray-900 mb-6">
-              Welcome Back to SkillWise
-            </h1>
-            <p className="text-lg text-gray-600 mb-8">
-              Continue your learning journey with AI-powered tutoring and personalized study plans.
-            </p>
-            
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <p className="ml-3 text-gray-700">Track your progress across all subjects</p>
-              </div>
-              
-              <div className="flex items-center">
-                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <p className="ml-3 text-gray-700">Get instant AI tutoring support</p>
-              </div>
-              
-              <div className="flex items-center">
-                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <p className="ml-3 text-gray-700">Connect with study groups</p>
-              </div>
-            </div>
+          <div className="auth-header-actions">
+            <button
+              onClick={toggleTheme}
+              className="auth-theme-toggle"
+              title={
+                theme === 'light'
+                  ? 'Switch to dark mode'
+                  : 'Switch to light mode'
+              }
+            >
+              {theme === 'light' ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="12" cy="12" r="5"></circle>
+                  <line x1="12" y1="1" x2="12" y2="3"></line>
+                  <line x1="12" y1="21" x2="12" y2="23"></line>
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                  <line x1="1" y1="12" x2="3" y2="12"></line>
+                  <line x1="21" y1="12" x2="23" y2="12"></line>
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+              )}
+            </button>
+            <Link to="/signup" className="auth-switch-btn">
+              Sign Up
+            </Link>
           </div>
         </div>
 
-        {/* Right Side - Login Form */}
-        <div className="flex-1 flex flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
-          <div className="mx-auto w-full max-w-sm lg:w-96">
-            <div className="text-center lg:text-left">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Sign in to your account</h2>
-              <p className="text-gray-600">
-                Don't have an account?{' '}
-                <Link to="/signup" className="text-blue-600 hover:text-blue-500 font-semibold">
-                  Create one here
-                </Link>
+        <div className="auth-container">
+          {/* Left Side - Welcome Content */}
+          <div className="auth-welcome-panel">
+            <div className="welcome-content">
+              <h1 className="welcome-title">Welcome Back to SkillWise</h1>
+              <p className="welcome-description">
+                Continue your learning journey with AI-powered tutoring and
+                personalized study plans.
               </p>
             </div>
+          </div>
 
-            <div className="mt-8">
-              {error && (
-                <div className="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm text-red-700">{error}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
+          {/* Right Side - Login Form */}
+          <div className="auth-form-panel">
+            <div className="form-container">
+              <div className="form-header">
+                <h2 className="form-title">Sign in to your account</h2>
+                <p className="form-subtitle">
+                  Don't have an account?{' '}
+                  <Link to="/signup">Create one here</Link>
+                </p>
+              </div>
 
-              <div className="bg-white py-8 px-6 shadow-xl rounded-lg border">
-                <LoginForm 
-                  onSubmit={handleLogin} 
+              {error && <div className="error-message">{error}</div>}
+
+              <div className="form-card">
+                <LoginForm
+                  onSubmit={handleLogin}
                   isLoading={isLoading}
                   error={error}
                 />
               </div>
 
               {/* Additional Options */}
-              <div className="mt-6">
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300" />
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-gray-50 text-gray-500">Need help?</span>
-                  </div>
+              <div className="auth-link" style={{ marginTop: '1.5rem' }}>
+                <div className="divider">
+                  <div className="divider-line"></div>
+                  <span className="divider-text">Need help?</span>
+                  <div className="divider-line"></div>
                 </div>
 
-                <div className="mt-6 text-center">
-                  <Link 
-                    to="/forgot-password" 
-                    className="text-blue-600 hover:text-blue-500 text-sm font-medium"
-                  >
+                <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+                  <Link to="/forgot-password" className="forgot-password">
                     Forgot your password?
                   </Link>
                 </div>

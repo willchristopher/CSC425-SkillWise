@@ -1,12 +1,13 @@
 import React from 'react';
 import ChallengeForm from './ChallengeForm';
 
-const ChallengeModal = ({ 
-  isOpen, 
-  onClose, 
-  onSubmit, 
-  challenge = null, 
+const ChallengeModal = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  challenge = null,
   isLoading = false,
+  goals = [],
 }) => {
   if (!isOpen) return null;
 
@@ -23,7 +24,7 @@ const ChallengeModal = ({
   };
 
   return (
-    <div 
+    <div
       className="modal-overlay"
       onClick={handleOverlayClick}
       onKeyDown={handleKeyDown}
@@ -46,13 +47,14 @@ const ChallengeModal = ({
             ×
           </button>
         </div>
-        
+
         <div className="modal-body">
           <ChallengeForm
             challenge={challenge}
             onSubmit={onSubmit}
             onCancel={onClose}
             isLoading={isLoading}
+            goals={goals}
           />
         </div>
       </div>

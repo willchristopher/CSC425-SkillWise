@@ -29,4 +29,24 @@ router.post('/analysis', auth, aiController.analyzeProgress);
 // Body: { category, difficulty, topic (optional), requirements (optional) }
 router.post('/generateChallenge', auth, aiController.generateChallenge);
 
+// POST /api/ai/analyze-topic - Analyze a topic from user input
+// Body: { userInput }
+router.post('/analyze-topic', auth, aiController.analyzeTopic);
+
+// POST /api/ai/study-guide - Generate a comprehensive study guide
+// Body: { topic, questionTypes, questionCount, gradingMode, difficultyLevel, additionalContext }
+router.post('/study-guide', auth, aiController.generateStudyGuide);
+
+// POST /api/ai/grade-answer - Grade a student's answer using AI
+// Body: { question, correctAnswer, studentAnswer, questionType }
+router.post('/grade-answer', auth, aiController.gradeAnswer);
+
+// POST /api/ai/grade-submission/:submissionId - Grade a challenge submission using AI
+// Body: { challengeContext: { title, description, requirements } }
+router.post(
+  '/grade-submission/:submissionId',
+  auth,
+  aiController.gradeSubmissionWithAI
+);
+
 module.exports = router;

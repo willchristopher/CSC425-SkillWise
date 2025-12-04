@@ -10,15 +10,24 @@ const challengeSchema = z.object({
   instructions: z.string().min(1, 'Instructions are required'),
   category: z.string().min(1, 'Category is required'),
   difficulty_level: z.enum(['easy', 'medium', 'hard']),
-  estimated_time_minutes: z.number().min(1, 'Must be at least 1 minute').optional(),
-  points_reward: z.number().min(1, 'Must be at least 1 point').default(10),
+  estimated_time_minutes: z
+    .number()
+    .min(1, 'Must be at least 1 minute')
+    .optional(),
+  points_reward: z.literal(5).default(5), // Capped at 5 points
   max_attempts: z.number().min(1, 'Must allow at least 1 attempt').default(3),
-  requires_peer_review: z.boolean().default(false),
-  tags: z.array(z.string()).default([]),
+  goal_id: z.number().int().positive().optional(),
+  progress_contribution: z.number().min(1).max(100).default(10),
   learning_objectives: z.array(z.string()).default([]),
 });
 
-const ChallengeForm = ({ challenge = null, onSubmit, onCancel, isLoading = false }) => {
+const ChallengeForm = ({
+  challenge = null,
+  onSubmit,
+  onCancel,
+  isLoading = false,
+  goals = [],
+}) => {
   const {
     register,
     handleSubmit,
@@ -34,37 +43,31 @@ const ChallengeForm = ({ challenge = null, onSubmit, onCancel, isLoading = false
       category: '',
       difficulty_level: 'medium',
       estimated_time_minutes: 30,
-      points_reward: 10,
+      points_reward: 5, // Fixed at 5 points
       max_attempts: 3,
-      requires_peer_review: false,
-      tags: [],
+      goal_id: '',
+      progress_contribution: 10,
       learning_objectives: [],
     },
   });
 
-  const watchedTags = watch('tags');
   const watchedObjectives = watch('learning_objectives');
-
-  const handleAddTag = () => {
-    const newTag = prompt('Enter a new tag:');
-    if (newTag && newTag.trim()) {
-      setValue('tags', [...watchedTags, newTag.trim()]);
-    }
-  };
-
-  const handleRemoveTag = (index) => {
-    setValue('tags', watchedTags.filter((_, i) => i !== index));
-  };
 
   const handleAddObjective = () => {
     const newObjective = prompt('Enter a learning objective:');
     if (newObjective && newObjective.trim()) {
-      setValue('learning_objectives', [...watchedObjectives, newObjective.trim()]);
+      setValue('learning_objectives', [
+        ...watchedObjectives,
+        newObjective.trim(),
+      ]);
     }
   };
 
   const handleRemoveObjective = (index) => {
-    setValue('learning_objectives', watchedObjectives.filter((_, i) => i !== index));
+    setValue(
+      'learning_objectives',
+      watchedObjectives.filter((_, i) => i !== index)
+    );
   };
 
   const categories = [
@@ -85,7 +88,7 @@ const ChallengeForm = ({ challenge = null, onSubmit, onCancel, isLoading = false
     <form onSubmit={handleSubmit(onSubmit)} className="challenge-form">
       <div className="form-section">
         <h3>Basic Information</h3>
-        
+
         <div className="form-group">
           <label htmlFor="title" className="form-label required">
             Challenge Title
@@ -137,7 +140,7 @@ const ChallengeForm = ({ challenge = null, onSubmit, onCancel, isLoading = false
 
       <div className="form-section">
         <h3>Challenge Settings</h3>
-        
+
         <div className="form-row">
           <div className="form-group">
             <label htmlFor="category" className="form-label required">
@@ -167,14 +170,18 @@ const ChallengeForm = ({ challenge = null, onSubmit, onCancel, isLoading = false
             <select
               id="difficulty_level"
               {...register('difficulty_level')}
-              className={`form-select ${errors.difficulty_level ? 'error' : ''}`}
+              className={`form-select ${
+                errors.difficulty_level ? 'error' : ''
+              }`}
             >
               <option value="easy">Easy</option>
               <option value="medium">Medium</option>
               <option value="hard">Hard</option>
             </select>
             {errors.difficulty_level && (
-              <span className="form-error">{errors.difficulty_level.message}</span>
+              <span className="form-error">
+                {errors.difficulty_level.message}
+              </span>
             )}
           </div>
         </div>
@@ -189,11 +196,15 @@ const ChallengeForm = ({ challenge = null, onSubmit, onCancel, isLoading = false
               type="number"
               min="1"
               {...register('estimated_time_minutes', { valueAsNumber: true })}
-              className={`form-input ${errors.estimated_time_minutes ? 'error' : ''}`}
+              className={`form-input ${
+                errors.estimated_time_minutes ? 'error' : ''
+              }`}
               placeholder="30"
             />
             {errors.estimated_time_minutes && (
-              <span className="form-error">{errors.estimated_time_minutes.message}</span>
+              <span className="form-error">
+                {errors.estimated_time_minutes.message}
+              </span>
             )}
           </div>
 
@@ -201,17 +212,20 @@ const ChallengeForm = ({ challenge = null, onSubmit, onCancel, isLoading = false
             <label htmlFor="points_reward" className="form-label">
               Points Reward
             </label>
-            <input
-              id="points_reward"
-              type="number"
-              min="1"
-              {...register('points_reward', { valueAsNumber: true })}
-              className={`form-input ${errors.points_reward ? 'error' : ''}`}
-              placeholder="10"
-            />
-            {errors.points_reward && (
-              <span className="form-error">{errors.points_reward.message}</span>
-            )}
+            <div className="points-fixed-container">
+              <input
+                id="points_reward"
+                type="number"
+                value={5}
+                readOnly
+                className="form-input points-fixed"
+                title="All challenges are worth 5 points"
+              />
+              <span className="points-fixed-badge">Fixed</span>
+            </div>
+            <span className="form-hint">
+              All challenges are worth 5 points to keep things fair!
+            </span>
           </div>
         </div>
 
@@ -232,49 +246,67 @@ const ChallengeForm = ({ challenge = null, onSubmit, onCancel, isLoading = false
               <span className="form-error">{errors.max_attempts.message}</span>
             )}
           </div>
-
-          <div className="form-group">
-            <label className="form-checkbox-label">
-              <input
-                type="checkbox"
-                {...register('requires_peer_review')}
-                className="form-checkbox"
-              />
-              <span className="checkbox-text">Requires Peer Review</span>
-            </label>
-          </div>
         </div>
       </div>
 
       <div className="form-section">
         <h3>Additional Information</h3>
-        
+
         <div className="form-group">
-          <label className="form-label">Tags</label>
-          <div className="tag-manager">
-            <div className="tag-list">
-              {watchedTags.map((tag, index) => (
-                <div key={index} className="tag-item">
-                  <span className="tag">{tag}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveTag(index)}
-                    className="tag-remove"
-                    aria-label={`Remove ${tag} tag`}
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={handleAddTag}
-                className="btn btn-outline btn-sm"
-              >
-                + Add Tag
-              </button>
-            </div>
+          <label htmlFor="goal_id" className="form-label">
+            Assign to Goal (Optional)
+          </label>
+          <p className="form-hint" style={{ marginBottom: '0.75rem' }}>
+            🎯 Select a goal to link this challenge to. When you complete the
+            challenge, it will count towards your goal progress.
+          </p>
+          <select
+            id="goal_id"
+            {...register('goal_id', { valueAsNumber: true })}
+            className={`form-input ${errors.goal_id ? 'error' : ''}`}
+          >
+            <option value="">-- No Goal Selected --</option>
+            {goals && goals.length > 0 ? (
+              goals.map((goal) => (
+                <option key={goal.id} value={goal.id}>
+                  {goal.title}
+                </option>
+              ))
+            ) : (
+              <option disabled>No goals available</option>
+            )}
+          </select>
+          {errors.goal_id && (
+            <span className="form-error">{errors.goal_id.message}</span>
+          )}
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="progress_contribution" className="form-label">
+            Goal Progress Contribution (%)
+          </label>
+          <p className="form-hint" style={{ marginBottom: '0.75rem' }}>
+            📈 How much should completing this challenge add to your goal's
+            progress? (1-100%)
+          </p>
+          <div className="progress-contribution-container">
+            <input
+              id="progress_contribution"
+              type="range"
+              min="1"
+              max="100"
+              {...register('progress_contribution', { valueAsNumber: true })}
+              className="progress-contribution-slider"
+            />
+            <span className="progress-contribution-value">
+              {watch('progress_contribution') || 10}%
+            </span>
           </div>
+          {errors.progress_contribution && (
+            <span className="form-error">
+              {errors.progress_contribution.message}
+            </span>
+          )}
         </div>
 
         <div className="form-group">
@@ -315,12 +347,12 @@ const ChallengeForm = ({ challenge = null, onSubmit, onCancel, isLoading = false
         >
           Cancel
         </button>
-        <button
-          type="submit"
-          className="btn btn-primary"
-          disabled={isLoading}
-        >
-          {isLoading ? 'Saving...' : (challenge ? 'Update Challenge' : 'Create Challenge')}
+        <button type="submit" className="btn btn-primary" disabled={isLoading}>
+          {isLoading
+            ? 'Saving...'
+            : challenge
+            ? 'Update Challenge'
+            : 'Create Challenge'}
         </button>
       </div>
     </form>

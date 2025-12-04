@@ -98,9 +98,11 @@ export const AuthProvider = ({ children }) => {
         try {
           // Validate token by fetching user profile
           const response = await apiService.user.getProfile();
+          // Profile API returns { success: true, data: { user data } }
+          const userData = response.data?.data || response.data;
           dispatch({
             type: AUTH_ACTIONS.LOGIN_SUCCESS,
-            payload: { user: response.data },
+            payload: { user: userData },
           });
         } catch (error) {
           console.error('Token validation failed:', error);

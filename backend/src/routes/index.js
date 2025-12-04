@@ -65,6 +65,7 @@ router.use('/submissions', submissionRoutes);
 router.use('/ai', aiRoutes);
 router.use('/feedback', feedbackRoutes);
 router.use('/reviews', reviewRoutes);
+router.use('/peer-review', reviewRoutes); // Alias for frontend compatibility
 router.use('/leaderboard', leaderboardRoutes);
 router.use('/sentry', sentryRoutes);
 

@@ -91,7 +91,7 @@ const callGemini = async (systemPrompt, userPrompt, options = {}) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        timeout: 30000, // 30 second timeout
+        timeout: 60000, // 60 second timeout for longer submissions
       }
     );
 
@@ -101,10 +101,25 @@ const callGemini = async (systemPrompt, userPrompt, options = {}) => {
     console.log('Gemini API response:', JSON.stringify(response.data, null, 2));
 
     // Extract text from Gemini response
-    if (response.data?.candidates?.[0]?.content?.parts?.[0]?.text) {
-      const responseText = response.data.candidates[0].content.parts[0].text;
+    const candidate = response.data?.candidates?.[0];
+    const content = candidate?.content;
+    const finishReason = candidate?.finishReason;
+
+    // Check if response was truncated due to MAX_TOKENS before any text was generated
+    // This happens with Gemini 2.5 models that use "thinking tokens"
+    if (
+      finishReason === 'MAX_TOKENS' &&
+      (!content?.parts || !content.parts[0]?.text)
+    ) {
+      console.error(
+        'Response exhausted token budget during thinking phase. Increase maxOutputTokens.'
+      );
+      throw new Error('AI response was too short. Please try again.');
+    }
+
+    if (content?.parts?.[0]?.text) {
+      const responseText = content.parts[0].text;
       const tokensUsed = response.data?.usageMetadata?.totalTokenCount;
-      const finishReason = response.data.candidates[0].finishReason;
 
       // Warn if response was truncated due to MAX_TOKENS
       if (finishReason === 'MAX_TOKENS') {
@@ -164,10 +179,19 @@ const callGemini = async (systemPrompt, userPrompt, options = {}) => {
     throw new Error('Invalid response format from Gemini API');
   } catch (error) {
     const responseTime = Date.now() - startTime;
-    console.error(
-      'Error calling Gemini API:',
-      error.response?.data || error.message
-    );
+
+    // Log the full error details
+    if (error.response) {
+      console.error('Gemini API Error Response:', {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data,
+      });
+    } else if (error.request) {
+      console.error('Gemini API Error - No Response:', error.message);
+    } else {
+      console.error('Gemini API Error:', error.message);
+    }
 
     // Log failed interaction
     if (options.endpoint) {
@@ -221,13 +245,9 @@ const aiService = {
     });
 
     // Validate the response has expected content
-    const validation = validateResponse(response, {
-      minLength: 50,
-      requiredKeywords: ['feedback', 'code', 'suggestion'],
-      maxLength: 5000,
-    });
+    const validation = validateResponse('generateFeedback', response);
 
-    if (!validation.isValid) {
+    if (!validation.valid) {
       console.warn('Feedback validation failed:', validation.errors);
       // Still return the response but log the issue
     }
@@ -428,6 +448,150 @@ For each suggestion, briefly explain why it would be beneficial for their learni
       console.error('Raw response:', response);
       // Return a structured error with the raw response
       throw new Error('AI generated invalid JSON. Please try again.');
+    }
+  },
+
+  /**
+   * Analyze a topic to understand what the user wants to study
+   * @param {string} userInput - The user's input describing what they want to study
+   * @param {number} userId - User ID for logging
+   * @returns {Promise<object>} Topic analysis with subject area and focus
+   */
+  analyzeTopic: async (userInput, userId = null) => {
+    const prompt = getPrompt('analyzeTopic', { userInput });
+
+    const response = await callGemini(prompt.systemPrompt, prompt.userPrompt, {
+      ...prompt.config,
+      endpoint: 'analyzeTopic',
+      userId,
+      metadata: { userInput },
+    });
+
+    try {
+      let cleanedResponse = response.trim();
+      cleanedResponse = cleanedResponse.replace(/^```json\s*/i, '');
+      cleanedResponse = cleanedResponse.replace(/^```\s*/, '');
+      cleanedResponse = cleanedResponse.replace(/\s*```\s*$/, '');
+
+      const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        cleanedResponse = jsonMatch[0];
+      }
+
+      return JSON.parse(cleanedResponse);
+    } catch (parseError) {
+      console.error('Error parsing topic analysis:', parseError);
+      throw new Error('Failed to analyze topic. Please try again.');
+    }
+  },
+
+  /**
+   * Generate a comprehensive study guide
+   * @param {object} params - Study guide parameters
+   * @param {number} userId - User ID for logging
+   * @returns {Promise<object>} Complete study guide with questions
+   */
+  generateStudyGuide: async (params, userId = null) => {
+    const {
+      topic,
+      questionTypes,
+      questionCount,
+      gradingMode,
+      difficultyLevel,
+      additionalContext,
+    } = params;
+
+    const prompt = getPrompt('generateStudyGuide', {
+      topic,
+      questionTypes: questionTypes.join(', '),
+      questionCount: questionCount.toString(),
+      gradingMode,
+      difficultyLevel,
+      additionalContext: additionalContext || '',
+    });
+
+    const response = await callGemini(prompt.systemPrompt, prompt.userPrompt, {
+      ...prompt.config,
+      endpoint: 'generateStudyGuide',
+      userId,
+      metadata: {
+        topic,
+        questionTypes,
+        questionCount,
+        gradingMode,
+        difficultyLevel,
+      },
+    });
+
+    try {
+      let cleanedResponse = response.trim();
+      cleanedResponse = cleanedResponse.replace(/^```json\s*/i, '');
+      cleanedResponse = cleanedResponse.replace(/^```\s*/, '');
+      cleanedResponse = cleanedResponse.replace(/\s*```\s*$/, '');
+
+      const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        cleanedResponse = jsonMatch[0];
+      }
+
+      const studyGuide = JSON.parse(cleanedResponse);
+
+      // Validate response
+      const validation = validateResponse('generateStudyGuide', studyGuide);
+      if (!validation.valid) {
+        console.warn('Study guide validation failed:', validation.errors);
+      }
+
+      return {
+        ...studyGuide,
+        gradingMode,
+        generatedAt: new Date().toISOString(),
+      };
+    } catch (parseError) {
+      console.error('Error parsing study guide:', parseError);
+      console.error('Raw response:', response);
+      throw new Error('Failed to generate study guide. Please try again.');
+    }
+  },
+
+  /**
+   * Grade a student's answer using AI
+   * @param {object} params - Grading parameters
+   * @param {number} userId - User ID for logging
+   * @returns {Promise<object>} Grading result with feedback
+   */
+  gradeAnswer: async (params, userId = null) => {
+    const { question, correctAnswer, studentAnswer, questionType } = params;
+
+    const prompt = getPrompt('gradeResponse', {
+      question,
+      correctAnswer,
+      studentAnswer,
+      questionType,
+    });
+
+    const response = await callGemini(prompt.systemPrompt, prompt.userPrompt, {
+      ...prompt.config,
+      endpoint: 'gradeAnswer',
+      userId,
+      metadata: { questionType },
+    });
+
+    try {
+      let cleanedResponse = response.trim();
+      cleanedResponse = cleanedResponse.replace(/^```json\s*/i, '');
+      cleanedResponse = cleanedResponse.replace(/^```\s*/, '');
+      cleanedResponse = cleanedResponse.replace(/\s*```\s*$/, '');
+
+      const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        cleanedResponse = jsonMatch[0];
+      }
+
+      return JSON.parse(cleanedResponse);
+    } catch (parseError) {
+      console.error('Error parsing grade response:', parseError);
+      throw new Error('Failed to grade answer. Please try again.');
     }
   },
 };

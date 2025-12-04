@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3001/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
   withCredentials: true, // Include cookies for httpOnly refresh token
   timeout: 10000, // 10 second timeout
   headers: {
@@ -56,7 +56,7 @@ api.interceptors.request.use(
     }
 
     // Log request in development
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.log(
         `🔄 API Request: ${config.method?.toUpperCase()} ${config.url}`
       );
@@ -74,7 +74,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => {
     // Log successful response in development
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.log(
         `✅ API Response: ${response.config.method?.toUpperCase()} ${
           response.config.url
@@ -88,7 +88,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // Log error in development
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.log(
         `❌ API Error: ${originalRequest?.method?.toUpperCase()} ${
           originalRequest?.url
@@ -119,7 +119,7 @@ api.interceptors.response.use(
         // Attempt to refresh the token using httpOnly refresh cookie
         const refreshResponse = await axios.post(
           `${
-            process.env.REACT_APP_API_URL || 'http://localhost:3001/api'
+            import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
           }/auth/refresh`,
           {},
           {
@@ -214,10 +214,11 @@ export const apiService = {
 
   // User methods
   user: {
-    getProfile: () => api.get('/user/profile'),
-    updateProfile: (data) => api.put('/user/profile', data),
-    deleteAccount: () => api.delete('/user/profile'),
-    changePassword: (data) => api.put('/user/change-password', data),
+    getProfile: () => api.get('/users/profile'),
+    updateProfile: (data) => api.put('/users/profile', data),
+    deleteAccount: () => api.delete('/users/profile'),
+    changePassword: (data) => api.put('/users/change-password', data),
+    getStatistics: () => api.get('/users/statistics'),
   },
 
   // Goals methods
@@ -234,13 +235,29 @@ export const apiService = {
   // Challenges methods
   challenges: {
     getAll: (params) => api.get('/challenges', { params }),
+    getMy: () => api.get('/challenges/my'),
+    getRecommended: () => api.get('/challenges/recommended'),
     getById: (id) => api.get(`/challenges/${id}`),
     create: (challenge) => api.post('/challenges', challenge),
     update: (id, challenge) => api.put(`/challenges/${id}`, challenge),
     delete: (id) => api.delete(`/challenges/${id}`),
     submit: (id, submission) =>
       api.post(`/challenges/${id}/submit`, submission),
+    submitAnswer: (id, submission) =>
+      api.post(`/challenges/${id}/submit`, submission, { timeout: 30000 }),
     getSubmissions: (id) => api.get(`/challenges/${id}/submissions`),
+    markComplete: (challengeId, submissionId) =>
+      api.post('/challenges/submit/complete', {
+        challenge_id: challengeId,
+        submission_id: submissionId,
+      }),
+  },
+
+  // Submissions methods
+  submissions: {
+    getById: (id) => api.get(`/submissions/${id}`),
+    delete: (id) => api.delete(`/submissions/${id}`),
+    update: (id, data) => api.put(`/submissions/${id}`, data),
   },
 
   // Progress methods
@@ -255,6 +272,9 @@ export const apiService = {
   leaderboard: {
     getGlobal: (params) => api.get('/leaderboard/global', { params }),
     getUserRank: () => api.get('/leaderboard/user-rank'),
+    getAchievements: () => api.get('/leaderboard/achievements'),
+    getAllAchievements: () => api.get('/leaderboard/achievements/all'),
+    getStats: () => api.get('/leaderboard/stats'),
   },
 
   // Peer Review methods
@@ -265,6 +285,16 @@ export const apiService = {
       api.post(`/peer-review/submissions/${submissionId}/review`, review),
     getReviewDetails: (submissionId) =>
       api.get(`/peer-review/submissions/${submissionId}`),
+    submitWorkForReview: (data) => api.post('/peer-review/submit-work', data),
+    updateSubmission: (submissionId, data) =>
+      api.put(`/peer-review/submissions/${submissionId}`, data),
+    deleteSubmission: (submissionId) =>
+      api.delete(`/peer-review/submissions/${submissionId}`),
+    getReceivedFeedback: (params) =>
+      api.get('/peer-review/feedback', { params }),
+    markFeedbackRead: (reviewId) =>
+      api.put(`/peer-review/feedback/${reviewId}/read`),
+    getReviewHistory: () => api.get('/peer-review/history'),
   },
 
   // Notifications methods
@@ -276,12 +306,8 @@ export const apiService = {
 
   // AI methods
   ai: {
-    generateFeedback: (submissionText, challengeContext) =>
-      api.post(
-        '/ai/feedback/direct',
-        { submissionText, challengeContext },
-        { timeout: 30000 }
-      ), // Direct code feedback
+    generateFeedback: (feedbackRequest) =>
+      api.post('/ai/feedback/direct', feedbackRequest, { timeout: 30000 }), // Direct code feedback
     generateSubmissionFeedback: (submissionId) =>
       api.post('/ai/feedback', { submissionId }, { timeout: 30000 }), // Feedback for existing submission
     getHints: (challengeId, challenge, userProgress) =>
@@ -296,6 +322,16 @@ export const apiService = {
       api.post('/ai/analysis', { userId, learningData }),
     generateChallenge: (params) =>
       api.post('/ai/generateChallenge', params, { timeout: 30000 }), // 30 second timeout for AI generation
+    analyzeTopic: (userInput) =>
+      api.post('/ai/analyze-topic', { userInput }, { timeout: 30000 }),
+    generateStudyGuide: (params) =>
+      api.post('/ai/study-guide', params, { timeout: 60000 }), // 60 second timeout for study guide
+    gradeAnswer: (params) =>
+      api.post('/ai/grade-answer', params, { timeout: 30000 }),
+    gradeSubmission: (submissionId, params) =>
+      api.post(`/ai/grade-submission/${submissionId}`, params, {
+        timeout: 30000,
+      }),
   },
 
   // Feedback methods - for retrieving stored AI feedback

@@ -1,0 +1,396 @@
+/* ========================================
+   GOAL CARD - DARK THEME REDESIGN
+   ======================================== */
+
+.goal-card-redesign {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 500px;
+  background: linear-gradient(135deg, #1a2332 0%, #0f1419 100%);
+  border: 1px solid #2a3f5f;
+  border-radius: 16px;
+  padding: 32px 24px;
+  gap: 24px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.goal-card-redesign:hover {
+  border-color: var(--accent-color);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+  transform: translateY(-4px);
+}
+
+.goal-card-redesign.completed {
+  background: linear-gradient(135deg, #0f3d2d 0%, #081f1a 100%);
+  border-color: #10b981;
+}
+
+.goal-card-redesign.overdue {
+  background: linear-gradient(135deg, #4a1a1a 0%, #2a0f0f 100%);
+  border-color: #ef4444;
+}
+
+/* Accent Bar at Top */
+.accent-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--accent-color);
+  border-radius: 16px 16px 0 0;
+}
+
+.goal-card-redesign.completed .accent-bar {
+  background: #10b981;
+}
+
+.goal-card-redesign.overdue .accent-bar {
+  background: #ef4444;
+}
+
+/* ========================================
+   TOP SECTION - ICON & BADGE
+   ======================================== */
+
+.card-top {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 16px;
+}
+
+.icon-wrapper {
+  font-size: 56px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-badge {
+  position: absolute;
+  top: -16px;
+  right: -16px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.status-badge.done {
+  background: #a7f3d0;
+  color: #065f46;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* ========================================
+   TITLE SECTION
+   ======================================== */
+
+.title-section {
+  text-align: center;
+  width: 100%;
+}
+
+.goal-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #e5e7eb;
+  line-height: 1.3;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.goal-card-redesign.completed .goal-title {
+  color: #86efac;
+}
+
+.goal-card-redesign.overdue .goal-title {
+  color: #fca5a5;
+}
+
+/* ========================================
+   DESCRIPTION
+   ======================================== */
+
+.goal-description {
+  margin: 0;
+  font-size: 14px;
+  color: #9ca3af;
+  line-height: 1.5;
+  text-align: center;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* ========================================
+   DIFFICULTY SECTION
+   ======================================== */
+
+.difficulty-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.difficulty-emoji {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.difficulty-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #d1d5db;
+  text-transform: capitalize;
+}
+
+/* ========================================
+   CIRCULAR PROGRESS
+   ======================================== */
+
+.progress-circle-wrapper {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-circle {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.progress-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 6;
+}
+
+.progress-ring {
+  fill: none;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  stroke-dasharray: 282.7433388230814;
+}
+
+.progress-text {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.progress-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #f3f4f6;
+  text-align: center;
+  line-height: 1;
+}
+
+.goal-card-redesign.completed .progress-value {
+  color: #86efac;
+}
+
+.goal-card-redesign.overdue .progress-value {
+  color: #fca5a5;
+}
+
+/* ========================================
+   CARD ACTIONS
+   ======================================== */
+
+.card-actions {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
+.menu-container {
+  position: relative;
+}
+
+.menu-btn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: #d1d5db;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.menu-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #f3f4f6;
+}
+
+.menu-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #1a2332;
+  border: 1px solid #2a3f5f;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  z-index: 1000;
+  min-width: 150px;
+}
+
+.menu-item {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  color: #d1d5db;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.menu-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f3f4f6;
+}
+
+.menu-item.delete-item {
+  color: #fca5a5;
+}
+
+.menu-item.delete-item:hover {
+  background: rgba(244, 67, 54, 0.1);
+  color: #fca5a5;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 768px) {
+  .goal-card-redesign {
+    min-height: 480px;
+    padding: 28px 20px;
+    gap: 20px;
+  }
+
+  .icon-wrapper {
+    font-size: 48px;
+  }
+
+  .goal-title {
+    font-size: 18px;
+  }
+
+  .progress-circle-wrapper {
+    width: 120px;
+    height: 120px;
+  }
+
+  .progress-value {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .goal-card-redesign {
+    min-height: 460px;
+    padding: 24px 16px;
+    gap: 18px;
+  }
+
+  .icon-wrapper {
+    font-size: 40px;
+  }
+
+  .goal-title {
+    font-size: 16px;
+  }
+
+  .goal-description {
+    font-size: 13px;
+  }
+
+  .progress-circle-wrapper {
+    width: 110px;
+    height: 110px;
+  }
+
+  .progress-value {
+    font-size: 22px;
+  }
+
+  .menu-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+}
+
+/* ========================================
+   ACCESSIBILITY & ANIMATION
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .goal-card-redesign,
+  .menu-btn,
+  .progress-ring {
+    transition: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+  .goal-card-redesign {
+    border-width: 2px;
+  }
+
+  .menu-btn {
+    border-width: 2px;
+  }
+}
+
+/* Dark mode is already implemented as base */
+@media (prefers-color-scheme: dark) {
+  .goal-card-redesign {
+    background: linear-gradient(135deg, #0f1419 0%, #0a0e14 100%);
+    border-color: #1a2f4f;
+  }
+
+  .goal-card-redesign:hover {
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.7);
+  }
+}
